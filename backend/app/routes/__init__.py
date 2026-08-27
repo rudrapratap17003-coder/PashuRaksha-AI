@@ -1,3 +1,9 @@
-"""
-API Routes Package
-"""
+from .auth import router as auth_router
+from .animals import router as animals_router
+from .vaccinations import router as vaccinations_router
+from .health_reports import router as health_reports_router
+from .risk_assessments import router as risk_assessments_router
+from .clusters import router as clusters_router
+from .alerts import router as alerts_router
+from .vet import router as vet_router
+from .authority import router as authority_router
