@@ -9,6 +9,8 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import FarmerDashboard from './pages/farmer/FarmerDashboard'
 import FarmerAnimalsPage from './pages/farmer/FarmerAnimalsPage'
+import AddAnimalPage from './pages/farmer/AddAnimalPage'
+import AnimalProfilePage from './pages/farmer/AnimalProfilePage'
 import FarmerVaccinationsPage from './pages/farmer/FarmerVaccinationsPage'
 import FarmerAlertsPage from './pages/farmer/FarmerAlertsPage'
 import VetDashboard from './pages/vet/VetDashboard'
@@ -50,6 +52,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
               <FarmerAnimalsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/animals/add"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
+              <AddAnimalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/animals/:animalId"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
+              <AnimalProfilePage />
             </ProtectedRoute>
           }
         />
