@@ -14,11 +14,14 @@ import {
   Syringe,
   AlertTriangle,
   Radio,
-  FileText
+  FileText,
+  Sparkles,
+  Presentation
 } from 'lucide-react'
 import { USER_ROLES } from '../utils/constants'
 import AlertCenterModal from '../components/common/AlertCenterModal'
 import DemoScenarioBar from '../components/common/DemoScenarioBar'
+import SurveillanceBackground from '../components/background/SurveillanceBackground'
 import apiClient from '../services/api'
 
 export default function DashboardLayout({ user, onLogout }) {
@@ -33,7 +36,7 @@ export default function DashboardLayout({ user, onLogout }) {
   const fetchUnreadAlerts = async () => {
     try {
       const res = await apiClient.get(`/alerts?role=${role}`)
-      const unread = res.data.filter(a => !a.is_read).length
+      const unread = res.data.filter((a) => !a.is_read).length
       setUnreadCount(unread)
     } catch {
       // Fallback
@@ -77,23 +80,25 @@ export default function DashboardLayout({ user, onLogout }) {
   const navItems = getNavItems()
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#061B17] text-white flex flex-col font-sans relative">
+      <SurveillanceBackground />
+
       {/* Floating Jury Scenario Bar */}
       <DemoScenarioBar />
 
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200 shadow-xs">
+      <header className="sticky top-0 z-40 bg-[#061B17]/95 backdrop-blur-md border-b border-emerald-500/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Brand Logo */}
           <div className="flex items-center space-x-3">
             <Link to="/" className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-200">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/30">
                 <Activity className="w-6 h-6" />
               </div>
               <div className="hidden sm:block">
-                <span className="text-base font-black tracking-tight text-slate-900 leading-none">
-                  PASHURAKSHA <span className="text-emerald-600">AI</span>
+                <span className="text-base font-black tracking-tight text-white leading-none">
+                  PASHURAKSHA <span className="text-emerald-400">AI</span>
                 </span>
                 <span className="block text-[10px] font-semibold text-slate-400">
                   SIH26128 • Livestock Health Platform
@@ -102,18 +107,25 @@ export default function DashboardLayout({ user, onLogout }) {
             </Link>
 
             {/* Role Badge */}
-            <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+            <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-500/30">
               {role}
             </span>
           </div>
 
           {/* Right Header Actions */}
           <div className="flex items-center space-x-2 sm:space-x-3">
+            <Link to="/presentation" className="hidden sm:flex">
+              <button className="px-3 py-1.5 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900 transition flex items-center space-x-1">
+                <Presentation className="w-3.5 h-3.5" />
+                <span>Jury View</span>
+              </button>
+            </Link>
+
             {/* Notification Bell */}
             <button
               type="button"
               onClick={() => setAlertCenterOpen(true)}
-              className="relative p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+              className="relative p-2.5 rounded-xl border border-emerald-500/30 text-slate-300 hover:text-white hover:bg-emerald-950/60 transition"
               title="Surveillance Notifications"
             >
               <Bell className="w-5 h-5" />
@@ -125,12 +137,12 @@ export default function DashboardLayout({ user, onLogout }) {
             </button>
 
             {/* User Profile Pill */}
-            <div className="hidden sm:flex items-center space-x-2 pl-2 border-l border-slate-200">
+            <div className="hidden sm:flex items-center space-x-2 pl-2 border-l border-emerald-500/20">
               <div className="text-right">
-                <span className="block text-xs font-bold text-slate-900 leading-tight">
+                <span className="block text-xs font-bold text-white leading-tight">
                   {user?.name || 'User'}
                 </span>
-                <span className="block text-[10px] text-slate-400">
+                <span className="block text-[10px] text-emerald-400">
                   {user?.village || 'Rampur'}
                 </span>
               </div>
@@ -143,7 +155,7 @@ export default function DashboardLayout({ user, onLogout }) {
                 navigate('/')
               }}
               title="Sign Out"
-              className="p-2.5 rounded-xl border border-slate-200 text-rose-600 hover:bg-rose-50 transition"
+              className="p-2.5 rounded-xl border border-rose-900/40 text-rose-400 hover:bg-rose-950/60 transition"
             >
               <LogOut className="w-5 h-5" />
             </button>
@@ -151,7 +163,7 @@ export default function DashboardLayout({ user, onLogout }) {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl border border-slate-200 text-slate-600"
+              className="md:hidden p-2 rounded-xl border border-emerald-500/30 text-slate-300"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -160,12 +172,12 @@ export default function DashboardLayout({ user, onLogout }) {
       </header>
 
       {/* Main Container with Sidebar */}
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex gap-6">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex gap-6 relative z-10">
         
         {/* Desktop Sidebar Navigation */}
         <aside className="hidden md:flex flex-col w-56 space-y-2 flex-shrink-0">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
-            Navigation Menu
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 px-3 py-1">
+            PORTAL NAVIGATION
           </span>
           {navItems.map((item) => {
             const Icon = item.icon
@@ -176,8 +188,8 @@ export default function DashboardLayout({ user, onLogout }) {
                 to={item.path}
                 className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-200'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                    : 'text-slate-300 hover:bg-[#092923] hover:text-white'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -194,7 +206,7 @@ export default function DashboardLayout({ user, onLogout }) {
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex justify-around p-2 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#061B17] border-t border-emerald-500/20 flex justify-around p-2 shadow-2xl">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -203,7 +215,7 @@ export default function DashboardLayout({ user, onLogout }) {
               key={item.path}
               to={item.path}
               className={`flex flex-col items-center py-1 px-3 rounded-xl text-[10px] font-bold ${
-                isActive ? 'text-emerald-600' : 'text-slate-500'
+                isActive ? 'text-emerald-400' : 'text-slate-400'
               }`}
             >
               <Icon className="w-5 h-5" />

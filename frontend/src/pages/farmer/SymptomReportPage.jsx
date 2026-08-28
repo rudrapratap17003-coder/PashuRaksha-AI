@@ -1,505 +1,412 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { 
   FilePlus2, 
-  ArrowLeft, 
-  Check, 
-  AlertTriangle, 
-  CheckCircle2, 
-  ShieldAlert, 
   Sparkles, 
-  Thermometer, 
-  Wind, 
-  Droplets, 
-  UtensilsCrossed, 
-  AlertCircle, 
-  Moon, 
-  Milk, 
-  HeartPulse, 
-  Waves, 
-  Activity, 
+  CheckCircle2, 
+  AlertTriangle, 
+  ArrowRight, 
   MapPin, 
-  Info,
+  PawPrint, 
+  HelpCircle,
+  Stethoscope,
+  Radio,
+  Clock,
+  Mic,
+  ShieldCheck,
   ChevronRight,
-  Plus,
-  Minus,
-  RefreshCw
+  RefreshCw,
+  Cpu
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
-import { CORE_SYMPTOMS } from '../../utils/symptomDefinitions'
-import { useAuth } from '../../context/AuthContext'
+import VoiceReportModal from '../../components/common/VoiceReportModal'
 import apiClient from '../../services/api'
-
-// Icon mapper for dynamic symptom rendering
-const iconMap = {
-  Thermometer,
-  Wind,
-  Droplets,
-  UtensilsCrossed,
-  AlertCircle,
-  Moon,
-  Milk,
-  HeartPulse,
-  Waves,
-  AlertTriangle,
-  ActivitySquare: Activity,
-}
+import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
+import { useAuth } from '../../context/AuthContext'
 
 export default function SymptomReportPage() {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { user } = useAuth()
-  
+  const navigate = useNavigate()
   const [animals, setAnimals] = useState([])
+  const [selectedAnimalId, setSelectedAnimalId] = useState('')
+  const [selectedSymptoms, setSelectedSymptoms] = useState([])
+  const [severity, setSeverity] = useState('moderate')
+  const [durationDays, setDurationDays] = useState(2)
+  const [affectedCount, setAffectedCount] = useState(1)
+  const [village, setVillage] = useState('Rampur')
+  const [district, setDistrict] = useState('Jaipur Rural')
   const [loadingAnimals, setLoadingAnimals] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+
+  // AI Analysis & Outcome State
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysisStep, setAnalysisStep] = useState(0)
+  const [analysisResult, setAnalysisResult] = useState(null)
   const [error, setError] = useState(null)
-  const [aiEvaluation, setAiEvaluation] = useState(null)
-
-  const preselectedAnimalId = searchParams.get('animalId') || ''
-
-  const [formData, setFormData] = useState({
-    animal_id: preselectedAnimalId,
-    fever: false,
-    cough: false,
-    nasal_discharge: false,
-    reduced_appetite: false,
-    diarrhea: false,
-    lethargy: false,
-    reduced_milk: false,
-    difficulty_breathing: false,
-    salivation: false,
-    lesions: false,
-    swelling: false,
-    other_symptoms: '',
-    severity: 'moderate',
-    duration_days: 2,
-    number_of_animals_affected: 1,
-    village: user?.village || 'Rampur',
-    district: user?.district || 'Jaipur Rural',
-  })
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false)
 
   useEffect(() => {
-    const fetchAnimals = async () => {
+    async function loadAnimals() {
       try {
         const res = await apiClient.get('/animals')
         setAnimals(res.data)
-        if (!formData.animal_id && res.data.length > 0) {
-          setFormData(prev => ({ ...prev, animal_id: res.data[0].animal_id }))
-        }
+        if (res.data.length > 0) setSelectedAnimalId(res.data[0].animal_id)
       } catch (err) {
         console.error(err)
       } finally {
         setLoadingAnimals(false)
       }
     }
-    fetchAnimals()
+    loadAnimals()
   }, [])
 
-  const toggleSymptom = (key) => {
-    setFormData(prev => ({ ...prev, [key]: !prev[key] }))
+  const toggleSymptom = (id) => {
+    setSelectedSymptoms((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    )
   }
 
-  const handleAnimalChange = (e) => {
-    setFormData(prev => ({ ...prev, animal_id: e.target.value }))
-  }
-
-  const handleSeveritySelect = (sev) => {
-    setFormData(prev => ({ ...prev, severity: sev }))
-  }
-
-  const handleAnimalsCount = (delta) => {
-    setFormData(prev => ({
-      ...prev,
-      number_of_animals_affected: Math.max(1, Math.min(50, prev.number_of_animals_affected + delta))
-    }))
-  }
-
-  const selectedSymptomsCount = CORE_SYMPTOMS.filter(s => formData[s.key]).length
-
-  const handleSubmit = async (e) => {
+  const handleAnalyzeHealthRisk = async (e) => {
     e.preventDefault()
-    if (!formData.animal_id) {
-      setError('Please select or specify an animal identification number')
+    if (selectedSymptoms.length === 0) {
+      setError('Please select at least one clinical symptom to analyze.')
       return
     }
 
-    if (selectedSymptomsCount === 0 && !formData.other_symptoms) {
-      setError('Please select at least one observed symptom')
-      return
-    }
-
-    setSubmitting(true)
     setError(null)
+    setAnalyzing(true)
+    setAnalysisStep(1)
+
+    // Build payload
+    const payload = {
+      animal_id: selectedAnimalId,
+      fever: selectedSymptoms.includes('fever'),
+      cough: selectedSymptoms.includes('cough'),
+      nasal_discharge: selectedSymptoms.includes('nasal_discharge'),
+      difficulty_breathing: selectedSymptoms.includes('difficulty_breathing'),
+      lesions: selectedSymptoms.includes('lesions'),
+      salivation: selectedSymptoms.includes('salivation'),
+      diarrhea: selectedSymptoms.includes('diarrhea'),
+      reduced_milk: selectedSymptoms.includes('reduced_milk'),
+      swelling: selectedSymptoms.includes('swelling'),
+      lethargy: selectedSymptoms.includes('lethargy'),
+      reduced_appetite: selectedSymptoms.includes('reduced_appetite'),
+      severity,
+      duration_days: parseInt(durationDays) || 2,
+      number_of_animals_affected: parseInt(affectedCount) || 1,
+      village,
+      district,
+    }
+
+    // Step-by-step AI sequence
+    setTimeout(() => setAnalysisStep(2), 700)
+    setTimeout(() => setAnalysisStep(3), 1400)
+    setTimeout(() => setAnalysisStep(4), 2100)
 
     try {
-      const response = await apiClient.post('/health-reports', {
-        ...formData,
-        reported_by: user?.id || 'usr-farmer-1'
-      })
-      setAiEvaluation(response.data)
+      const res = await apiClient.post('/health-reports', payload)
+      setTimeout(() => {
+        setAnalyzing(false)
+        setAnalysisResult(res.data)
+      }, 2800)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to submit health report')
-    } finally {
-      setSubmitting(false)
+      setAnalyzing(false)
+      setError(err.response?.data?.detail || err.message || 'Failed to analyze health risk')
     }
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/farmer/dashboard"
-            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-                Farmer Health Reporting Desk
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                AI Early-Warning Active
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Report Livestock Symptoms
-            </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-mono font-bold text-emerald-400 uppercase">
+              Clinical Symptom Reporting
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/40 text-emerald-400 text-[10px] font-bold">
+              AI Decision Support
+            </span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white">
+            Livestock Health Problem Intake
+          </h1>
         </div>
+
+        <Button
+          onClick={() => setVoiceModalOpen(true)}
+          icon={Mic}
+          className="font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"
+        >
+          Voice Intake (आवाज में बताएं)
+        </Button>
       </div>
 
       {error && (
-        <Card className="p-4 bg-rose-50 border-rose-200 text-rose-800 flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
-          <span className="text-xs font-semibold">{error}</span>
-        </Card>
+        <div className="p-4 rounded-2xl bg-rose-950/80 border border-rose-500 text-rose-200 text-xs font-bold flex items-center space-x-2">
+          <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
       )}
 
-      {/* Main Reporting Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="p-6 sm:p-8 space-y-6">
-          
-          {/* Step 1: Select Livestock */}
-          <div className="space-y-3 pb-6 border-b border-slate-100">
-            <label className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">
-                1
-              </span>
-              <span>Select Affected Animal</span>
-            </label>
+      {/* Main Multi-Step Symptom Form */}
+      <form onSubmit={handleAnalyzeHealthRisk} className="space-y-6">
+        
+        {/* Step 1: Select Animal */}
+        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+            <span className="text-xs font-mono font-black uppercase text-emerald-400">
+              STEP 1 • SELECT ANIMAL
+            </span>
+            <span className="text-[11px] text-slate-400">Select livestock from your digital registry</span>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-600">
-                  Registered Livestock Passport
-                </label>
-                <select
-                  value={formData.animal_id}
-                  onChange={handleAnimalChange}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 bg-white font-bold text-slate-800"
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {animals.map((anim) => (
+              <div
+                key={anim.id}
+                onClick={() => setSelectedAnimalId(anim.animal_id)}
+                className={`p-3.5 rounded-2xl border cursor-pointer transition space-y-1 ${
+                  selectedAnimalId === anim.animal_id
+                    ? 'bg-emerald-950 border-emerald-400 ring-2 ring-emerald-400/40'
+                    : 'bg-[#061B17] border-emerald-500/20 hover:border-emerald-500/40 text-slate-300'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-mono font-black text-emerald-400">{anim.animal_id}</span>
+                  <PawPrint className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <h4 className="font-bold text-sm text-white">{anim.species}</h4>
+                <span className="text-[11px] text-slate-400 block">{anim.breed || 'Gir'} • {anim.age} yrs</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Step 2: 11 Core Symptoms Checklist */}
+        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+            <span className="text-xs font-mono font-black uppercase text-emerald-400">
+              STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
+            </span>
+            <span className="text-[11px] text-slate-400">Tap all symptoms currently present</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+            {SYMPTOM_DEFINITIONS.map((sym) => {
+              const active = selectedSymptoms.includes(sym.id)
+              return (
+                <div
+                  key={sym.id}
+                  onClick={() => toggleSymptom(sym.id)}
+                  className={`p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between space-y-2 select-none ${
+                    active
+                      ? 'bg-emerald-950 border-emerald-400 ring-2 ring-emerald-400/50 text-white'
+                      : 'bg-[#061B17] border-emerald-500/20 hover:border-emerald-500/40 text-slate-300'
+                  }`}
                 >
-                  {animals.map((a) => (
-                    <option key={a.id} value={a.animal_id}>
-                      {a.animal_id} — {a.species} ({a.breed})
-                    </option>
-                  ))}
-                  <option value="CUSTOM">Other / Unregistered Animal</option>
-                </select>
-              </div>
-
-              {formData.animal_id === 'CUSTOM' && (
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-600">
-                    Enter Ear-Tag or Identifier
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. COW-999"
-                    value={formData.animal_id === 'CUSTOM' ? '' : formData.animal_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, animal_id: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 font-mono uppercase font-bold"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Step 2: 11 Core Symptoms Checklist */}
-          <div className="space-y-3 pb-6 border-b border-slate-100">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-                <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">
-                  2
-                </span>
-                <span>Select Observed Symptoms ({selectedSymptomsCount}/11 Selected)</span>
-              </label>
-              <span className="text-xs text-slate-400 font-medium">Tap tiles to toggle</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {CORE_SYMPTOMS.map((sym) => {
-                const IconComponent = iconMap[sym.icon] || Activity
-                const isSelected = !!formData[sym.key]
-
-                return (
-                  <button
-                    key={sym.key}
-                    type="button"
-                    onClick={() => toggleSymptom(sym.key)}
-                    className={`p-4 rounded-2xl border text-left transition relative flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 ring-2 ring-emerald-500/20 shadow-xs'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                        isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        <IconComponent className="w-5 h-5" />
-                      </div>
-                      
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition ${
-                        isSelected ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'
-                      }`}>
-                        {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 space-y-0.5">
-                      <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
-                        {sym.label}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">
-                        {sym.description}
-                      </p>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Step 3: Severity, Duration & Spread */}
-          <div className="space-y-4">
-            <label className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">
-                3
-              </span>
-              <span>Severity, Duration &amp; Flock Spread</span>
-            </label>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              
-              {/* Severity Selector */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">Severity Level</label>
-                <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl">
-                  {['mild', 'moderate', 'severe'].map((sev) => (
-                    <button
-                      key={sev}
-                      type="button"
-                      onClick={() => handleSeveritySelect(sev)}
-                      className={`py-2 text-xs font-bold rounded-lg uppercase tracking-wider transition ${
-                        formData.severity === sev
-                          ? sev === 'severe'
-                            ? 'bg-rose-600 text-white shadow-xs'
-                            : sev === 'moderate'
-                            ? 'bg-amber-500 text-white shadow-xs'
-                            : 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {sev}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Duration in Days */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">Duration (Days)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  required
-                  value={formData.duration_days}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration_days: parseInt(e.target.value) || 1 }))}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 font-bold"
-                />
-              </div>
-
-              {/* Animals Affected in Herd */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Animals Showing Signs
-                </label>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => handleAnimalsCount(-1)}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <div className="flex-1 text-center py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm text-slate-900">
-                    {formData.number_of_animals_affected} {formData.number_of_animals_affected > 1 ? 'Animals' : 'Animal'}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">{sym.icon}</span>
+                    <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
+                      active ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black' : 'border-slate-600'
+                    }`}>
+                      {active ? '✓' : ''}
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleAnimalsCount(1)}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                  <div>
+                    <h4 className="font-bold text-xs leading-tight">{sym.name}</h4>
+                    <span className="text-[10px] text-slate-400 font-medium block">{sym.hindiName}</span>
+                  </div>
                 </div>
-              </div>
+              )
+            })}
+          </div>
+        </Card>
+
+        {/* Step 3: Severity, Duration & Location */}
+        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+            <span className="text-xs font-mono font-black uppercase text-emerald-400">
+              STEP 3 • CLINICAL CONTEXT &amp; LOCATION
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            {/* Severity */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-slate-300">Severity Level</label>
+              <select
+                value={severity}
+                onChange={(e) => setSeverity(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
+              >
+                <option value="mild">Mild (हल्का)</option>
+                <option value="moderate">Moderate (मध्यम)</option>
+                <option value="severe">Severe (गंभीर - Emergency)</option>
+              </select>
             </div>
 
-            {/* Additional Notes */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">
-                Additional Notes / Other Observations (Optional)
-              </label>
-              <textarea
-                rows="2"
-                placeholder="Describe any other unusual signs, sudden environmental changes, or recent animal purchases..."
-                value={formData.other_symptoms}
-                onChange={(e) => setFormData(prev => ({ ...prev, other_symptoms: e.target.value }))}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500"
+            {/* Duration */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-slate-300">Duration (Days)</label>
+              <select
+                value={durationDays}
+                onChange={(e) => setDurationDays(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
+              >
+                <option value="1">1 Day (आज से)</option>
+                <option value="2">2–3 Days</option>
+                <option value="5">4–7 Days</option>
+                <option value="10">More than 7 Days</option>
+              </select>
+            </div>
+
+            {/* Affected Animals Count */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-slate-300">Animals Affected in Herd</label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={affectedCount}
+                onChange={(e) => setAffectedCount(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
               />
             </div>
           </div>
-
-          {/* Submit Button */}
-          <div className="pt-4 border-t border-slate-100">
-            <Button
-              type="submit"
-              size="lg"
-              loading={submitting}
-              icon={Sparkles}
-              className="w-full font-bold shadow-lg shadow-emerald-200 py-3.5"
-            >
-              Submit Symptoms for AI Decision-Support Assessment
-            </Button>
-          </div>
         </Card>
+
+        {/* Big Submit Button */}
+        <Button
+          type="submit"
+          size="lg"
+          icon={Sparkles}
+          className="w-full font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-emerald-500/30 text-base py-3.5"
+        >
+          Analyze Livestock Health Risk →
+        </Button>
       </form>
 
-      {/* AI Evaluation & Recommendation Modal */}
-      {aiEvaluation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <Card className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border-slate-200 max-h-[90vh] overflow-y-auto">
+      {/* AI Health Analysis Multi-Step Loading Modal */}
+      {analyzing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <Card className="bg-[#092923] border border-emerald-500/40 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl text-white">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto animate-spin">
+              <RefreshCw className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-black text-xl text-white">
+                ANALYZING LIVESTOCK HEALTH...
+              </h3>
+              <p className="text-xs text-slate-300">
+                PASHURAKSHA AI Explainable Risk Engine Active
+              </p>
+            </div>
+
+            <div className="space-y-2 text-xs text-left max-w-xs mx-auto">
+              <div className={`flex items-center space-x-2 ${analysisStep >= 1 ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}>
+                <span>{analysisStep >= 1 ? '✓' : '○'}</span>
+                <span>Symptom pattern &amp; synergies analyzed</span>
+              </div>
+              <div className={`flex items-center space-x-2 ${analysisStep >= 2 ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}>
+                <span>{analysisStep >= 2 ? '✓' : '○'}</span>
+                <span>Animal history &amp; age factors checked</span>
+              </div>
+              <div className={`flex items-center space-x-2 ${analysisStep >= 3 ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}>
+                <span>{analysisStep >= 3 ? '✓' : '○'}</span>
+                <span>Vaccination coverage &amp; immunity status checked</span>
+              </div>
+              <div className={`flex items-center space-x-2 ${analysisStep >= 4 ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}>
+                <span>{analysisStep >= 4 ? '✓' : '○'}</span>
+                <span>Nearby spatial reports in Rampur analyzed</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* AI Health Risk Assessment Result Modal */}
+      {analysisResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <Card className="bg-[#092923] border border-emerald-500/40 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
             
-            {/* Modal Header */}
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-md shadow-emerald-100">
-                <Sparkles className="w-6 h-6 text-emerald-600" />
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-emerald-500/20 pb-4">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                  AI DECISION-SUPPORT ASSESSMENT
+                </span>
+                <h3 className="text-xl font-black text-white">
+                  Health Risk Evaluation: {analysisResult.animal_id}
+                </h3>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                AI Health Risk Assessment
-              </h2>
-              <p className="text-xs text-slate-500">
-                Evaluation generated for <strong>{aiEvaluation.animal_id}</strong> ({aiEvaluation.species})
-              </p>
+              <RiskBadge level={analysisResult.risk_level} score={analysisResult.risk_score} />
             </div>
 
-            {/* Risk Badge & Score Banner */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Computed Health Risk Level
-              </span>
-              <div className="flex justify-center">
-                <RiskBadge
-                  level={aiEvaluation.risk_level}
-                  score={aiEvaluation.risk_score}
-                  size="lg"
-                />
+            {/* Score & Disease Match */}
+            <div className="p-4 rounded-2xl bg-[#061B17] border border-emerald-500/30 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400 font-bold">Calculated Risk Score:</span>
+                <strong className="text-xl font-black text-emerald-300">{analysisResult.risk_score} / 100</strong>
               </div>
-              <div className="text-sm font-black text-slate-800">
-                Risk Score: {aiEvaluation.risk_score}/100
+
+              <div className="text-xs space-y-1 pt-1 border-t border-emerald-500/10">
+                <div className="text-slate-300">
+                  Potential Disease Concern: <strong className="text-rose-400">{analysisResult.possible_disease_concern}</strong>
+                </div>
               </div>
             </div>
 
-            {/* Possible Disease Concern */}
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
-                <span>Possible Disease Concern</span>
-              </span>
-              <p className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs sm:text-sm font-semibold text-amber-900">
-                {aiEvaluation.possible_disease_concern}
-              </p>
+            {/* Action Advice */}
+            <div className="p-3.5 rounded-2xl bg-amber-950/70 border border-amber-500/40 text-xs text-amber-200 space-y-1">
+              <strong className="text-amber-400 block font-bold">Recommended Isolation &amp; Veterinary Guidance:</strong>
+              <p>{analysisResult.recommended_action || 'Isolate symptomatic animal in dry pen, ensure clean water, and await on-site veterinary inspection.'}</p>
             </div>
 
-            {/* Veterinary & Management Recommendation */}
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
-                <ShieldAlert className="w-4 h-4 text-emerald-600" />
-                <span>Recommended Action &amp; Guidance</span>
-              </span>
-              <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-xs sm:text-sm text-emerald-950 font-medium space-y-2">
-                <p>{aiEvaluation.recommendation}</p>
-                {aiEvaluation.risk_score >= 60 && (
-                  <div className="p-2 rounded-lg bg-white/80 border border-emerald-300 text-xs font-bold text-emerald-800">
-                    ⚡ This case has been automatically escalated to the Local Veterinary Priority Triage Queue.
-                  </div>
-                )}
+            {/* Link to Outbreak Map */}
+            <div className="p-3.5 rounded-2xl bg-rose-950/50 border border-rose-500/40 text-xs flex items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <span className="font-bold text-rose-300 block">Nearby Spatial Disease Cluster Detected</span>
+                <span className="text-slate-400 text-[11px]">Multiple similar cases reported in Rampur sector</span>
               </div>
+              <Link to="/presentation">
+                <Button size="sm" className="font-bold bg-rose-600 hover:bg-rose-500 text-white">
+                  View Outbreak Map →
+                </Button>
+              </Link>
             </div>
 
-            {/* Non-Diagnostic Disclaimer */}
-            <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-500 leading-relaxed italic">
-              <strong>Mandatory Notice:</strong> PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment.
-            </div>
-
-            {/* Modal Actions */}
+            {/* Bottom Actions */}
             <div className="flex items-center space-x-3 pt-2">
               <Button
                 onClick={() => navigate('/farmer/dashboard')}
-                size="lg"
-                className="flex-1 font-bold"
+                size="md"
+                className="flex-1 font-black bg-emerald-500 text-slate-950"
               >
                 Return to Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => {
-                  setAiEvaluation(null)
-                  setFormData(prev => ({
-                    ...prev,
-                    fever: false,
-                    cough: false,
-                    nasal_discharge: false,
-                    reduced_appetite: false,
-                    diarrhea: false,
-                    lethargy: false,
-                    reduced_milk: false,
-                    difficulty_breathing: false,
-                    salivation: false,
-                    lesions: false,
-                    swelling: false,
-                    other_symptoms: '',
-                  }))
-                }}
-              >
-                Log Another
               </Button>
             </div>
 
           </Card>
         </div>
       )}
+
+      {/* Voice Reporting Modal */}
+      <VoiceReportModal
+        isOpen={voiceModalOpen}
+        onClose={() => setVoiceModalOpen(false)}
+        onSymptomsDetected={(symList) => {
+          // Map recognized strings to ids
+          const mapped = symList.map(s => s.toLowerCase().replace(' ', '_'))
+          setSelectedSymptoms(mapped)
+        }}
+      />
+
     </div>
   )
 }

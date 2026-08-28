@@ -1,10 +1,12 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ScenarioProvider } from './context/ScenarioContext'
 import MainLayout from './layouts/MainLayout'
 import DashboardLayout from './layouts/DashboardLayout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
+import PresentationPage from './pages/PresentationPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import FarmerDashboard from './pages/farmer/FarmerDashboard'
@@ -30,6 +32,9 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
+
+      {/* Dedicated SIH Presentation Mode */}
+      <Route path="/presentation" element={<PresentationPage />} />
 
       {/* Protected Dashboard Views */}
       <Route
@@ -153,9 +158,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <ScenarioProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ScenarioProvider>
     </AuthProvider>
   )
 }
