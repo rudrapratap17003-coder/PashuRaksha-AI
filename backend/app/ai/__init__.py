@@ -1,3 +1,3 @@
-"""
-AI / ML Intelligence Layer Package (Risk Engine & Spatial Outbreak Clustering)
-"""
+from app.ai.risk_engine import ExplainableRiskEngine
+
+__all__ = ["ExplainableRiskEngine"]

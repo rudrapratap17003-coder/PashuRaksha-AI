@@ -8,6 +8,7 @@ from app.models.animal import Animal
 from app.models.user import User
 from app.models.alert import Alert
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
+from app.ai.risk_engine import ExplainableRiskEngine
 
 class HealthReportService:
     @staticmethod
@@ -98,50 +99,35 @@ class HealthReportService:
             (Animal.animal_id == report_in.animal_id) | (Animal.id == report_in.animal_id)
         ).first()
         species = animal.species if animal else "Cattle (Cow)"
+        vaccination_status = animal.vaccination_status if animal else "Up to date"
 
-        # Calculate preliminary prototype score
-        score = 0.0
-        factors = []
-        if report_in.fever:
-            score += 20.0
-            factors.append({"factor": "Elevated temperature (Fever)", "weight_contribution": 20.0, "category": "Vitals"})
-        if report_in.cough or report_in.nasal_discharge:
-            score += 15.0
-            factors.append({"factor": "Respiratory signs (Cough/Discharge)", "weight_contribution": 15.0, "category": "Symptoms"})
-        if report_in.difficulty_breathing:
-            score += 25.0
-            factors.append({"factor": "Severe respiratory distress", "weight_contribution": 25.0, "category": "Critical Vitals"})
-        if report_in.lesions:
-            score += 25.0
-            factors.append({"factor": "Blisters/Lesions on mouth or feet", "weight_contribution": 25.0, "category": "Critical Signs"})
-        if report_in.reduced_appetite or report_in.lethargy:
-            score += 12.0
-            factors.append({"factor": "Loss of appetite / Lethargy", "weight_contribution": 12.0, "category": "General State"})
-        if report_in.number_of_animals_affected > 1:
-            score += 12.0
-            factors.append({"factor": f"{report_in.number_of_animals_affected} animals displaying signs", "weight_contribution": 12.0, "category": "Community Spread"})
+        # Execute Explainable AI Risk Evaluation
+        eval_result = ExplainableRiskEngine.evaluate(
+            fever=report_in.fever,
+            cough=report_in.cough,
+            nasal_discharge=report_in.nasal_discharge,
+            reduced_appetite=report_in.reduced_appetite,
+            diarrhea=report_in.diarrhea,
+            lethargy=report_in.lethargy,
+            reduced_milk=report_in.reduced_milk,
+            difficulty_breathing=report_in.difficulty_breathing,
+            salivation=report_in.salivation,
+            lesions=report_in.lesions,
+            swelling=report_in.swelling,
+            other_symptoms=report_in.other_symptoms,
+            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
+            duration_days=report_in.duration_days,
+            number_of_animals_affected=report_in.number_of_animals_affected,
+            vaccination_status=vaccination_status,
+            species=species,
+            previous_diseases=animal.previous_diseases if animal else None,
+        )
 
-        if report_in.severity == "severe":
-            score += 10.0
-        elif report_in.severity == "moderate":
-            score += 5.0
-
-        normalized_score = min(max(round(score, 1), 0.0), 100.0)
-        
-        if normalized_score >= 80:
-            level = "CRITICAL"
-            rec = "Urgent veterinary attention required. Isolate animal immediately."
-        elif normalized_score >= 60:
-            level = "HIGH"
-            rec = "Veterinary assessment recommended. Monitor vitals and isolate from herd."
-        elif normalized_score >= 30:
-            level = "MODERATE"
-            rec = "Moderate health concern. Keep animal hydrated and observe for 24 hours."
-        else:
-            level = "LOW"
-            rec = "Routine monitoring. Normal vitals reported."
-
-        possible_disease = "Possible Respiratory / Viral Complex (Decision-Support Assessment)"
+        score = eval_result["risk_score"]
+        level = eval_result["risk_level"]
+        rec = eval_result["recommendation"]
+        possible_disease = eval_result["possible_disease_concern"]
+        factors = eval_result["contributing_factors"]
 
         rep = HealthReport(
             id=f"rep-{str(uuid.uuid4())[:8]}",
@@ -161,14 +147,14 @@ class HealthReportService:
             lesions=report_in.lesions,
             swelling=report_in.swelling,
             other_symptoms=report_in.other_symptoms,
-            severity=report_in.severity.value,
+            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
             duration_days=report_in.duration_days,
             number_of_animals_affected=report_in.number_of_animals_affected,
             latitude=report_in.latitude or (user.latitude if user else 26.9124),
             longitude=report_in.longitude or (user.longitude if user else 75.7873),
             village=report_in.village or (user.village if user else "Rampur"),
             district=report_in.district or (user.district if user else "Jaipur Rural"),
-            risk_score=normalized_score,
+            risk_score=score,
             risk_level=level,
             possible_disease_concern=possible_disease,
             recommendation=rec,
@@ -177,15 +163,15 @@ class HealthReportService:
         db.commit()
         db.refresh(rep)
 
-        # Store linked risk assessment
+        # Store linked risk assessment with explainable factor breakdown
         risk = RiskAssessment(
             id=f"risk-{str(uuid.uuid4())[:8]}",
             report_id=rep.id,
             animal_id=rep.animal_id,
-            risk_score=normalized_score,
+            risk_score=score,
             risk_level=level,
             possible_disease_concern=possible_disease,
-            disease_risk_score=normalized_score,
+            disease_risk_score=score,
             contributing_factors=factors,
             recommendation=rec,
             cluster_detected=report_in.number_of_animals_affected > 1,
@@ -195,18 +181,18 @@ class HealthReportService:
 
         # Update animal's current risk score
         if animal:
-            animal.current_risk_score = normalized_score
+            animal.current_risk_score = score
             animal.current_risk_level = level
 
         # If high/critical risk, create an alert
-        if normalized_score >= 60:
+        if score >= 60.0:
             alert = Alert(
                 id=f"alt-{str(uuid.uuid4())[:8]}",
                 user_id=reported_by,
                 target_role="veterinarian",
                 alert_type="vet_triage",
                 title=f"High Risk Case: {animal.animal_id if animal else rep.animal_id} ({rep.village})",
-                message=f"{species} reported with risk score {normalized_score}/100. Prompt veterinary review recommended.",
+                message=f"{species} reported with risk score {score}/100 ({possible_disease}). Prompt veterinary review recommended.",
                 risk_level=level,
                 village=rep.village,
             )
