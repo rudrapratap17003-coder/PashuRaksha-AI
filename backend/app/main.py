@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from contextlib import asynccontextmanager
 from app.config import settings
+from app.database import init_db
 
 # Import modular routers
 from app.routes import (
@@ -15,6 +17,13 @@ from app.routes import (
     vet_router,
     authority_router,
 )
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize database tables and seed data on startup
+    init_db()
+    yield
+    # Cleanup on shutdown if needed
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,9 +39,10 @@ app = FastAPI(
 
 > **Non-Diagnostic Principle**: PASHURAKSHA AI provides decision-support and surveillance intelligence. It does not replace professional veterinary diagnosis or treatment.
     """,
-    version="0.3.0",
+    version="0.4.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
     openapi_tags=[
         {"name": "Core & Health", "description": "System health and runtime status"},
         {"name": "Authentication", "description": "User registration, login, and profile access"},
@@ -96,7 +106,8 @@ def health_check():
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "service": settings.PROJECT_NAME,
-        "version": "0.3.0",
+        "version": "0.4.0",
         "environment": settings.ENVIRONMENT,
+        "database": "SQLAlchemy ORM (Active)",
         "disclaimer": "PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment."
     }

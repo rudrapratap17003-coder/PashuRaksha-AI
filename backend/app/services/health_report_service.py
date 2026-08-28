@@ -1,40 +1,105 @@
 import uuid
 from typing import List, Optional
 from datetime import datetime
+from sqlalchemy.orm import Session
+from app.models.health_report import HealthReport
+from app.models.risk_assessment import RiskAssessment
+from app.models.animal import Animal
+from app.models.user import User
+from app.models.alert import Alert
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
-from app.schemas.risk_assessment import RiskAssessmentResponse, RiskLevelEnum
-from app.services.store import store
 
 class HealthReportService:
     @staticmethod
-    def get_all(animal_id: Optional[str] = None) -> List[HealthReportResponse]:
-        reports = list(store.health_reports.values())
+    def get_all(db: Session, animal_id: Optional[str] = None) -> List[HealthReportResponse]:
+        query = db.query(HealthReport)
         if animal_id:
-            reports = [r for r in reports if r.get("animal_id") == animal_id]
-        return [HealthReportResponse(**r) for r in reports]
+            query = query.filter(HealthReport.animal_id == animal_id)
+        reports = query.order_by(HealthReport.reported_at.desc()).all()
+        return [
+            HealthReportResponse(
+                id=r.id,
+                animal_id=r.animal_id,
+                reported_by=r.reported_by,
+                reporter_name=r.reporter_name,
+                species=r.species,
+                fever=r.fever,
+                cough=r.cough,
+                nasal_discharge=r.nasal_discharge,
+                reduced_appetite=r.reduced_appetite,
+                diarrhea=r.diarrhea,
+                lethargy=r.lethargy,
+                reduced_milk=r.reduced_milk,
+                difficulty_breathing=r.difficulty_breathing,
+                salivation=r.salivation,
+                lesions=r.lesions,
+                swelling=r.swelling,
+                other_symptoms=r.other_symptoms,
+                severity=r.severity,
+                duration_days=r.duration_days,
+                number_of_animals_affected=r.number_of_animals_affected,
+                latitude=r.latitude,
+                longitude=r.longitude,
+                village=r.village,
+                district=r.district,
+                reported_at=r.reported_at,
+                risk_score=r.risk_score,
+                risk_level=r.risk_level,
+                possible_disease_concern=r.possible_disease_concern,
+                recommendation=r.recommendation
+            )
+            for r in reports
+        ]
 
     @staticmethod
-    def get_by_id(report_id: str) -> Optional[HealthReportResponse]:
-        report = store.health_reports.get(report_id)
-        if report:
-            return HealthReportResponse(**report)
-        return None
+    def get_by_id(db: Session, report_id: str) -> Optional[HealthReportResponse]:
+        r = db.query(HealthReport).filter(HealthReport.id == report_id).first()
+        if not r:
+            return None
+        return HealthReportResponse(
+            id=r.id,
+            animal_id=r.animal_id,
+            reported_by=r.reported_by,
+            reporter_name=r.reporter_name,
+            species=r.species,
+            fever=r.fever,
+            cough=r.cough,
+            nasal_discharge=r.nasal_discharge,
+            reduced_appetite=r.reduced_appetite,
+            diarrhea=r.diarrhea,
+            lethargy=r.lethargy,
+            reduced_milk=r.reduced_milk,
+            difficulty_breathing=r.difficulty_breathing,
+            salivation=r.salivation,
+            lesions=r.lesions,
+            swelling=r.swelling,
+            other_symptoms=r.other_symptoms,
+            severity=r.severity,
+            duration_days=r.duration_days,
+            number_of_animals_affected=r.number_of_animals_affected,
+            latitude=r.latitude,
+            longitude=r.longitude,
+            village=r.village,
+            district=r.district,
+            reported_at=r.reported_at,
+            risk_score=r.risk_score,
+            risk_level=r.risk_level,
+            possible_disease_concern=r.possible_disease_concern,
+            recommendation=r.recommendation
+        )
 
     @staticmethod
-    def create(report_in: HealthReportCreate) -> HealthReportResponse:
-        rep_id = f"rep-{str(uuid.uuid4())[:8]}"
-        risk_id = f"risk-{str(uuid.uuid4())[:8]}"
-        
-        # Determine animal species and owner
-        species = "Cattle (Cow)"
-        animal = None
-        for a in store.animals.values():
-            if a["animal_id"] == report_in.animal_id or a["id"] == report_in.animal_id:
-                species = a.get("species", "Cattle (Cow)")
-                animal = a
-                break
+    def create(db: Session, report_in: HealthReportCreate) -> HealthReportResponse:
+        reported_by = report_in.reported_by or "usr-farmer-1"
+        user = db.query(User).filter(User.id == reported_by).first()
+        reporter_name = user.name if user else "Farmer"
 
-        # Calculate preliminary prototype score (will be refined in Phase 9 AI Risk Engine)
+        animal = db.query(Animal).filter(
+            (Animal.animal_id == report_in.animal_id) | (Animal.id == report_in.animal_id)
+        ).first()
+        species = animal.species if animal else "Cattle (Cow)"
+
+        # Calculate preliminary prototype score
         score = 0.0
         factors = []
         if report_in.fever:
@@ -78,73 +143,105 @@ class HealthReportService:
 
         possible_disease = "Possible Respiratory / Viral Complex (Decision-Support Assessment)"
 
-        rep_dict = report_in.model_dump()
-        rep_dict["id"] = rep_id
-        rep_dict["reported_by"] = report_in.reported_by or "usr-farmer-1"
-        rep_dict["reporter_name"] = store.users.get(rep_dict["reported_by"], {}).get("name", "Farmer")
-        rep_dict["species"] = species
-        rep_dict["reported_at"] = datetime.utcnow()
-        rep_dict["risk_score"] = normalized_score
-        rep_dict["risk_level"] = level
-        rep_dict["possible_disease_concern"] = possible_disease
-        rep_dict["recommendation"] = rec
-
-        store.health_reports[rep_id] = rep_dict
+        rep = HealthReport(
+            id=f"rep-{str(uuid.uuid4())[:8]}",
+            animal_id=report_in.animal_id,
+            reported_by=reported_by,
+            reporter_name=reporter_name,
+            species=species,
+            fever=report_in.fever,
+            cough=report_in.cough,
+            nasal_discharge=report_in.nasal_discharge,
+            reduced_appetite=report_in.reduced_appetite,
+            diarrhea=report_in.diarrhea,
+            lethargy=report_in.lethargy,
+            reduced_milk=report_in.reduced_milk,
+            difficulty_breathing=report_in.difficulty_breathing,
+            salivation=report_in.salivation,
+            lesions=report_in.lesions,
+            swelling=report_in.swelling,
+            other_symptoms=report_in.other_symptoms,
+            severity=report_in.severity.value,
+            duration_days=report_in.duration_days,
+            number_of_animals_affected=report_in.number_of_animals_affected,
+            latitude=report_in.latitude or (user.latitude if user else 26.9124),
+            longitude=report_in.longitude or (user.longitude if user else 75.7873),
+            village=report_in.village or (user.village if user else "Rampur"),
+            district=report_in.district or (user.district if user else "Jaipur Rural"),
+            risk_score=normalized_score,
+            risk_level=level,
+            possible_disease_concern=possible_disease,
+            recommendation=rec,
+        )
+        db.add(rep)
+        db.commit()
+        db.refresh(rep)
 
         # Store linked risk assessment
-        store.risk_assessments[risk_id] = {
-            "id": risk_id,
-            "report_id": rep_id,
-            "animal_id": report_in.animal_id,
-            "risk_score": normalized_score,
-            "risk_level": level,
-            "possible_disease_concern": possible_disease,
-            "disease_risk_score": normalized_score,
-            "contributing_factors": factors,
-            "recommendation": rec,
-            "cluster_detected": report_in.number_of_animals_affected > 1,
-            "disclaimer": "PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment.",
-            "created_at": datetime.utcnow(),
-        }
+        risk = RiskAssessment(
+            id=f"risk-{str(uuid.uuid4())[:8]}",
+            report_id=rep.id,
+            animal_id=rep.animal_id,
+            risk_score=normalized_score,
+            risk_level=level,
+            possible_disease_concern=possible_disease,
+            disease_risk_score=normalized_score,
+            contributing_factors=factors,
+            recommendation=rec,
+            cluster_detected=report_in.number_of_animals_affected > 1,
+            cluster_name="Rampur Village Cluster #1" if report_in.number_of_animals_affected > 1 else None,
+        )
+        db.add(risk)
 
         # Update animal's current risk score
         if animal:
-            animal["current_risk_score"] = normalized_score
-            animal["current_risk_level"] = level
+            animal.current_risk_score = normalized_score
+            animal.current_risk_level = level
 
-        # If high risk, create a vet triage case
+        # If high/critical risk, create an alert
         if normalized_score >= 60:
-            case_id = f"case-{str(uuid.uuid4())[:6]}"
-            symptoms = []
-            if report_in.fever: symptoms.append("Fever")
-            if report_in.cough: symptoms.append("Cough")
-            if report_in.nasal_discharge: symptoms.append("Nasal Discharge")
-            if report_in.reduced_appetite: symptoms.append("Reduced Appetite")
-            if report_in.difficulty_breathing: symptoms.append("Difficulty Breathing")
-            if report_in.lesions: symptoms.append("Lesions")
+            alert = Alert(
+                id=f"alt-{str(uuid.uuid4())[:8]}",
+                user_id=reported_by,
+                target_role="veterinarian",
+                alert_type="vet_triage",
+                title=f"High Risk Case: {animal.animal_id if animal else rep.animal_id} ({rep.village})",
+                message=f"{species} reported with risk score {normalized_score}/100. Prompt veterinary review recommended.",
+                risk_level=level,
+                village=rep.village,
+            )
+            db.add(alert)
 
-            store.vet_cases[case_id] = {
-                "id": case_id,
-                "report_id": rep_id,
-                "animal_id": report_in.animal_id,
-                "species": species,
-                "breed": animal.get("breed", "Local") if animal else "Local",
-                "farmer_name": rep_dict["reporter_name"],
-                "farmer_phone": "9876543210",
-                "village": report_in.village or "Rampur",
-                "district": report_in.district or "Jaipur Rural",
-                "symptoms": symptoms,
-                "severity": report_in.severity.value,
-                "duration_days": report_in.duration_days,
-                "risk_score": normalized_score,
-                "risk_level": level,
-                "possible_disease_concern": possible_disease,
-                "cluster_flag": report_in.number_of_animals_affected > 1,
-                "cluster_id": "clust-101" if report_in.number_of_animals_affected > 1 else None,
-                "status": "pending",
-                "veterinary_notes": None,
-                "lab_referral": False,
-                "reported_at": datetime.utcnow(),
-            }
+        db.commit()
 
-        return HealthReportResponse(**rep_dict)
+        return HealthReportResponse(
+            id=rep.id,
+            animal_id=rep.animal_id,
+            reported_by=rep.reported_by,
+            reporter_name=rep.reporter_name,
+            species=rep.species,
+            fever=rep.fever,
+            cough=rep.cough,
+            nasal_discharge=rep.nasal_discharge,
+            reduced_appetite=rep.reduced_appetite,
+            diarrhea=rep.diarrhea,
+            lethargy=rep.lethargy,
+            reduced_milk=rep.reduced_milk,
+            difficulty_breathing=rep.difficulty_breathing,
+            salivation=rep.salivation,
+            lesions=rep.lesions,
+            swelling=rep.swelling,
+            other_symptoms=rep.other_symptoms,
+            severity=rep.severity,
+            duration_days=rep.duration_days,
+            number_of_animals_affected=rep.number_of_animals_affected,
+            latitude=rep.latitude,
+            longitude=rep.longitude,
+            village=rep.village,
+            district=rep.district,
+            reported_at=rep.reported_at,
+            risk_score=rep.risk_score,
+            risk_level=rep.risk_level,
+            possible_disease_concern=rep.possible_disease_concern,
+            recommendation=rep.recommendation
+        )

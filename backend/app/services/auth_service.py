@@ -1,36 +1,65 @@
 import uuid
-from datetime import datetime
+from typing import Optional
+from sqlalchemy.orm import Session
+from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, TokenResponse
-from app.services.store import store
 
 class AuthService:
     @staticmethod
-    def register(user_in: UserCreate) -> UserResponse:
+    def register(db: Session, user_in: UserCreate) -> UserResponse:
         user_id = f"usr-{str(uuid.uuid4())[:8]}"
-        user_dict = user_in.model_dump()
-        user_dict.pop("password", None)
-        user_dict["id"] = user_id
-        user_dict["created_at"] = datetime.utcnow()
-        store.users[user_id] = user_dict
-        return UserResponse(**user_dict)
-
-    @staticmethod
-    def login(login_in: UserLogin) -> TokenResponse:
-        # Match user by email
-        for user in store.users.values():
-            if user["email"].lower() == login_in.email.lower():
-                token = f"pashuraksha_demo_jwt_{user['id']}"
-                return TokenResponse(
-                    access_token=token,
-                    user=UserResponse(**user)
-                )
-        # If not found, return demo user for smooth SIH testing
-        demo_user = list(store.users.values())[0]
-        return TokenResponse(
-            access_token="pashuraksha_demo_jwt_default",
-            user=UserResponse(**demo_user)
+        user = User(
+            id=user_id,
+            name=user_in.name,
+            phone=user_in.phone,
+            email=user_in.email,
+            password_hash=f"hashed_{user_in.password}",  # To be hashed with passlib in Phase 5
+            role=user_in.role.value,
+            village=user_in.village,
+            district=user_in.district,
+            state=user_in.state,
+            latitude=user_in.latitude,
+            longitude=user_in.longitude,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return UserResponse(
+            id=user.id,
+            name=user.name,
+            phone=user.phone,
+            email=user.email,
+            role=user.role,
+            village=user.village,
+            district=user.district,
+            state=user.state,
+            latitude=user.latitude,
+            longitude=user.longitude,
+            created_at=user.created_at
         )
 
     @staticmethod
-    def get_user_by_id(user_id: str):
-        return store.users.get(user_id)
+    def login(db: Session, login_in: UserLogin) -> TokenResponse:
+        user = db.query(User).filter(User.email.ilike(login_in.email)).first()
+        if not user:
+            user = db.query(User).first()  # Fallback demo user
+        
+        token = f"pashuraksha_demo_jwt_{user.id}"
+        user_resp = UserResponse(
+            id=user.id,
+            name=user.name,
+            phone=user.phone,
+            email=user.email,
+            role=user.role,
+            village=user.village,
+            district=user.district,
+            state=user.state,
+            latitude=user.latitude,
+            longitude=user.longitude,
+            created_at=user.created_at
+        )
+        return TokenResponse(access_token=token, user=user_resp)
+
+    @staticmethod
+    def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
+        return db.query(User).filter(User.id == user_id).first()
