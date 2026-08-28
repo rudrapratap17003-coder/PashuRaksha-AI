@@ -1,175 +1,305 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   Building2, 
-  Map, 
-  Radio, 
-  BarChart3, 
-  Users, 
-  ShieldAlert, 
+  MapPin, 
   AlertTriangle, 
+  ShieldAlert, 
+  TrendingUp, 
+  Users, 
   Syringe, 
-  Download,
-  Filter
+  Sparkles, 
+  CheckCircle2, 
+  RefreshCw,
+  Layers,
+  Radio,
+  FileSpreadsheet,
+  Activity
 } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
-import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
+import RiskBadge from '../../components/common/RiskBadge'
+import OutbreakMap from '../../components/map/OutbreakMap'
+import apiClient from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
 
-export default function AuthorityDashboard({ user }) {
-  // Demo district summary for Phase 2 scaffold
-  const villageStats = [
-    { village: 'Rampur', district: 'Jaipur Rural', animals: 142, activeCases: 5, clusterStatus: 'CRITICAL HOTSPOT', riskScore: 84 },
-    { village: 'Kalyanpura', district: 'Jaipur Rural', animals: 98, activeCases: 2, clusterStatus: 'WATCHLIST', riskScore: 42 },
-    { village: 'Sanganer Outskirts', district: 'Jaipur Rural', animals: 210, activeCases: 1, clusterStatus: 'NORMAL', riskScore: 18 },
-    { village: 'Amer North', district: 'Jaipur Rural', animals: 175, activeCases: 0, clusterStatus: 'NORMAL', riskScore: 8 },
-  ]
+export default function AuthorityDashboard() {
+  const { user } = useAuth()
+  const [summary, setSummary] = useState(null)
+  const [clusters, setClusters] = useState([])
+  const [trends, setTrends] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [runningDetection, setRunningDetection] = useState(false)
+  const [detectionNotice, setDetectionNotice] = useState(null)
+
+  const fetchAuthorityData = async () => {
+    setLoading(true)
+    try {
+      const [sumRes, clustRes, trendRes] = await Promise.allSettled([
+        apiClient.get('/authority/dashboard'),
+        apiClient.get('/clusters'),
+        apiClient.get('/authority/trends'),
+      ])
+
+      if (sumRes.status === 'fulfilled') setSummary(sumRes.value.data)
+      if (clustRes.status === 'fulfilled') setClusters(clustRes.value.data)
+      if (trendRes.status === 'fulfilled') setTrends(trendRes.value.data)
+    } catch (err) {
+      console.error('Error loading authority data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAuthorityData()
+  }, [])
+
+  const handleRunClusterDetection = async () => {
+    setRunningDetection(true)
+    setDetectionNotice(null)
+    try {
+      const res = await apiClient.post('/clusters/run-detection')
+      setClusters(res.data)
+      setDetectionNotice(`Spatial-temporal clustering executed. ${res.data.length} active disease clusters updated in database.`)
+      fetchAuthorityData()
+    } catch (err) {
+      setDetectionNotice('Failed to execute cluster detection')
+    } finally {
+      setRunningDetection(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Authority Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">
-            Animal Health &amp; Disease Surveillance Portal
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">
+              District Surveillance Portal
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
+              Epidemic Intelligence Active
+            </span>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            District Surveillance: Jaipur Rural
+            Livestock Disease Surveillance Command
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Monitoring Officer: <strong>{user?.name || 'R. Verma (District Health Officer)'}</strong>
+            Jurisdiction: <strong>Jaipur Rural District • Department of Animal Husbandry</strong>
           </p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" icon={Download}>
-            Export Report
-          </Button>
-          <Button variant="primary" size="sm" icon={Radio} className="bg-purple-600 hover:bg-purple-700">
-            Broadcast Alert
+          <button
+            onClick={fetchAuthorityData}
+            title="Refresh"
+            className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          
+          <Button
+            onClick={handleRunClusterDetection}
+            loading={runningDetection}
+            icon={Sparkles}
+            className="font-bold bg-purple-700 hover:bg-purple-600 text-white shadow-md shadow-purple-200"
+          >
+            Run Outbreak Detection
           </Button>
         </div>
       </div>
 
-      {/* Surveillance Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {detectionNotice && (
+        <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold flex items-center space-x-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />
+          <span>{detectionNotice}</span>
+        </div>
+      )}
+
+      {/* District KPI Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
         <StatCard
           title="Monitored Livestock"
-          value="625"
-          subtitle="4 registered villages"
+          value={summary?.total_monitored_animals || 625}
+          subtitle="Across 4 Sub-districts"
           icon={Users}
-          iconBg="bg-slate-100 text-slate-700"
+          iconBg="bg-purple-50 text-purple-700"
         />
         <StatCard
-          title="Active Disease Reports"
-          value="8"
-          subtitle="Past 7 days"
-          icon={AlertTriangle}
-          iconBg="bg-amber-50 text-amber-600"
+          title="Health Reports"
+          value={summary?.total_health_reports || 12}
+          subtitle="Past 14 Days"
+          icon={Activity}
+          iconBg="bg-sky-50 text-sky-600"
         />
         <StatCard
-          title="Detected Clusters"
-          value="1"
-          subtitle="Rampur Hotspot"
+          title="Active Clusters"
+          value={clusters.length}
+          subtitle="Spatial Hotspots"
           icon={Radio}
-          iconBg="bg-rose-50 text-rose-600"
+          iconBg={clusters.length > 0 ? "bg-rose-50 text-rose-600" : "bg-slate-50 text-slate-500"}
         />
         <StatCard
-          title="Vaccination Coverage"
-          value="84.2%"
-          subtitle="Target: >90%"
+          title="Hotspot Villages"
+          value={summary?.high_risk_villages_count || 1}
+          subtitle="Critical Attention"
+          icon={AlertTriangle}
+          iconBg="bg-orange-50 text-orange-600"
+        />
+        <StatCard
+          title="Vaccination Rate"
+          value={`${summary?.district_vaccination_rate || 84.2}%`}
+          subtitle="District Coverage"
           icon={Syringe}
           iconBg="bg-emerald-50 text-emerald-600"
         />
       </div>
 
-      {/* Outbreak Heatmap Placeholder Card */}
-      <Card className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
-              <Map className="w-5 h-5 text-purple-600" />
-              <span>Spatial Outbreak Risk Heatmap (Preview)</span>
-            </h2>
+      {/* Geospatial Outbreak Map Section */}
+      <Card className="space-y-4 p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-5 h-5 text-rose-600" />
+              <h3 className="font-bold text-slate-900 text-base">
+                District Epidemiological GIS Heatmap ({clusters.length} Active Hotspots)
+              </h3>
+            </div>
             <p className="text-xs text-slate-500">
-              Interactive Leaflet GIS map with village-level cluster centroids (Full Integration in Phase 12)
+              Interactive spatial-temporal cluster centroids and containment buffer zones
             </p>
           </div>
-          <Badge variant="purple" size="sm">Leaflet GIS Ready</Badge>
+          <Badge variant="danger" dot>Real-time Haversine Detection</Badge>
         </div>
 
-        {/* Heatmap visual mock container */}
-        <div className="h-64 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 relative overflow-hidden flex items-center justify-center p-6 text-center text-white">
-          <div className="space-y-3 max-w-md">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center mx-auto text-purple-300 animate-pulse">
-              <Radio className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-base">Geospatial Cluster Visualization Engine</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Spatial density points centered at <strong>Rampur (26.9124° N, 75.7873° E)</strong> showing 4 correlated respiratory reports forming an active cluster.
-            </p>
-            <div className="flex justify-center gap-2 pt-1 text-[11px]">
-              <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">
-                ● Rampur Hotspot (Critical)
-              </span>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                ● Sanganer (Clear)
-              </span>
-            </div>
-          </div>
-        </div>
+        <OutbreakMap
+          clusters={clusters}
+          height="440px"
+          zoom={11}
+        />
       </Card>
 
-      {/* Village Surveillance Table */}
-      <Card className="p-0 overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 flex items-center space-x-2">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
-            <span>Village Risk Stratification Index</span>
-          </h3>
-          <span className="text-xs font-semibold text-slate-500">4 Villages Monitored</span>
-        </div>
+      {/* 2-Column Split: Village Risk Index & Epidemic Trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Village Risk Stratification Table (2 Cols) */}
+        <Card className="lg:col-span-2 p-0 overflow-hidden space-y-0">
+          <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Building2 className="w-5 h-5 text-purple-700" />
+              <h3 className="font-bold text-slate-900 text-base">
+                Village Risk Stratification Matrix
+              </h3>
+            </div>
+            <span className="text-xs font-semibold text-slate-400">
+              4 Villages Monitored
+            </span>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] font-bold">
-              <tr>
-                <th className="py-3.5 px-4 sm:px-6">Village</th>
-                <th className="py-3.5 px-4">District</th>
-                <th className="py-3.5 px-4">Total Animals</th>
-                <th className="py-3.5 px-4">Active Reports</th>
-                <th className="py-3.5 px-4">Cluster Classification</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">Risk Index</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {villageStats.map((v) => (
-                <tr key={v.village} className="hover:bg-slate-50/80 transition">
-                  <td className="py-3.5 px-4 sm:px-6 font-bold text-slate-900">
-                    {v.village}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-500">{v.district}</td>
-                  <td className="py-3.5 px-4">{v.animals}</td>
-                  <td className="py-3.5 px-4 font-bold">{v.activeCases}</td>
-                  <td className="py-3.5 px-4">
-                    {v.clusterStatus === 'CRITICAL HOTSPOT' ? (
-                      <Badge variant="danger" dot>{v.clusterStatus}</Badge>
-                    ) : v.clusterStatus === 'WATCHLIST' ? (
-                      <Badge variant="warning" dot>{v.clusterStatus}</Badge>
-                    ) : (
-                      <Badge variant="primary">{v.clusterStatus}</Badge>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-6 text-right">
-                    <RiskBadge score={v.riskScore} level={v.riskScore > 75 ? 'CRITICAL' : v.riskScore > 30 ? 'MODERATE' : 'LOW'} />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] font-bold">
+                <tr>
+                  <th className="py-3.5 px-4 sm:px-6">Village</th>
+                  <th className="py-3.5 px-4">Monitored Animals</th>
+                  <th className="py-3.5 px-4">Active Reports</th>
+                  <th className="py-3.5 px-4">Vaccine Coverage</th>
+                  <th className="py-3.5 px-4">Risk Index</th>
+                  <th className="py-3.5 px-4 sm:px-6">Cluster Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                {summary?.villages?.map((v) => (
+                  <tr key={v.village} className="hover:bg-slate-50/80 transition">
+                    <td className="py-3.5 px-4 sm:px-6 font-bold text-slate-900">
+                      {v.village}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-700">
+                      {v.monitored_animals}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-700">
+                      {v.active_health_reports}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-emerald-700">
+                      {v.vaccination_coverage}%
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-slate-900">
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        v.risk_index >= 80 ? 'bg-rose-100 text-rose-800' :
+                        v.risk_index >= 40 ? 'bg-amber-100 text-amber-800' :
+                        'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {v.risk_index}/100
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 sm:px-6">
+                      <Badge variant={
+                        v.cluster_status.includes('CRITICAL') ? 'danger' :
+                        v.cluster_status.includes('WATCHLIST') ? 'warning' : 'primary'
+                      }>
+                        {v.cluster_status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        {/* Multi-Day Epidemic Trend Visualizer (1 Col) */}
+        <Card className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              <h3 className="font-bold text-slate-900 text-sm">
+                Epidemic Risk Trends (7 Days)
+              </h3>
+            </div>
+            <span className="text-[11px] font-semibold text-slate-400">Daily Incidents</span>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            {trends.map((t) => (
+              <div key={t.date} className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold text-slate-600">
+                  <span>{t.date}</span>
+                  <span>{t.low_risk_count + t.high_risk_count + t.critical_risk_count} cases</span>
+                </div>
+                
+                {/* Multi-tier Stacked Bar */}
+                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                  <div
+                    style={{ width: `${(t.low_risk_count / (t.low_risk_count + t.high_risk_count + t.critical_risk_count || 1)) * 100}%` }}
+                    className="bg-emerald-500 h-full"
+                    title={`Low Risk: ${t.low_risk_count}`}
+                  />
+                  <div
+                    style={{ width: `${(t.high_risk_count / (t.low_risk_count + t.high_risk_count + t.critical_risk_count || 1)) * 100}%` }}
+                    className="bg-orange-500 h-full"
+                    title={`High Risk: ${t.high_risk_count}`}
+                  />
+                  <div
+                    style={{ width: `${(t.critical_risk_count / (t.low_risk_count + t.high_risk_count + t.critical_risk_count || 1)) * 100}%` }}
+                    className="bg-rose-600 h-full"
+                    title={`Critical Risk: ${t.critical_risk_count}`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+            <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/><span>Low Risk</span></span>
+            <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block"/><span>High Risk</span></span>
+            <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-rose-600 inline-block"/><span>Critical</span></span>
+          </div>
+        </Card>
+
+      </div>
     </div>
   )
 }
