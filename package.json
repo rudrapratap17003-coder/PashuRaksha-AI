@@ -1,0 +1,30 @@
+{
+  "name": "pashuraksha-ai",
+  "version": "1.0.0",
+  "description": "PASHURAKSHA AI — Livestock Health Intelligence & Outbreak Early-Warning Platform (SIH26128)",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173",
+    "dev:backend": "backend\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
+    "dev:backend:unix": "./backend/.venv/bin/uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
+    "build": "npm --prefix frontend run build",
+    "install:all": "npm install && npm --prefix frontend install --legacy-peer-deps",
+    "test": "backend\\.venv\\Scripts\\pytest.exe backend/tests/test_api.py -v",
+    "test:unix": "./backend/.venv/bin/pytest backend/tests/test_api.py -v"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "sih2026",
+    "sih26128",
+    "livestock-health",
+    "disease-surveillance",
+    "fastapi",
+    "react",
+    "epidemiology"
+  ],
+  "author": "PASHURAKSHA AI Team",
+  "license": "MIT"
+}

@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Pashuraksha AI (Both Backend & Frontend)",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "isBackground": true,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Start Frontend Only",
+      "type": "npm",
+      "script": "dev:frontend",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Start Backend Only",
+      "type": "npm",
+      "script": "dev:backend",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Run Automated Tests",
+      "type": "npm",
+      "script": "test",
+      "problemMatcher": []
+    }
+  ]
+}
