@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     ENVIRONMENT: str = "development"
     
+    # JWT Security Configuration
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "pashuraksha-super-secret-jwt-key-sih2026-secure-token-998877")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 Hours
+    
     # Comma-separated CORS origins or list
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",

@@ -1,20 +1,23 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Activity, User, Phone, MapPin, Mail, Lock } from 'lucide-react'
+import { Activity, AlertCircle } from 'lucide-react'
 import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
+import { useAuth } from '../../context/AuthContext'
 import { USER_ROLES } from '../../utils/constants'
 
-export default function RegisterPage({ onRegisterSuccess }) {
+export default function RegisterPage() {
   const navigate = useNavigate()
+  const { register, loading } = useAuth()
   const [role, setRole] = useState(USER_ROLES.FARMER)
+  const [error, setError] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     password: '',
     village: '',
-    district: '',
+    district: 'Jaipur Rural',
     state: 'Rajasthan',
   })
 
@@ -22,23 +25,18 @@ export default function RegisterPage({ onRegisterSuccess }) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const mockUser = {
-      id: 'registered-user-1',
-      name: formData.name || 'New Registered User',
-      email: formData.email,
-      phone: formData.phone,
-      role,
-      village: formData.village,
-      district: formData.district,
+    setError(null)
+    try {
+      const user = await register({ ...formData, role })
+      if (user.role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
+      else if (user.role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
+      else if (user.role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
+      else navigate('/')
+    } catch (err) {
+      setError(err.message || 'Registration failed')
     }
-    if (onRegisterSuccess) {
-      onRegisterSuccess(mockUser)
-    }
-    if (role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
-    else if (role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
-    else if (role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
   }
 
   return (
@@ -95,6 +93,13 @@ export default function RegisterPage({ onRegisterSuccess }) {
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -170,7 +175,6 @@ export default function RegisterPage({ onRegisterSuccess }) {
                 type="text"
                 name="district"
                 required
-                placeholder="District"
                 value={formData.district}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -189,7 +193,7 @@ export default function RegisterPage({ onRegisterSuccess }) {
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="w-full font-bold">
+          <Button type="submit" size="lg" loading={loading} className="w-full font-bold">
             Create Account
           </Button>
         </form>

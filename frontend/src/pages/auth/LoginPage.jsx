@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Activity, Lock, Mail, Users, Stethoscope, Building2, ArrowRight } from 'lucide-react'
+import { Activity, Lock, Mail, AlertCircle } from 'lucide-react'
 import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
+import { useAuth } from '../../context/AuthContext'
 import { USER_ROLES } from '../../utils/constants'
 
-export default function LoginPage({ onLoginSuccess }) {
+export default function LoginPage() {
   const navigate = useNavigate()
+  const { login, loading } = useAuth()
   const [role, setRole] = useState(USER_ROLES.FARMER)
   const [email, setEmail] = useState('farmer.ramesh@pashuraksha.ai')
   const [password, setPassword] = useState('password123')
+  const [error, setError] = useState(null)
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole)
@@ -22,25 +25,18 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Prepare mock user for Phase 2 frontend testing
-    const mockUser = {
-      id: 'demo-user-1',
-      name: role === USER_ROLES.FARMER ? 'Ramesh Kumar (Farmer)' : role === USER_ROLES.VETERINARIAN ? 'Dr. Sharma (Veterinary Officer)' : 'R. Verma (District Health Officer)',
-      email,
-      role,
-      village: 'Rampur',
-      district: 'Jaipur',
+    setError(null)
+    try {
+      const user = await login(email, password)
+      if (user.role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
+      else if (user.role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
+      else if (user.role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
+      else navigate('/')
+    } catch (err) {
+      setError(err.message || 'Invalid credentials')
     }
-    
-    if (onLoginSuccess) {
-      onLoginSuccess(mockUser)
-    }
-
-    if (role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
-    else if (role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
-    else if (role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
   }
 
   return (
@@ -58,7 +54,7 @@ export default function LoginPage({ onLoginSuccess }) {
           </p>
         </div>
 
-        {/* Role Quick Selector */}
+        {/* 1-Click Role Switcher */}
         <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
           <button
             type="button"
@@ -95,9 +91,16 @@ export default function LoginPage({ onLoginSuccess }) {
           </button>
         </div>
 
+        {error && (
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">Email Address / Phone</label>
+            <label className="text-xs font-bold text-slate-700">Email Address / User ID</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -105,7 +108,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
@@ -119,12 +122,12 @@ export default function LoginPage({ onLoginSuccess }) {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="w-full font-bold">
+          <Button type="submit" size="lg" loading={loading} className="w-full font-bold">
             Enter as {role.toUpperCase()}
           </Button>
         </form>

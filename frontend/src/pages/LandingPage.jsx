@@ -11,26 +11,30 @@ import {
   Radio, 
   ShieldAlert, 
   CheckCircle2, 
-  Layers,
-  BarChart2,
-  Syringe
+  Layers
 } from 'lucide-react'
 import Button from '../components/common/Button'
 import Card from '../components/common/Card'
 import Badge from '../components/common/Badge'
 import RiskBadge from '../components/common/RiskBadge'
+import { useAuth } from '../context/AuthContext'
 import { USER_ROLES } from '../utils/constants'
 
-export default function LandingPage({ onSelectDemoRole }) {
+export default function LandingPage() {
   const navigate = useNavigate()
+  const { loginAsRole, loading } = useAuth()
 
-  const handleLaunchRole = (role) => {
-    if (onSelectDemoRole) {
-      onSelectDemoRole(role)
+  const handleLaunchRole = async (role) => {
+    try {
+      await loginAsRole(role)
+      if (role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
+      else if (role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
+      else if (role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
+    } catch {
+      if (role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
+      else if (role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
+      else if (role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
     }
-    if (role === USER_ROLES.FARMER) navigate('/farmer/dashboard')
-    if (role === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')
-    if (role === USER_ROLES.AUTHORITY) navigate('/authority/dashboard')
   }
 
   return (
@@ -66,6 +70,7 @@ export default function LandingPage({ onSelectDemoRole }) {
                   onClick={() => handleLaunchRole(USER_ROLES.FARMER)}
                   icon={Users}
                   size="md"
+                  loading={loading}
                   className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold"
                 >
                   Farmer Portal
@@ -75,6 +80,7 @@ export default function LandingPage({ onSelectDemoRole }) {
                   icon={Stethoscope}
                   variant="outline"
                   size="md"
+                  loading={loading}
                   className="bg-white/10 hover:bg-white/20 text-white border-white/20 font-bold"
                 >
                   Veterinarian Desk
@@ -84,6 +90,7 @@ export default function LandingPage({ onSelectDemoRole }) {
                   icon={Building2}
                   variant="outline"
                   size="md"
+                  loading={loading}
                   className="bg-white/10 hover:bg-white/20 text-white border-white/20 font-bold"
                 >
                   Authority Portal
