@@ -8,6 +8,9 @@ import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import FarmerDashboard from './pages/farmer/FarmerDashboard'
+import FarmerAnimalsPage from './pages/farmer/FarmerAnimalsPage'
+import FarmerVaccinationsPage from './pages/farmer/FarmerVaccinationsPage'
+import FarmerAlertsPage from './pages/farmer/FarmerAlertsPage'
 import VetDashboard from './pages/vet/VetDashboard'
 import AuthorityDashboard from './pages/authority/AuthorityDashboard'
 import NotFoundPage from './pages/NotFoundPage'
@@ -18,14 +21,14 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Routes (Wrapped in MainLayout) */}
+      {/* Public Routes */}
       <Route element={<MainLayout user={user} onLogout={logout} />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      {/* Role Dashboards (Protected by Role Guards) */}
+      {/* Protected Dashboard Views */}
       <Route
         element={
           <ProtectedRoute>
@@ -33,12 +36,36 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* Farmer Portal */}
+        {/* Farmer Portal Routes */}
         <Route
           path="/farmer/dashboard"
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
-              <FarmerDashboard user={user} />
+              <FarmerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/animals"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
+              <FarmerAnimalsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/vaccinations"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
+              <FarmerVaccinationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/alerts"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
+              <FarmerAlertsPage />
             </ProtectedRoute>
           }
         />
@@ -46,12 +73,12 @@ function AppRoutes() {
           path="/farmer/*"
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.FARMER]}>
-              <FarmerDashboard user={user} />
+              <FarmerDashboard />
             </ProtectedRoute>
           }
         />
 
-        {/* Veterinarian Portal */}
+        {/* Veterinarian Portal Routes */}
         <Route
           path="/vet/dashboard"
           element={
@@ -69,7 +96,7 @@ function AppRoutes() {
           }
         />
 
-        {/* Authority Portal */}
+        {/* Authority Portal Routes */}
         <Route
           path="/authority/dashboard"
           element={
