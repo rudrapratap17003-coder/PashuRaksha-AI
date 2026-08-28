@@ -11,6 +11,14 @@ router = APIRouter(prefix="/clusters", tags=["Outbreak Clusters & Early Warning"
 def list_outbreak_clusters(db: Session = Depends(get_db)):
     return ClusterService.get_all(db)
 
+@router.post("/run-detection", response_model=List[ClusterResponse])
+def run_cluster_detection(db: Session = Depends(get_db)):
+    """
+    Manually triggers spatial-temporal Haversine clustering over active health reports
+    and updates outbreak clusters in the database.
+    """
+    return ClusterService.run_detection(db)
+
 @router.get("/{cluster_id}", response_model=ClusterResponse)
 def get_outbreak_cluster(cluster_id: str, db: Session = Depends(get_db)):
     cluster = ClusterService.get_by_id(db, cluster_id)
