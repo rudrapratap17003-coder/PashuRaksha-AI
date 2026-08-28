@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { USER_ROLES } from '../utils/constants'
 import AlertCenterModal from '../components/common/AlertCenterModal'
+import DemoScenarioBar from '../components/common/DemoScenarioBar'
 import apiClient from '../services/api'
 
 export default function DashboardLayout({ user, onLogout }) {
@@ -77,6 +78,9 @@ export default function DashboardLayout({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Floating Jury Scenario Bar */}
+      <DemoScenarioBar />
+
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
