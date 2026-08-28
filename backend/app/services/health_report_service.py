@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.alert import Alert
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
 from app.ai.risk_engine import ExplainableRiskEngine
+from app.ai.disease_model import DiseasePatternModel
 
 class HealthReportService:
     @staticmethod
@@ -101,7 +102,7 @@ class HealthReportService:
         species = animal.species if animal else "Cattle (Cow)"
         vaccination_status = animal.vaccination_status if animal else "Up to date"
 
-        # Execute Explainable AI Risk Evaluation
+        # 1. Execute Explainable Risk Evaluation
         eval_result = ExplainableRiskEngine.evaluate(
             fever=report_in.fever,
             cough=report_in.cough,
@@ -123,11 +124,43 @@ class HealthReportService:
             previous_diseases=animal.previous_diseases if animal else None,
         )
 
+        # 2. Execute Disease Differential Pattern Match
+        diff_result = DiseasePatternModel.evaluate_differentials(
+            fever=report_in.fever,
+            cough=report_in.cough,
+            nasal_discharge=report_in.nasal_discharge,
+            reduced_appetite=report_in.reduced_appetite,
+            diarrhea=report_in.diarrhea,
+            lethargy=report_in.lethargy,
+            reduced_milk=report_in.reduced_milk,
+            difficulty_breathing=report_in.difficulty_breathing,
+            salivation=report_in.salivation,
+            lesions=report_in.lesions,
+            swelling=report_in.swelling,
+            species=species,
+            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
+            number_of_animals_affected=report_in.number_of_animals_affected,
+        )
+
         score = eval_result["risk_score"]
         level = eval_result["risk_level"]
         rec = eval_result["recommendation"]
-        possible_disease = eval_result["possible_disease_concern"]
+        primary_disease = diff_result["primary_disease_match"]
         factors = eval_result["contributing_factors"]
+
+        # Append top differential info into factors
+        if diff_result.get("differential_matches"):
+            top_diff = diff_result["differential_matches"][0]
+            factors.append({
+                "factor": f"Pattern Match: {top_diff['disease_name']} ({top_diff['match_percentage']}% alignment)",
+                "weight_contribution": top_diff["match_percentage"],
+                "category": "Differential Diagnosis"
+            })
+            factors.append({
+                "factor": f"Recommended Lab Test: {top_diff['suggested_diagnostic_test']}",
+                "weight_contribution": 0.0,
+                "category": "Diagnostic Referral"
+            })
 
         rep = HealthReport(
             id=f"rep-{str(uuid.uuid4())[:8]}",
@@ -156,22 +189,22 @@ class HealthReportService:
             district=report_in.district or (user.district if user else "Jaipur Rural"),
             risk_score=score,
             risk_level=level,
-            possible_disease_concern=possible_disease,
+            possible_disease_concern=primary_disease,
             recommendation=rec,
         )
         db.add(rep)
         db.commit()
         db.refresh(rep)
 
-        # Store linked risk assessment with explainable factor breakdown
+        # Store linked risk assessment
         risk = RiskAssessment(
             id=f"risk-{str(uuid.uuid4())[:8]}",
             report_id=rep.id,
             animal_id=rep.animal_id,
             risk_score=score,
             risk_level=level,
-            possible_disease_concern=possible_disease,
-            disease_risk_score=score,
+            possible_disease_concern=primary_disease,
+            disease_risk_score=diff_result["primary_confidence"],
             contributing_factors=factors,
             recommendation=rec,
             cluster_detected=report_in.number_of_animals_affected > 1,
@@ -192,7 +225,7 @@ class HealthReportService:
                 target_role="veterinarian",
                 alert_type="vet_triage",
                 title=f"High Risk Case: {animal.animal_id if animal else rep.animal_id} ({rep.village})",
-                message=f"{species} reported with risk score {score}/100 ({possible_disease}). Prompt veterinary review recommended.",
+                message=f"{species} reported with risk score {score}/100 ({primary_disease}). Prompt veterinary review recommended.",
                 risk_level=level,
                 village=rep.village,
             )
@@ -217,7 +250,7 @@ class HealthReportService:
             salivation=rep.salivation,
             lesions=rep.lesions,
             swelling=rep.swelling,
-            other_symptoms=rep.other_symptoms,
+            other_symptoms=report_in.other_symptoms,
             severity=rep.severity,
             duration_days=rep.duration_days,
             number_of_animals_affected=rep.number_of_animals_affected,
