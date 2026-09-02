@@ -96,11 +96,20 @@ export default function AnimalProfilePage() {
           </div>
         </div>
 
-        <Link to={`/farmer/report?animalId=${animal.animal_id}`}>
-          <Button icon={FilePlus2} className="font-bold shadow-md shadow-emerald-200">
-            Report Symptom
-          </Button>
-        </Link>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => window.print()}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center space-x-1.5"
+          >
+            <FileText className="w-4 h-4 text-emerald-400" />
+            <span>Print Digital Passport</span>
+          </button>
+          <Link to={`/farmer/report?animalId=${animal.animal_id}`}>
+            <Button icon={FilePlus2} className="font-bold shadow-md shadow-emerald-200">
+              Report Symptom
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Main Profile Card */}
@@ -147,7 +156,7 @@ export default function AnimalProfilePage() {
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-slate-400">Location</span>
-              <span className="font-bold text-slate-800">{animal.village || 'Rampur'}, {animal.district || 'Jaipur Rural'}</span>
+              <span className="font-bold text-slate-800">{animal.village || 'Baramati'}, {animal.district || 'Pune'}</span>
             </div>
           </div>
         </Card>

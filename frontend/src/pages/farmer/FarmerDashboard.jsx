@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  PawPrint, 
-  FilePlus2, 
-  Syringe, 
-  AlertTriangle, 
-  ShieldCheck, 
-  Mic, 
-  Plus, 
-  ChevronRight, 
-  Activity, 
-  Clock, 
-  MapPin, 
+import {
+  PawPrint,
+  FilePlus2,
+  Syringe,
+  AlertTriangle,
+  Mic,
+  Plus,
+  ChevronRight,
   Phone,
-  Radio,
-  Sparkles,
-  Volume2
+  Calculator
 } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
-import Badge from '../../components/common/Badge'
 import VoiceReportModal from '../../components/common/VoiceReportModal'
+import WeatherWidget from '../../components/common/WeatherWidget'
+import EconomicLossCalculator from '../../components/farmer/EconomicLossCalculator'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
@@ -33,7 +28,8 @@ export default function FarmerDashboard() {
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
-  const [language, setLanguage] = useState('hi')
+  const [lossCalcOpen, setLossCalcOpen] = useState(false)
+  const [language, setLanguage] = useState('mr')
 
   const fetchFarmerData = async () => {
     setLoading(true)
@@ -44,8 +40,8 @@ export default function FarmerDashboard() {
       ])
       if (animRes.status === 'fulfilled') setAnimals(animRes.value.data)
       if (alertRes.status === 'fulfilled') setAlerts(alertRes.value.data)
-    } catch (err) {
-      console.error(err)
+    } catch {
+      // Fallback
     } finally {
       setLoading(false)
     }
@@ -55,193 +51,254 @@ export default function FarmerDashboard() {
     fetchFarmerData()
   }, [])
 
-  const isCritical = currentScenario === 'RAMPUR_OUTBREAK'
+  const translations = {
+    mr: {
+      welcome: 'नमस्कार, रमेश पाटील',
+      sub: 'आपली जनावरे AI निगराणी अंतर्गत सुरक्षित आहेत',
+      villageBadge: 'बारामती, पुणे',
+      reportBtn: 'लक्षणे नोंदवा',
+      voiceBtn: 'बोलून सांगा',
+      addAnimal: 'नवीन जनावर जोडा',
+      livestockHeader: 'माझी जनावरे',
+      alertsHeader: 'इशारे',
+      vaccineDue: 'लसीकरण बाकी',
+      statusNormal: 'आरोग्य उत्तम',
+      lossTitle: 'दूध नुकसान मोजा',
+      lossSub: 'आजारी जनावरांमुळे होणारे नुकसान मोजा व शासकीय भरपाईसाठी अर्ज करा.',
+      lossBtn: 'नुकसान मोजा →'
+    },
+    hi: {
+      welcome: 'नमस्ते, रमेश पाटिल',
+      sub: 'आपके पशु AI निगरानी के तहत सुरक्षित हैं',
+      villageBadge: 'बारामती, पुणे',
+      reportBtn: 'लक्षण दर्ज करें',
+      voiceBtn: 'बोलकर बताएं',
+      addAnimal: 'नया पशु जोड़ें',
+      livestockHeader: 'मेरे पशु',
+      alertsHeader: 'चेतावनी',
+      vaccineDue: 'टीकाकरण बाकी',
+      statusNormal: 'स्वास्थ्य सामान्य',
+      lossTitle: 'दूध नुकसान गणना',
+      lossSub: 'बीमार पशुओं से होने वाले नुकसान की गणना करें और सरकारी भरपाई के लिए आवेदन करें।',
+      lossBtn: 'नुकसान मोजा →'
+    },
+    en: {
+      welcome: 'Welcome, Ramesh Patil',
+      sub: 'Your animals are protected under AI health monitoring',
+      villageBadge: 'Baramati, Pune',
+      reportBtn: 'Report Symptoms',
+      voiceBtn: 'Speak to Report',
+      addAnimal: 'Add Animal',
+      livestockHeader: 'My Animals',
+      alertsHeader: 'Alerts',
+      vaccineDue: 'Vaccine Due',
+      statusNormal: 'Healthy',
+      lossTitle: 'Calculate Milk Loss',
+      lossSub: 'Calculate loss from sick animals and apply for government compensation.',
+      lossBtn: 'Calculate Loss →'
+    }
+  }
+
+  const t = translations[language] || translations.mr
 
   return (
-    <div className="space-y-6">
-      
-      {/* Top Welcome Bar with Language Switcher */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-[#092923] to-[#061B17] border border-emerald-500/30 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+    <div className="space-y-5 pb-12 text-slate-800 font-sans">
+
+      {/* Welcome Bar */}
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase">
-              Farmer Mobile Portal • किसान पोर्टल
+            <span className="text-sm font-semibold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              Farmer Portal • शेतकरी कक्ष
             </span>
-            <Badge variant="primary" size="sm">Rampur Village</Badge>
+            <span className="bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+              {t.villageBadge}
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            {language === 'hi' ? 'नमस्ते, रमेश कुमार जी' : 'Welcome, Ramesh Kumar'}
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            {t.welcome}
           </h1>
-          <p className="text-xs text-slate-300">
-            {language === 'hi' ? 'आपके 5 पशु निगरानी नेटवर्क से जुड़े हैं' : '5 livestock actively protected under AI health surveillance'}
-          </p>
+          <p className="text-sm text-slate-500">{t.sub}</p>
         </div>
 
-        {/* Language Selector */}
-        <div className="flex items-center bg-[#061B17] p-1.5 rounded-2xl border border-emerald-500/20 text-xs">
-          <span className="text-[10px] text-slate-400 font-bold px-2">भाषा:</span>
-          <button
-            onClick={() => setLanguage('en')}
-            className={`px-2.5 py-1 rounded-xl font-bold transition ${
-              language === 'en' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            English
-          </button>
-          <button
-            onClick={() => setLanguage('hi')}
-            className={`px-2.5 py-1 rounded-xl font-bold transition ${
-              language === 'hi' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            हिंदी
-          </button>
-          <button
-            onClick={() => setLanguage('kn')}
-            className={`px-2.5 py-1 rounded-xl font-bold transition ${
-              language === 'kn' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            ಕನ್ನಡ
-          </button>
-        </div>
-      </div>
-
-      {/* HUGE Big-Button Rural Action Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        
-        {/* 1. Report Symptoms Primary Action */}
-        <Link to="/farmer/report" className="col-span-2 sm:col-span-2">
-          <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-600/30 hover:scale-[1.02] transition flex items-center justify-between cursor-pointer border border-emerald-400/40">
-            <div className="space-y-1">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-100">
-                Primary Action • मुख्य कार्य
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black">
-                {language === 'hi' ? '🩺 बीमारी की सूचना दें' : '🩺 Report Animal Symptoms'}
-              </h3>
-              <p className="text-xs text-emerald-100 font-medium">
-                {language === 'hi' ? 'तुरंत एआई स्वास्थ्य विश्लेषण और सलाह प्राप्त करें' : 'Instant AI risk assessment & isolation guidance'}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-              <FilePlus2 className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </Link>
-
-        {/* 2. Voice Report Action */}
-        <div
-          onClick={() => setVoiceModalOpen(true)}
-          className="p-5 rounded-3xl bg-[#092923] border border-emerald-500/40 text-white hover:bg-emerald-950/80 transition flex flex-col justify-between cursor-pointer shadow-lg hover:scale-[1.02]"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-emerald-400 uppercase">Voice AI</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <Mic className="w-4 h-4" />
-            </div>
-          </div>
-          <div>
-            <h4 className="font-black text-sm text-white">
-              {language === 'hi' ? '🎙 बोलकर बताएं' : '🎙 Voice Report'}
-            </h4>
-            <span className="text-[11px] text-slate-300 font-medium">
-              {language === 'hi' ? 'हिंदी / इंग्लिश आवाज पहचान' : 'Dialect Voice Intake'}
-            </span>
-          </div>
-        </div>
-
-        {/* 3. My Animals */}
-        <Link
-          to="/farmer/animals"
-          className="p-5 rounded-3xl bg-[#092923] border border-emerald-500/40 text-white hover:bg-emerald-950/80 transition flex flex-col justify-between cursor-pointer shadow-lg hover:scale-[1.02]"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-emerald-400 uppercase">Digital Records</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <PawPrint className="w-4 h-4" />
-            </div>
-          </div>
-          <div>
-            <h4 className="font-black text-sm text-white">
-              {language === 'hi' ? '🐄 मेरे पशु (' + animals.length + ')' : '🐄 My Animals (' + animals.length + ')'}
-            </h4>
-            <span className="text-[11px] text-slate-300 font-medium">Digital Passports</span>
-          </div>
-        </Link>
-      </div>
-
-      {/* Outbreak Advisory Warning Banner when Outbreak is Active */}
-      {isCritical && (
-        <div className="p-4 rounded-3xl bg-gradient-to-r from-rose-950 to-[#092923] border border-rose-500/50 text-white shadow-xl flex items-start space-x-3.5 animate-pulse">
-          <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0 font-black">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <div className="space-y-0.5 flex-1">
-            <div className="flex items-center justify-between">
-              <h4 className="font-black text-sm text-rose-200">
-                {language === 'hi' ? '⚠️ रामपुरा में पशु रोग का अलर्ट!' : '⚠️ Active Disease Outbreak Alert in Rampur!'}
-              </h4>
-              <Badge variant="danger" size="sm">CRITICAL</Badge>
-            </div>
-            <p className="text-xs text-slate-300 leading-snug">
-              {language === 'hi' 
-                ? 'आपके गाँव में खुरपका-मुंहपका (FMD) के 13 मामले मिले हैं। कृपया अपने पशुओं को अलग रखें और तुरंत जाँच करें।' 
-                : '13 cases of acute vesicular disease detected nearby. Check animal mouths for lesions and isolate symptomatic cattle immediately.'}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Livestock Overview Grid */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-black text-white flex items-center space-x-2">
-            <PawPrint className="w-4 h-4 text-emerald-400" />
-            <span>{language === 'hi' ? 'पशु डिजिटल पासपोर्ट' : 'Livestock Digital Passports'}</span>
-          </h2>
-          <Link to="/farmer/animals/add">
-            <Button size="sm" icon={Plus} className="font-bold bg-emerald-500 text-slate-950">
-              Add Animal
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {animals.map((anim) => (
-            <Card key={anim.id} hover className="bg-[#092923] border border-emerald-500/30 p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-mono font-bold text-emerald-400">
-                    {anim.animal_id}
-                  </span>
-                  <h4 className="font-black text-sm text-white">{anim.species}</h4>
-                  <span className="text-xs text-slate-300">{anim.breed || 'Gir'} • {anim.age} yrs</span>
-                </div>
-                <RiskBadge level={anim.health_status === 'critical' ? 'CRITICAL' : 'LOW'} />
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-emerald-500/20 text-xs text-slate-300">
-                <span>Milk: <strong>{anim.milk_production || 12} L/day</strong></span>
-                <Link to={`/farmer/animals/${anim.animal_id}`} className="text-emerald-400 font-bold flex items-center">
-                  <span>Passport</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </Card>
+        {/* Language Selector — Big Buttons for Farmers */}
+        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { code: 'mr', label: 'मराठी' },
+            { code: 'hi', label: 'हिंदी' },
+            { code: 'en', label: 'English' },
+          ].map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => setLanguage(lang.code)}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors duration-200 ${
+                language === lang.code
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {lang.label}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Voice Reporting Modal */}
+      {/* Quick Actions — BIG Buttons for Less Educated Users */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        {/* Report Symptoms */}
+        <Link
+          to="/farmer/report"
+          className="group p-5 rounded-2xl bg-sky-600 text-white shadow-md card-hover flex items-start space-x-4"
+        >
+          <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <FilePlus2 className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">{t.reportBtn}</h3>
+            <p className="text-sm text-sky-100 mt-1">
+              Fever, cough, blisters, milk drop
+            </p>
+          </div>
+        </Link>
+
+        {/* Voice Report */}
+        <button
+          onClick={() => setVoiceModalOpen(true)}
+          className="group p-5 rounded-2xl bg-white border-2 border-amber-300 text-slate-800 shadow-sm card-hover flex items-start space-x-4 text-left"
+        >
+          <div className="w-14 h-14 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+            <Mic className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">{t.voiceBtn}</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Marathi / Hindi / English
+            </p>
+          </div>
+        </button>
+
+        {/* Weather */}
+        <div className="sm:col-span-2 lg:col-span-1">
+          <WeatherWidget district="Pune" village="Baramati" />
+        </div>
+      </div>
+
+      {/* Economic Loss Banner — Simple */}
+      <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-base font-bold text-slate-900">{t.lossTitle}</h3>
+          <p className="text-sm text-slate-600 mt-0.5">{t.lossSub}</p>
+        </div>
+        <button
+          onClick={() => setLossCalcOpen(true)}
+          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm flex items-center space-x-2 flex-shrink-0 transition-colors duration-200"
+        >
+          <Calculator className="w-4 h-4" />
+          <span>{t.lossBtn}</span>
+        </button>
+      </div>
+
+      {/* Animals & Alerts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* My Animals */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-extrabold text-slate-900">{t.livestockHeader}</h2>
+            <Link to="/farmer/animals/add">
+              <Button size="sm" icon={Plus} className="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-colors duration-200">
+                {t.addAnimal}
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(animals.length > 0 ? animals : [
+              { id: 'anim-101', animal_id: 'COW-101', species: 'Cattle (Cow)', breed: 'Gir', current_risk_level: 'LOW', current_risk_score: 12.0, vaccination_status: 'Up to date' },
+              { id: 'anim-102', animal_id: 'BUF-204', species: 'Buffalo', breed: 'Murrah', current_risk_level: 'HIGH', current_risk_score: 74.0, vaccination_status: 'Due soon' },
+              { id: 'anim-103', animal_id: 'GOAT-305', species: 'Goat', breed: 'Sirohi', current_risk_level: 'LOW', current_risk_score: 8.0, vaccination_status: 'Up to date' },
+              { id: 'anim-104', animal_id: 'COW-108', species: 'Cattle (Cow)', breed: 'Dangi', current_risk_level: 'LOW', current_risk_score: 15.0, vaccination_status: 'Up to date' },
+            ]).map((animal) => (
+              <Link
+                key={animal.id}
+                to={`/farmer/animals/${animal.animal_id}`}
+                className="group bg-white border border-slate-200 hover:border-sky-400 rounded-2xl p-4 shadow-sm card-hover block space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                      <PawPrint className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id}</span>
+                      <span className="text-xs text-slate-500">{animal.breed} • {animal.species}</span>
+                    </div>
+                  </div>
+                  <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                  <span className="flex items-center space-x-1.5">
+                    <Syringe className="w-4 h-4 text-sky-600" />
+                    <span>{animal.vaccination_status}</span>
+                  </span>
+                  <span className="text-sky-600 font-semibold flex items-center space-x-1">
+                    <span>View</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Alerts */}
+        <div className="space-y-3">
+          <h2 className="text-lg font-extrabold text-slate-900">{t.alertsHeader}</h2>
+          {[
+            {
+              title: 'Baramati Respiratory Watch',
+              msg: 'Multiple cases reported. Isolate cattle showing nasal discharge.',
+              level: 'CRITICAL',
+              date: 'Today, 10:15 AM'
+            },
+            {
+              title: 'Vaccination Drive',
+              msg: 'HS + BQ booster drive starts next week at Taluka Veterinary Center.',
+              level: 'MODERATE',
+              date: 'Yesterday'
+            }
+          ].map((al, idx) => (
+            <div
+              key={idx}
+              className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-slate-900 text-sm">{al.title}</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  al.level === 'CRITICAL' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {al.level}
+                </span>
+              </div>
+              <p className="text-sm text-slate-600">{al.msg}</p>
+              <span className="text-xs text-slate-400 block">{al.date}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modals */}
       <VoiceReportModal
         isOpen={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}
-        onSymptomsDetected={(symptoms) => {
-          // Handled via redirection or state
-        }}
+        onSuccess={() => fetchFarmerData()}
       />
-
+      <EconomicLossCalculator
+        isOpen={lossCalcOpen}
+        onClose={() => setLossCalcOpen(false)}
+      />
     </div>
   )
 }

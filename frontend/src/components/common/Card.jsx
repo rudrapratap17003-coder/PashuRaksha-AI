@@ -3,15 +3,15 @@ import React from 'react'
 export default function Card({
   children,
   className = '',
-  hover = false,
-  padding = 'p-6',
+  hover = true,
+  padding = 'p-5',
   ...props
 }) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${padding} ${
-        hover ? 'hover:shadow-md hover:border-slate-300 transition-all duration-200' : ''
-      } ${className}`}
+      className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${
+        hover ? 'card-hover' : ''
+      } ${padding} ${className}`}
       {...props}
     >
       {children}

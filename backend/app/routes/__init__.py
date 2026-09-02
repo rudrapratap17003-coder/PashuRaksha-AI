@@ -7,3 +7,13 @@ from .clusters import router as clusters_router
 from .alerts import router as alerts_router
 from .vet import router as vet_router
 from .authority import router as authority_router
+from .laboratory import router as laboratory_router
+from .field_worker import router as field_worker_router
+from .admin_route import router as admin_router
+from .analytics_route import router as analytics_router
+from .notifications import router as notifications_router
+from .timeline import router as timeline_router
+from .ai_assistant import router as ai_assistant_router
+from .weather import router as weather_router
+from .treatment import router as treatment_router
+from .nutrition import router as nutrition_router

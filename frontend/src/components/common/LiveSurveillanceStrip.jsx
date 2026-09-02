@@ -8,7 +8,7 @@ export default function LiveSurveillanceStrip() {
   const isCritical = currentScenario === 'RAMPUR_OUTBREAK'
 
   return (
-    <div className="w-full bg-[#08221D]/90 backdrop-blur-md border-y border-emerald-500/20 text-slate-200 py-2.5 px-4 z-20 relative">
+    <div className="w-full bg-slate-950/90 backdrop-blur-md border-y border-slate-800/80 text-slate-200 py-2.5 px-4 z-20 relative">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
         
         {/* Status Indicator */}

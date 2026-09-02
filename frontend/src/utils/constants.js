@@ -55,6 +55,8 @@ export const USER_ROLES = {
   FARMER: 'farmer',
   VETERINARIAN: 'veterinarian',
   AUTHORITY: 'authority',
+  FIELD_WORKER: 'field_worker',
+  LABORATORY: 'laboratory',
   ADMIN: 'admin',
 }
 

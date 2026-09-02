@@ -24,6 +24,7 @@ import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
 import VoiceReportModal from '../../components/common/VoiceReportModal'
+import VisualLesionScannerModal from '../../components/common/VisualLesionScannerModal'
 import apiClient from '../../services/api'
 import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
 import { useAuth } from '../../context/AuthContext'
@@ -37,8 +38,8 @@ export default function SymptomReportPage() {
   const [severity, setSeverity] = useState('moderate')
   const [durationDays, setDurationDays] = useState(2)
   const [affectedCount, setAffectedCount] = useState(1)
-  const [village, setVillage] = useState('Rampur')
-  const [district, setDistrict] = useState('Jaipur Rural')
+  const [village, setVillage] = useState('Baramati')
+  const [district, setDistrict] = useState('Pune')
   const [loadingAnimals, setLoadingAnimals] = useState(true)
 
   // AI Analysis & Outcome State
@@ -47,6 +48,7 @@ export default function SymptomReportPage() {
   const [analysisResult, setAnalysisResult] = useState(null)
   const [error, setError] = useState(null)
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
+  const [lesionScannerOpen, setLesionScannerOpen] = useState(false)
 
   useEffect(() => {
     async function loadAnimals() {
@@ -137,13 +139,24 @@ export default function SymptomReportPage() {
           </h1>
         </div>
 
-        <Button
-          onClick={() => setVoiceModalOpen(true)}
-          icon={Mic}
-          className="font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"
-        >
-          Voice Intake (आवाज में बताएं)
-        </Button>
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setLesionScannerOpen(true)}
+            className="px-4 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950 font-bold text-xs flex items-center space-x-2 transition shadow-md"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span>AI Lesion Scan (फोटो स्कॅन)</span>
+          </button>
+          <Button
+            type="button"
+            onClick={() => setVoiceModalOpen(true)}
+            icon={Mic}
+            className="font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"
+          >
+            Voice Intake (आवाज)
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -157,8 +170,8 @@ export default function SymptomReportPage() {
       <form onSubmit={handleAnalyzeHealthRisk} className="space-y-6">
         
         {/* Step 1: Select Animal */}
-        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+        <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-mono font-black uppercase text-emerald-400">
               STEP 1 • SELECT ANIMAL
             </span>
@@ -172,8 +185,8 @@ export default function SymptomReportPage() {
                 onClick={() => setSelectedAnimalId(anim.animal_id)}
                 className={`p-3.5 rounded-2xl border cursor-pointer transition space-y-1 ${
                   selectedAnimalId === anim.animal_id
-                    ? 'bg-emerald-950 border-emerald-400 ring-2 ring-emerald-400/40'
-                    : 'bg-[#061B17] border-emerald-500/20 hover:border-emerald-500/40 text-slate-300'
+                    ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/40'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -188,8 +201,8 @@ export default function SymptomReportPage() {
         </Card>
 
         {/* Step 2: 11 Core Symptoms Checklist */}
-        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+        <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-mono font-black uppercase text-emerald-400">
               STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
             </span>
@@ -205,8 +218,8 @@ export default function SymptomReportPage() {
                   onClick={() => toggleSymptom(sym.id)}
                   className={`p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between space-y-2 select-none ${
                     active
-                      ? 'bg-emerald-950 border-emerald-400 ring-2 ring-emerald-400/50 text-white'
-                      : 'bg-[#061B17] border-emerald-500/20 hover:border-emerald-500/40 text-slate-300'
+                      ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/50 text-white'
+                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -228,8 +241,8 @@ export default function SymptomReportPage() {
         </Card>
 
         {/* Step 3: Severity, Duration & Location */}
-        <Card className="bg-[#092923] border border-emerald-500/30 p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+        <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-mono font-black uppercase text-emerald-400">
               STEP 3 • CLINICAL CONTEXT &amp; LOCATION
             </span>
@@ -242,7 +255,7 @@ export default function SymptomReportPage() {
               <select
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               >
                 <option value="mild">Mild (हल्का)</option>
                 <option value="moderate">Moderate (मध्यम)</option>
@@ -256,7 +269,7 @@ export default function SymptomReportPage() {
               <select
                 value={durationDays}
                 onChange={(e) => setDurationDays(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               >
                 <option value="1">1 Day (आज से)</option>
                 <option value="2">2–3 Days</option>
@@ -274,7 +287,7 @@ export default function SymptomReportPage() {
                 max="50"
                 value={affectedCount}
                 onChange={(e) => setAffectedCount(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#061B17] border border-emerald-500/30 text-white font-semibold focus:ring-2 focus:ring-emerald-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               />
             </div>
           </div>
@@ -294,7 +307,7 @@ export default function SymptomReportPage() {
       {/* AI Health Analysis Multi-Step Loading Modal */}
       {analyzing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <Card className="bg-[#092923] border border-emerald-500/40 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl text-white">
+          <Card className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl text-white">
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto animate-spin">
               <RefreshCw className="w-8 h-8" />
             </div>
@@ -333,10 +346,10 @@ export default function SymptomReportPage() {
       {/* AI Health Risk Assessment Result Modal */}
       {analysisResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <Card className="bg-[#092923] border border-emerald-500/40 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
+          <Card className="bg-slate-900 border border-slate-700 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
             
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-emerald-500/20 pb-4">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
                   AI DECISION-SUPPORT ASSESSMENT
@@ -349,13 +362,13 @@ export default function SymptomReportPage() {
             </div>
 
             {/* Score & Disease Match */}
-            <div className="p-4 rounded-2xl bg-[#061B17] border border-emerald-500/30 space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400 font-bold">Calculated Risk Score:</span>
                 <strong className="text-xl font-black text-emerald-300">{analysisResult.risk_score} / 100</strong>
               </div>
 
-              <div className="text-xs space-y-1 pt-1 border-t border-emerald-500/10">
+              <div className="text-xs space-y-1 pt-1 border-t border-slate-800">
                 <div className="text-slate-300">
                   Potential Disease Concern: <strong className="text-rose-400">{analysisResult.possible_disease_concern}</strong>
                 </div>
@@ -404,6 +417,26 @@ export default function SymptomReportPage() {
           // Map recognized strings to ids
           const mapped = symList.map(s => s.toLowerCase().replace(' ', '_'))
           setSelectedSymptoms(mapped)
+        }}
+      />
+
+      {/* Visual Lesion AI Scanner Modal */}
+      <VisualLesionScannerModal
+        isOpen={lesionScannerOpen}
+        onClose={() => setLesionScannerOpen(false)}
+        onApplyToReport={(scan) => {
+          const syms = []
+          if (scan.symptomsMatched.fever) syms.push('fever')
+          if (scan.symptomsMatched.salivation) syms.push('excessive_salivation')
+          if (scan.symptomsMatched.lesions) syms.push('mouth_lesions')
+          if (scan.symptomsMatched.reduced_appetite) syms.push('loss_of_appetite')
+          if (scan.symptomsMatched.reduced_milk) syms.push('sudden_drop_milk')
+          if (scan.symptomsMatched.swelling) syms.push('body_swelling')
+          if (scan.symptomsMatched.lethargy) syms.push('lethargy')
+          setSelectedSymptoms(syms)
+          if (scan.severity.includes('Severe')) setSeverity('severe')
+          else if (scan.severity.includes('High')) setSeverity('severe')
+          else setSeverity('moderate')
         }}
       />
 

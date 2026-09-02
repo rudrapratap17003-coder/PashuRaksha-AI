@@ -1,476 +1,299 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Activity, 
-  PawPrint, 
-  Stethoscope, 
-  Building2, 
-  MapPin, 
-  AlertTriangle, 
-  ShieldAlert, 
-  Sparkles, 
-  TrendingUp, 
-  Users, 
-  Syringe, 
-  ArrowRight, 
-  CheckCircle2, 
-  Radio,
-  FileText,
-  ChevronRight,
-  Zap,
-  Layers,
-  HeartHandshake,
-  Cpu
+import {
+  Activity,
+  Stethoscope,
+  Building2,
+  AlertTriangle,
+  TrendingUp,
+  Users,
+  ArrowRight,
+  CheckCircle2,
+  Shield,
+  Truck,
+  Presentation,
+  QrCode,
+  Microscope,
+  Cpu,
+  Sparkles,
+  ChevronRight
 } from 'lucide-react'
-import { motion } from 'framer-motion'
 import Button from '../components/common/Button'
-import Card from '../components/common/Card'
-import Badge from '../components/common/Badge'
-import RiskBadge from '../components/common/RiskBadge'
 import OutbreakMap from '../components/map/OutbreakMap'
-import LiveSurveillanceStrip from '../components/common/LiveSurveillanceStrip'
 import SurveillanceBackground from '../components/background/SurveillanceBackground'
-import { useScenario } from '../context/ScenarioContext'
+import WeatherWidget from '../components/common/WeatherWidget'
+import PashuLogo from '../components/common/PashuLogo'
 
 export default function LandingPage() {
-  const { scenarioData, currentScenario } = useScenario()
 
-  const isCritical = currentScenario === 'RAMPUR_OUTBREAK'
+  const portals = [
+    {
+      title: 'Farmer Portal',
+      marathi: 'शेतकरी कक्ष',
+      description: 'Report animal symptoms, scan with camera, get AI advice in Marathi.',
+      link: '/farmer/dashboard',
+      icon: Users,
+      color: 'bg-sky-600',
+    },
+    {
+      title: 'Pashu Sakhi / Field Worker',
+      marathi: 'पशु सखी',
+      description: 'Door-to-door livestock census & offline sample collection.',
+      link: '/field-worker/dashboard',
+      icon: Activity,
+      color: 'bg-teal-600',
+    },
+    {
+      title: 'Veterinary Desk',
+      marathi: 'पशुवैद्यकीय दवाखाना',
+      description: 'AI case triage, prescriptions, and lab referrals.',
+      link: '/vet/dashboard',
+      icon: Stethoscope,
+      color: 'bg-blue-600',
+    },
+    {
+      title: 'Diagnostic Lab',
+      marathi: 'रोग निदान प्रयोगशाळा',
+      description: 'Sample testing, RT-PCR results, and outbreak sync.',
+      link: '/lab/dashboard',
+      icon: Microscope,
+      color: 'bg-cyan-600',
+    },
+    {
+      title: 'State Authority',
+      marathi: 'जिल्हा व राज्य नियंत्रण कक्ष',
+      description: 'District maps, containment zones, and 1962 ambulance dispatch.',
+      link: '/authority/dashboard',
+      icon: Building2,
+      color: 'bg-indigo-600',
+    },
+    {
+      title: 'Analytics & Reports',
+      marathi: 'साथरोग विश्लेषण',
+      description: 'Disease trends, breed data, economic loss reports.',
+      link: '/analytics',
+      icon: TrendingUp,
+      color: 'bg-amber-600',
+    }
+  ]
+
+  const corePillars = [
+    {
+      step: '01',
+      title: 'Early Warning System',
+      desc: 'Farmers report symptoms in Marathi by voice or text. AI detects disease risk within hours.',
+      icon: Cpu,
+    },
+    {
+      step: '02',
+      title: 'Camera Disease Scan',
+      desc: 'Point your phone camera at the animal. AI identifies Foot & Mouth, Lumpy Skin, Mastitis.',
+      icon: Sparkles,
+    },
+    {
+      step: '03',
+      title: 'Vaccine & Ambulance Tracking',
+      desc: 'Live tracking of vaccine cold-chain temperature and 1962 MVU ambulance location.',
+      icon: Truck,
+    },
+    {
+      step: '04',
+      title: 'Market Biosecurity',
+      desc: 'QR-based health check at APMC markets to stop sick animals from spreading disease.',
+      icon: QrCode,
+    }
+  ]
 
   return (
-    <div className="relative text-white font-sans overflow-x-hidden min-h-screen bg-[#061B17]">
+    <div className="relative text-slate-800 font-sans overflow-x-hidden min-h-screen bg-white">
       <SurveillanceBackground />
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-8 sm:pt-14 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Hero Column */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-lg">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Smart India Hackathon 2026 • PS ID: SIH26128</span>
+      <section className="relative z-10 pt-8 sm:pt-14 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+          {/* Left Hero Content */}
+          <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-sm font-semibold">
+              <span className="w-2 h-2 rounded-full bg-sky-500" />
+              <span>Smart India Hackathon 2026 • SIH26128</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-              Detect Livestock Disease <br />
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 bg-clip-text text-transparent">
-                Before It Becomes an Outbreak.
-              </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight">
+              Livestock Health &amp;<br className="hidden sm:inline" />
+              <span className="text-sky-600">Disease Protection</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-300 font-medium leading-relaxed max-w-2xl">
-              <strong>PASHURAKSHA AI</strong> connects rural farmers, field veterinarians, and public health authorities into a single, closed-loop epidemiological surveillance and early-warning intelligence network.
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <strong>PASHURAKSHA AI</strong> — Built for <strong>Government of Maharashtra</strong>. 
+              Early detection of animal diseases using AI, camera scanning, voice reporting in Marathi, 
+              and emergency ambulance dispatch.
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link to="/farmer/dashboard">
+            {/* CTAs — Large, Easy to Tap */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+              <Link to="/farmer/dashboard" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   icon={ArrowRight}
-                  className="font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-emerald-500/25 text-sm"
+                  className="w-full sm:w-auto font-bold bg-sky-600 hover:bg-sky-700 text-white text-base py-4 px-8 border-0 rounded-xl transition-colors duration-200"
                 >
-                  Launch Live Demo
+                  Open Demo
                 </Button>
               </Link>
 
-              <Link to="/presentation">
+              <Link to="/presentation" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="lg"
-                  icon={Sparkles}
-                  className="font-bold border-emerald-500/40 text-emerald-300 hover:bg-emerald-950/60 text-sm"
+                  icon={Presentation}
+                  className="w-full sm:w-auto font-bold bg-white border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-400 text-base py-4 px-8 rounded-xl transition-colors duration-200"
                 >
-                  Explore Outbreak Intelligence
+                  Jury Presentation
                 </Button>
               </Link>
             </div>
 
-            {/* Trust Highlights */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-emerald-500/20 text-xs text-slate-300 font-semibold">
-              <div className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Explainable AI Scoring</span>
+            {/* Trust Badges */}
+            <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-3 text-sm text-slate-600 border-t border-slate-200">
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                <Shield className="w-4 h-4 text-sky-600" />
+                <span className="font-semibold">Maharashtra State Innovation Society</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-teal-400 flex-shrink-0" />
-                <span>Haversine GIS Clusters</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                <span>Zero-Latency Alerts</span>
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                <span className="font-semibold">Dept. of Animal Husbandry</span>
               </div>
             </div>
           </div>
 
-          {/* Right Hero Column: Animated AI Surveillance Network Visualizer */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl p-6 bg-gradient-to-b from-[#092923] to-[#061B17] border border-emerald-500/30 shadow-2xl shadow-emerald-950/60 overflow-hidden space-y-5">
-              
-              {/* Card Ambient Glow */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl" />
-
-              {/* Card Header */}
-              <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+          {/* Right Hero: Live Telemetry Card */}
+          <div className="lg:col-span-5">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-md">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-300">
-                    Live Village Telemetry Mesh
-                  </span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                  <span className="text-sm font-bold text-slate-700">Live Surveillance</span>
                 </div>
-                <Badge variant={isCritical ? 'danger' : 'primary'} size="sm">
-                  {isCritical ? 'HOTSPOT DETECTED' : 'MONITORING ACTIVE'}
-                </Badge>
+                <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-3 py-1 rounded-full font-semibold">
+                  Pune Division
+                </span>
               </div>
 
-              {/* Village Nodes Data Flow */}
-              <div className="space-y-2.5">
-                {[
-                  { name: 'Village Rampur', status: 'critical', reports: 13, signal: 'Acute Vesicular' },
-                  { name: 'Village Kalyanpura', status: 'warning', reports: 4, signal: 'Cough & Fever' },
-                  { name: 'Village Sanganer', status: 'normal', reports: 1, signal: 'Routine Telemetry' },
-                  { name: 'Village Amer North', status: 'normal', reports: 0, signal: 'Baseline Normal' },
-                ].map((v) => (
-                  <div
-                    key={v.name}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition ${
-                      v.status === 'critical'
-                        ? 'bg-rose-950/60 border-rose-500/50 text-rose-200'
-                        : v.status === 'warning'
-                        ? 'bg-amber-950/60 border-amber-500/40 text-amber-200'
-                        : 'bg-[#061B17] border-emerald-500/20 text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className={`w-2 h-2 rounded-full ${
-                        v.status === 'critical' ? 'bg-rose-500 animate-ping' :
-                        v.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-400'
-                      }`} />
-                      <strong className="text-white">{v.name}</strong>
-                    </div>
-                    <div className="text-[11px] font-mono">
-                      <span>{v.reports} Reports</span> • <span className="opacity-80">{v.signal}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <WeatherWidget district="Pune" village="Baramati" />
 
-              {/* Centered AI Synthesis Outcome */}
-              <div className="p-4 rounded-2xl bg-[#061B17] border border-emerald-500/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Cpu className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold uppercase text-slate-300">
-                      PASHURAKSHA AI Engine
-                    </span>
-                  </div>
-                  <RiskBadge level={isCritical ? 'CRITICAL' : 'LOW'} score={isCritical ? 94 : 18} size="sm" />
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <span className="text-xs text-slate-500 block font-medium">Active Containment</span>
+                  <span className="text-sm font-bold text-rose-600">#RC-2026-014 (Baramati)</span>
                 </div>
-
-                <div className="text-xs space-y-1">
-                  <div className="flex justify-between text-slate-300">
-                    <span>Spatial Cluster Status:</span>
-                    <strong className={isCritical ? 'text-rose-400 font-extrabold' : 'text-emerald-400'}>
-                      {isCritical ? 'Outbreak Cluster #14 Detected' : 'No Active Clusters'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between text-slate-400 text-[11px]">
-                    <span>Veterinary Dispatch:</span>
-                    <strong className="text-sky-400">Emergency Triage Alert Triggered</strong>
-                  </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <span className="text-xs text-slate-500 block font-medium">Vaccination Coverage</span>
+                  <span className="text-sm font-bold text-emerald-600">78.5% (278/355)</span>
                 </div>
               </div>
-
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* Live Surveillance Status Strip */}
-      <LiveSurveillanceStrip />
-
-      {/* Section 2: From Individual Symptoms to Community Outbreak Intelligence */}
-      <section className="relative z-10 py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-            THE CORE INNOVATION WORKFLOW
+      {/* 4 Core Pillars — Simple & Clear */}
+      <section className="relative z-10 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-slate-200">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <span className="text-sm font-bold text-sky-700 bg-sky-50 px-4 py-1.5 rounded-full border border-sky-200">
+            HOW IT WORKS
           </span>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            From Individual Animal Symptoms to Community Outbreak Intelligence
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            4 Steps to Protect Your Animals
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            How PASHURAKSHA AI closes the surveillance gap between rural livestock farmers, clinical veterinarians, and district disease authorities.
-          </p>
+          <p className="text-base text-slate-500 mt-2">आपल्या जनावरांचे संरक्षण करण्याचे ४ मार्ग</p>
         </div>
 
-        {/* 5-Step Horizontal Animated Process */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
-          {[
-            {
-              step: '01',
-              title: 'Farmer Report',
-              desc: 'Farmer logs 11 symptoms or uses voice input in their native dialect.',
-              icon: PawPrint,
-              color: 'emerald',
-            },
-            {
-              step: '02',
-              title: 'AI Risk Analysis',
-              desc: 'Explainable AI computes 0-100 risk score with disease differential matching.',
-              icon: Sparkles,
-              color: 'teal',
-            },
-            {
-              step: '03',
-              title: 'Cluster Detection',
-              desc: 'Haversine algorithm groups nearby cases into spatial outbreak zones.',
-              icon: Radio,
-              color: 'amber',
-            },
-            {
-              step: '04',
-              title: 'Veterinary Triage',
-              desc: 'Clinical desk prioritizes dispatch, treatment notes, and lab test orders.',
-              icon: Stethoscope,
-              color: 'sky',
-            },
-            {
-              step: '05',
-              title: 'Authority Alert',
-              desc: 'Command Center activates ring vaccination and containment protocols.',
-              icon: Building2,
-              color: 'rose',
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {corePillars.map((p) => {
+            const Icon = p.icon
             return (
               <div
-                key={item.step}
-                className="p-5 rounded-2xl bg-[#092923] border border-emerald-500/20 space-y-3 relative hover:border-emerald-400/50 transition group"
+                key={p.step}
+                className="group p-5 rounded-2xl bg-white border border-slate-200 shadow-sm card-hover space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xl font-black text-emerald-400/60 group-hover:text-emerald-300 transition">
-                    {item.step}
-                  </span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                    <Icon className="w-4 h-4" />
+                  <span className="text-2xl font-extrabold text-sky-600">{p.step}</span>
+                  <div className="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center text-white icon-lift">
+                    <Icon className="w-5 h-5" />
                   </div>
                 </div>
-
-                <h3 className="font-black text-sm text-white">{item.title}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  {item.desc}
-                </p>
+                <h3 className="text-base font-bold text-slate-900">{p.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{p.desc}</p>
               </div>
             )
           })}
         </div>
       </section>
 
-      {/* Section 3: Explainable AI Health Risk Engine Breakdown */}
-      <section className="relative z-10 py-16 bg-[#08221D]/60 border-y border-emerald-500/20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          {/* Left AI Description */}
-          <div className="lg:col-span-6 space-y-5">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-              DECISION-SUPPORT INTELLIGENCE
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Explainable AI Health Risk Engine
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Unlike opaque black-box models, PASHURAKSHA AI generates fully transparent clinical factor trees. Every score is mathematically grounded in weighted symptom severity, clinical synergies, chronicity, and herd density.
-            </p>
+      {/* 6 Portals — Big Tap Targets for Farmers */}
+      <section className="relative z-10 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-slate-200">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <span className="text-sm font-bold text-sky-700 bg-sky-50 px-4 py-1.5 rounded-full border border-sky-200">
+            PORTALS
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            Choose Your Portal
+          </h2>
+          <p className="text-base text-slate-500 mt-2">आपला कक्ष निवडा</p>
+        </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#061B17] border border-emerald-500/20 text-xs text-slate-300 space-y-1 italic">
-              <strong className="text-emerald-400 not-italic block">Mandatory Non-Diagnostic Disclaimer:</strong>
-              PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning decision support. It does not replace professional veterinary diagnosis or treatment.
-            </div>
-          </div>
-
-          {/* Right Factor Breakdown Radial Card */}
-          <div className="lg:col-span-6">
-            <Card className="bg-[#092923] border border-emerald-500/30 p-6 space-y-6 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
-                <div>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
-                    CLINICAL CASE #PR-1024
-                  </span>
-                  <h3 className="text-base font-black text-white">
-                    Animal: BUF-204 (Murrah Buffalo)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {portals.map((p) => {
+            const Icon = p.icon
+            return (
+              <Link
+                key={p.title}
+                to={p.link}
+                className="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 card-hover shadow-sm flex items-start space-x-4"
+              >
+                <div className={`w-12 h-12 rounded-xl ${p.color} flex items-center justify-center text-white flex-shrink-0 icon-lift`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors duration-200">
+                    {p.title}
                   </h3>
-                </div>
-                <RiskBadge level="HIGH" score={78} />
-              </div>
-
-              {/* Radial Progress & Attribution */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-                
-                {/* Radial Visualizer */}
-                <div className="flex flex-col items-center justify-center p-4 bg-[#061B17] rounded-2xl border border-emerald-500/20">
-                  <div className="relative w-28 h-28 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        className="text-slate-800"
-                        strokeWidth="3.5"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className="text-orange-500"
-                        strokeDasharray="78, 100"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <div className="absolute text-center">
-                      <span className="font-black text-2xl text-white block">78</span>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold">/ 100 Risk</span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold text-orange-400 mt-2">HIGH RISK TIER</span>
-                  <span className="text-[10px] text-slate-400">AI Confidence: 87%</span>
-                </div>
-
-                {/* Factor Contribution Tree */}
-                <div className="space-y-2 text-xs">
-                  <span className="text-[10px] font-bold uppercase text-emerald-400 tracking-wider">
-                    Contributing Factors:
+                  <span className="text-sm text-sky-600 font-semibold">{p.marathi}</span>
+                  <p className="text-sm text-slate-500 mt-1">{p.description}</p>
+                  <span className="inline-flex items-center text-sm font-semibold text-sky-600 mt-2">
+                    Open <ChevronRight className="w-4 h-4 ml-0.5" />
                   </span>
-                  {[
-                    { label: 'Fever', pts: '+24' },
-                    { label: 'Respiratory signs (Dyspnea)', pts: '+18' },
-                    { label: 'Reduced appetite', pts: '+12' },
-                    { label: 'Milk production drop', pts: '+10' },
-                    { label: 'Nearby spatial cases (Rampur)', pts: '+14' },
-                  ].map((f) => (
-                    <div key={f.label} className="flex justify-between text-slate-300 border-b border-emerald-500/10 pb-1">
-                      <span>{f.label}</span>
-                      <strong className="text-emerald-400 font-mono">{f.pts}</strong>
-                    </div>
-                  ))}
-                  <div className="flex justify-between text-white font-bold pt-1">
-                    <span>Total Calculated Risk:</span>
-                    <strong className="text-orange-400 font-mono">78 / 100</strong>
-                  </div>
                 </div>
-
-              </div>
-
-              {/* Action Recommendation */}
-              <div className="p-3 rounded-xl bg-orange-950/60 border border-orange-500/40 text-xs text-orange-200">
-                <strong>Recommended Action:</strong> Immediate veterinary evaluation and farm isolation required within 24 hours.
-              </div>
-            </Card>
-          </div>
-
+              </Link>
+            )
+          })}
         </div>
       </section>
 
-      {/* Section 4: Full-Width Interactive GIS Surveillance Map Centerpiece */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Map Section */}
+      <section className="relative z-10 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-              GEOSPATIAL EPIDEMIOLOGY CENTERPIECE
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Interactive GIS Disease Surveillance Map
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Live Disease Map
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300">
-              Live spatial-temporal cluster centroids and dynamic containment buffers across Jaipur Rural District.
+            <p className="text-sm text-slate-500 mt-0.5">
+              Real-time outbreak locations across Pune, Satara, and Solapur districts.
             </p>
           </div>
-
-          <Link to="/presentation">
-            <Button size="sm" icon={Sparkles} className="font-bold bg-emerald-500 text-slate-950">
-              Open Fullscreen Jury View →
-            </Button>
+          <Link to="/authority/dashboard">
+            <button className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400 text-sm font-semibold flex items-center space-x-2 transition-colors duration-200">
+              <span>Full Map</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </Link>
         </div>
 
-        <Card className="bg-[#092923] border border-emerald-500/20 p-5 space-y-3">
-          <OutbreakMap
-            clusters={scenarioData.clusters}
-            height="480px"
-            zoom={11}
-          />
-        </Card>
-      </section>
-
-      {/* Section 5: Stakeholder Portals Showcase */}
-      <section className="relative z-10 py-16 bg-[#08221D]/60 border-t border-emerald-500/20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-              ROLE-BASED STAKEHOLDER WORKFLOWS
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Dedicated Solutions for Every Stakeholder
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Farmer Portal Card */}
-            <Card hover className="bg-[#092923] border border-emerald-500/30 p-6 space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                <PawPrint className="w-6 h-6" />
-              </div>
-              <h3 className="font-black text-lg text-white">🧑‍🌾 Rural Farmer Portal</h3>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                Simple high-contrast mobile interface with voice reporting, digital animal passports, and instant AI isolation guidance.
-              </p>
-              <Link to="/farmer/dashboard" className="block pt-2">
-                <Button size="sm" className="w-full font-bold bg-emerald-500 text-slate-950">
-                  Enter Farmer Portal →
-                </Button>
-              </Link>
-            </Card>
-
-            {/* Vet Desk Card */}
-            <Card hover className="bg-[#092923] border border-sky-500/30 p-6 space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
-                <Stethoscope className="w-6 h-6" />
-              </div>
-              <h3 className="font-black text-lg text-white">🩺 Veterinarian Clinical Desk</h3>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                AI-prioritized clinical triage queue, diagnostic laboratory test referral ordering, and farm quarantine enforcement.
-              </p>
-              <Link to="/vet/dashboard" className="block pt-2">
-                <Button size="sm" className="w-full font-bold bg-sky-500 text-slate-950">
-                  Enter Clinical Desk →
-                </Button>
-              </Link>
-            </Card>
-
-            {/* Authority Command Card */}
-            <Card hover className="bg-[#092923] border border-purple-500/30 p-6 space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-                <Building2 className="w-6 h-6" />
-              </div>
-              <h3 className="font-black text-lg text-white">🏛️ Authority Surveillance Command</h3>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                District-level epidemiological heatmaps, village risk stratification matrix, vaccination gaps, and rapid outbreak triggers.
-              </p>
-              <Link to="/authority/dashboard" className="block pt-2">
-                <Button size="sm" className="w-full font-bold bg-purple-500 text-slate-950">
-                  Enter Command Center →
-                </Button>
-              </Link>
-            </Card>
-
-          </div>
+        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-md h-80 sm:h-96">
+          <OutbreakMap />
         </div>
       </section>
-
     </div>
   )
 }

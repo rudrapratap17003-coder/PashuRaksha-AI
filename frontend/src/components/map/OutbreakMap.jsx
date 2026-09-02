@@ -52,8 +52,8 @@ const getRiskColor = (level) => {
 
 export default function OutbreakMap({
   clusters = [],
-  center = [26.9124, 75.7873],
-  zoom = 11,
+  center = [18.5204, 74.2800],
+  zoom = 9,
   height = '460px',
   onSelectCluster = null,
 }) {
@@ -71,8 +71,8 @@ export default function OutbreakMap({
         />
 
         {clusters.map((c) => {
-          const lat = c.latitude || 26.9124
-          const lng = c.longitude || 75.7873
+          const lat = c.latitude || 18.1515
+          const lng = c.longitude || 74.5772
           const radiusMeters = Math.max(800, (c.radius_km || 1.5) * 1000)
           const riskColor = getRiskColor(c.risk_level)
 
