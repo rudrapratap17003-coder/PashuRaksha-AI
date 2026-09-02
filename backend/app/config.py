@@ -19,8 +19,20 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
     ]
+    
+    # Additional CORS origins from environment (comma-separated)
+    EXTRA_CORS_ORIGINS: str = ""
+    
+    @property
+    def all_cors_origins(self) -> List[str]:
+        """Combine default CORS_ORIGINS with any extra origins from env."""
+        origins = list(self.CORS_ORIGINS)
+        if self.EXTRA_CORS_ORIGINS:
+            extras = [o.strip() for o in self.EXTRA_CORS_ORIGINS.split(",") if o.strip()]
+            origins.extend(extras)
+        return origins
     
     class Config:
         env_file = ".env"
