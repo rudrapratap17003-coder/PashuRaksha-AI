@@ -6,7 +6,14 @@ from app.config import settings
 # Determine Database URL
 # Format for PostgreSQL: postgresql://user:password@host:port/dbname
 # Default fallback: sqlite:///./pashuraksha.db for zero-config local execution
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./pashuraksha.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    if os.getenv("VERCEL"):
+        import tempfile
+        tmp_db = os.path.join(tempfile.gettempdir(), "pashuraksha.db").replace("\\", "/")
+        DATABASE_URL = f"sqlite:///{tmp_db}"
+    else:
+        DATABASE_URL = "sqlite:///./pashuraksha.db"
 
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):

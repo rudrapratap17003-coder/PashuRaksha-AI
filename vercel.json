@@ -1,18 +1,44 @@
 {
-  "version": 2,
-  "buildCommand": "cd frontend && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "frontend/dist",
-  "functions": {
-    "api/index.py": {
-      "runtime": "@vercel/python@latest",
-      "maxDuration": 30
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "app.main:app"
     }
   },
   "rewrites": [
-    { "source": "/api/v1/(.*)", "destination": "/api" },
-    { "source": "/docs", "destination": "/api" },
-    { "source": "/redoc", "destination": "/api" },
-    { "source": "/openapi.json", "destination": "/api" },
-    { "source": "/((?!api).*)", "destination": "/" }
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/docs",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/redoc",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/openapi.json",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
   ]
 }
