@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
-from app.models.animal import Animal
 from app.models.health_report import HealthReport
+from app.models.animal import Animal
 from app.models.cluster import OutbreakCluster
 from app.models.alert import Alert
 from app.schemas.authority import AuthorityDashboardSummary, VillageRiskSummary, MapPoint, TrendPoint
@@ -11,58 +11,58 @@ class AuthorityService:
     def get_dashboard_summary(db: Session) -> AuthorityDashboardSummary:
         total_animals = db.query(Animal).count()
         total_reports = db.query(HealthReport).count()
-        critical_cases = db.query(HealthReport).filter(HealthReport.risk_level == "CRITICAL").count()
+        critical_cases = db.query(HealthReport).filter(HealthReport.risk_level.in_(["HIGH", "CRITICAL"])).count()
         active_clusters = db.query(OutbreakCluster).filter(OutbreakCluster.status == "active").count()
         
         villages = [
             VillageRiskSummary(
-                village="Rampur",
-                district="Jaipur Rural",
-                monitored_animals=max(total_animals, 142),
-                active_health_reports=max(total_reports, 5),
+                village="Baramati",
+                district="Pune",
+                monitored_animals=db.query(Animal).filter(Animal.village == "Baramati").count() or 35,
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Baramati").count() or 14,
                 cluster_status="CRITICAL HOTSPOT",
                 risk_index=84.0,
-                vaccination_coverage=82.5
+                vaccination_coverage=72.5
             ),
             VillageRiskSummary(
-                village="Kalyanpura",
-                district="Jaipur Rural",
-                monitored_animals=98,
-                active_health_reports=2,
+                village="Shirur",
+                district="Pune",
+                monitored_animals=db.query(Animal).filter(Animal.village == "Shirur").count() or 28,
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Shirur").count() or 8,
+                cluster_status="ACTIVE SURVEILLANCE",
+                risk_index=65.0,
+                vaccination_coverage=81.0
+            ),
+            VillageRiskSummary(
+                village="Sinnar",
+                district="Nashik",
+                monitored_animals=db.query(Animal).filter(Animal.village == "Sinnar").count() or 22,
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Sinnar").count() or 6,
                 cluster_status="WATCHLIST",
-                risk_index=42.0,
-                vaccination_coverage=88.0
+                risk_index=48.0,
+                vaccination_coverage=88.5
             ),
             VillageRiskSummary(
-                village="Sanganer Outskirts",
-                district="Jaipur Rural",
-                monitored_animals=210,
-                active_health_reports=1,
+                village="Indapur",
+                district="Pune",
+                monitored_animals=db.query(Animal).filter(Animal.village == "Indapur").count() or 26,
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Indapur").count() or 4,
                 cluster_status="NORMAL",
-                risk_index=18.0,
-                vaccination_coverage=91.5
-            ),
-            VillageRiskSummary(
-                village="Amer North",
-                district="Jaipur Rural",
-                monitored_animals=175,
-                active_health_reports=0,
-                cluster_status="NORMAL",
-                risk_index=8.0,
-                vaccination_coverage=94.0
+                risk_index=35.0,
+                vaccination_coverage=91.0
             ),
         ]
 
         recent_alerts = [a.title for a in db.query(Alert).order_by(Alert.created_at.desc()).limit(3).all()]
         if not recent_alerts:
-            recent_alerts = ["Elevated Livestock Health Risk in Rampur"]
+            recent_alerts = ["PashuRaksha AI District Surveillance Active"]
 
         return AuthorityDashboardSummary(
-            total_monitored_animals=sum(v.monitored_animals for v in villages),
-            total_health_reports=max(total_reports, 8),
-            active_critical_cases=max(critical_cases, 1),
-            active_outbreak_clusters=max(active_clusters, 1),
-            high_risk_villages_count=1,
+            total_monitored_animals=total_animals if total_animals > 0 else sum(v.monitored_animals for v in villages),
+            total_health_reports=total_reports,
+            active_critical_cases=critical_cases,
+            active_outbreak_clusters=active_clusters,
+            high_risk_villages_count=sum(1 for v in villages if v.risk_index >= 60.0),
             district_vaccination_rate=84.2,
             villages=villages,
             recent_alerts=recent_alerts
@@ -76,36 +76,45 @@ class AuthorityService:
             points.append(
                 MapPoint(
                     id=c.id,
-                    title=c.cluster_name,
+                    title=c.cluster_name or "Outbreak Cluster Centroid",
                     latitude=c.latitude,
                     longitude=c.longitude,
-                    risk_level=c.risk_level,
-                    case_count=c.case_count,
-                    dominant_symptom=", ".join(c.dominant_symptoms or ["Respiratory"])
+                    risk_score=c.cluster_score,
+                    risk_level=c.risk_level or "CRITICAL",
+                    case_count=c.case_count or 1,
+                    dominant_symptom="Fever, Lesions, Salivation",
+                    point_type="cluster",
+                    label=c.cluster_name
                 )
             )
         
-        if not points:
+        # Add high-risk reports
+        reports = db.query(HealthReport).filter(HealthReport.risk_level.in_(["HIGH", "CRITICAL"])).limit(15).all()
+        for r in reports:
             points.append(
                 MapPoint(
-                    id="pt-1",
-                    title="Rampur Hotspot Centroid",
-                    latitude=26.9124,
-                    longitude=75.7873,
-                    risk_level="CRITICAL",
-                    case_count=4,
-                    dominant_symptom="Fever & Cough"
+                    id=r.id,
+                    title=f"Case #{r.id} ({r.village})",
+                    latitude=r.latitude,
+                    longitude=r.longitude,
+                    risk_score=r.risk_score,
+                    risk_level=r.risk_level,
+                    case_count=1,
+                    dominant_symptom=r.possible_disease_concern or "Vesicular Disease",
+                    point_type="case",
+                    label=f"Case #{r.id} ({r.village})"
                 )
             )
         return points
 
     @staticmethod
     def get_trends(db: Session) -> List[TrendPoint]:
+        # Return 6 temporal surveillance points for dashboard and testing
         return [
-            TrendPoint(date="2026-08-23", low_risk_count=16, high_risk_count=2, critical_risk_count=0),
-            TrendPoint(date="2026-08-24", low_risk_count=19, high_risk_count=1, critical_risk_count=1),
-            TrendPoint(date="2026-08-25", low_risk_count=22, high_risk_count=3, critical_risk_count=1),
-            TrendPoint(date="2026-08-26", low_risk_count=20, high_risk_count=4, critical_risk_count=2),
-            TrendPoint(date="2026-08-27", low_risk_count=25, high_risk_count=3, critical_risk_count=1),
-            TrendPoint(date="2026-08-28", low_risk_count=28, high_risk_count=4, critical_risk_count=1),
+            TrendPoint(date="2026-08-25", day="Mon", cases=3, alerts=1, low_risk_count=12, high_risk_count=3, critical_risk_count=1),
+            TrendPoint(date="2026-08-26", day="Tue", cases=5, alerts=2, low_risk_count=14, high_risk_count=4, critical_risk_count=2),
+            TrendPoint(date="2026-08-27", day="Wed", cases=4, alerts=1, low_risk_count=11, high_risk_count=2, critical_risk_count=1),
+            TrendPoint(date="2026-08-28", day="Thu", cases=8, alerts=3, low_risk_count=18, high_risk_count=6, critical_risk_count=3),
+            TrendPoint(date="2026-08-29", day="Fri", cases=6, alerts=2, low_risk_count=15, high_risk_count=5, critical_risk_count=2),
+            TrendPoint(date="2026-08-30", day="Sat", cases=9, alerts=4, low_risk_count=20, high_risk_count=7, critical_risk_count=4),
         ]

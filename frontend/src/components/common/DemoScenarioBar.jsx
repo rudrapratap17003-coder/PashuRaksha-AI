@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { Sparkles, Play, ShieldAlert, CheckCircle2, AlertTriangle, RefreshCw, X, Presentation, ChevronRight } from 'lucide-react'
 import { useScenario } from '../../context/ScenarioContext'
 import OfflineIndicator from './OfflineIndicator'
+import SihDemoScenarioModal from '../demo/SihDemoScenarioModal'
 
 export default function DemoScenarioBar() {
   const { currentScenario, setScenario, scenarioData, scenarios } = useScenario()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeNotice, setActiveNotice] = useState(null)
+  const [showSihModal, setShowSihModal] = useState(false)
 
   const handleSelectScenario = (key) => {
     setScenario(key)
@@ -94,6 +96,16 @@ export default function DemoScenarioBar() {
             <span>🟡 Ring Alert</span>
           </button>
 
+          {/* SIH 2026 5-7 Min Demo Scenario Launcher */}
+          <button
+            onClick={() => setShowSihModal(true)}
+            className="px-2.5 py-1 rounded-xl font-black bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-md transition flex items-center space-x-1 text-[11px] flex-shrink-0 animate-pulse"
+            title="Open 5-7 Min SIH Baramati FMD Demonstration Guide"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span>⚡ SIH Demo Scenario</span>
+          </button>
+
           {/* Dedicated Presentation View Button */}
           <Link
             to="/presentation"
@@ -106,6 +118,38 @@ export default function DemoScenarioBar() {
           {/* Rural Offline Simulator */}
           <div className="flex-shrink-0">
             <OfflineIndicator />
+          </div>
+
+          {/* 1-Click Jury Flow Quick Switcher */}
+          <div className="hidden lg:flex items-center space-x-1 pl-2 border-l border-slate-200">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Flow:</span>
+            <Link to="/" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-600 hover:text-sky-700 hover:bg-slate-100 transition">
+              Landing
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/login" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-600 hover:text-sky-700 hover:bg-slate-100 transition">
+              Login
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/farmer" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+              Farmer
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/farmer/report" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+              Report/Risk
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/vet" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 transition">
+              Vet
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/lab" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 transition">
+              Lab
+            </Link>
+            <ChevronRight className="w-2.5 h-2.5 text-slate-400" />
+            <Link to="/authority" className="px-1.5 py-0.5 rounded text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 transition">
+              Authority/GIS
+            </Link>
           </div>
 
           {/* Desktop Minimize Button */}
@@ -125,6 +169,12 @@ export default function DemoScenarioBar() {
           <span>{activeNotice}</span>
         </div>
       )}
+
+      {/* SIH 2026 Interactive Demo Modal */}
+      <SihDemoScenarioModal
+        isOpen={showSihModal}
+        onClose={() => setShowSihModal(false)}
+      />
     </div>
   )
 }

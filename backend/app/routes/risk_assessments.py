@@ -2,13 +2,23 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.dependencies import get_current_user
+from app.models.user import User
 from app.models.risk_assessment import RiskAssessment
 from app.schemas.risk_assessment import RiskAssessmentResponse
 
 router = APIRouter(prefix="/risk-assessments", tags=["AI Risk Assessment & Explainability"])
 
 @router.get("/{assessment_id}", response_model=RiskAssessmentResponse)
-def get_risk_assessment(assessment_id: str, db: Session = Depends(get_db)):
+def get_risk_assessment(
+    assessment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieve explainable health risk assessment factors and transparent weighting.
+    Authenticated users only.
+    """
     risk = db.query(RiskAssessment).filter(
         (RiskAssessment.id == assessment_id) | (RiskAssessment.report_id == assessment_id)
     ).first()

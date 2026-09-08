@@ -32,6 +32,7 @@ import OutbreakMap from '../../components/map/OutbreakMap'
 import WeatherWidget from '../../components/common/WeatherWidget'
 import BroadcastModal from '../../components/authority/BroadcastModal'
 import SitrepGeneratorModal from '../../components/authority/SitrepGeneratorModal'
+import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
@@ -43,29 +44,19 @@ export default function AuthorityDashboard() {
   const [actionNotice, setActionNotice] = useState(null)
   const [dashboardData, setDashboardData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [broadcastOpen, setBroadcastOpen] = useState(false)
   const [sitrepOpen, setSitrepOpen] = useState(false)
 
   const fetchAuthorityData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await apiClient.get('/authority/dashboard')
       setDashboardData(res.data)
-    } catch {
-      setDashboardData({
-        total_monitored_animals: 1247,
-        active_health_reports: 438,
-        critical_cases_count: 18,
-        active_outbreak_clusters: 2,
-        district_risk_status: 'ELEVATED WATCH',
-        villages: [
-          { village: 'Baramati', district: 'Pune', monitored_animals: 142, active_health_reports: 14, cluster_status: 'CRITICAL HOTSPOT', risk_index: 82.0, vaccination_coverage: 72.5 },
-          { village: 'Shirur', district: 'Pune', monitored_animals: 98, active_health_reports: 8, cluster_status: 'WATCHLIST', risk_index: 65.0, vaccination_coverage: 81.0 },
-          { village: 'Sinnar', district: 'Nashik', monitored_animals: 108, active_health_reports: 6, cluster_status: 'MONITORING', risk_index: 48.0, vaccination_coverage: 88.5 },
-          { village: 'Shrigonda', district: 'Ahmednagar', monitored_animals: 95, active_health_reports: 5, cluster_status: 'MONITORING', risk_index: 55.0, vaccination_coverage: 76.0 },
-          { village: 'Indapur', district: 'Pune', monitored_animals: 115, active_health_reports: 4, cluster_status: 'NORMAL', risk_index: 35.0, vaccination_coverage: 91.0 },
-        ]
-      })
+    } catch (err) {
+      console.warn('Failed to load authority dashboard data:', err)
+      setError(err?.response?.data?.detail || err?.message || 'Failed to fetch regional surveillance data.')
     } finally {
       setLoading(false)
     }
@@ -188,6 +179,63 @@ export default function AuthorityDashboard() {
         />
       </div>
 
+      {/* Active Baramati Outbreak Cluster Hotspot Banner */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-950 via-slate-900 to-purple-950 border-2 border-rose-500/80 shadow-2xl space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-500/30 pb-3">
+          <div className="flex items-center space-x-2.5">
+            <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+            <h3 className="text-lg font-black text-white tracking-wide">
+              BARAMATI OUTBREAK CLUSTER (CONFIRMED FMD)
+            </h3>
+          </div>
+          <span className="self-start sm:self-auto px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-xs uppercase shadow-md">
+            CRITICAL HOTSPOT • 5.0 KM CONTAINMENT RING
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-rose-500/30">
+            <span className="text-slate-400 block text-[10px]">Active Cases</span>
+            <strong className="text-lg font-black text-white">8 Reports</strong>
+          </div>
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-rose-500/30">
+            <span className="text-slate-400 block text-[10px]">Affected Animals</span>
+            <strong className="text-lg font-black text-rose-400">14 Animals</strong>
+          </div>
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-rose-500/30">
+            <span className="text-slate-400 block text-[10px]">Dominant Symptoms</span>
+            <strong className="text-xs font-bold text-amber-300 block mt-0.5">Fever, Oral Lesions, Salivation</strong>
+          </div>
+          <div className="bg-slate-950/80 p-3 rounded-2xl border border-rose-500/30">
+            <span className="text-slate-400 block text-[10px]">Containment Actions</span>
+            <strong className="text-xs font-bold text-emerald-400 block mt-0.5">Ring Vax + Advisory Broadcast</strong>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+          <span className="text-slate-300">
+            Affected Villages: <strong className="text-white">Baramati, Malegaon, Jalochi</strong>
+          </span>
+          <div className="flex items-center space-x-2">
+            <Button
+              size="sm"
+              onClick={handleDispatchTeam}
+              className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs"
+            >
+              Deploy Ring Vaccination (250 Doses)
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleIssueAlert}
+              className="bg-slate-900 border-purple-400/50 text-purple-300 hover:bg-purple-950 text-xs font-bold"
+            >
+              Broadcast Biosecurity Advisory
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Main Grid: GIS Map + Protocol Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 8 Cols: GIS Radar Map */}
@@ -252,47 +300,64 @@ export default function AuthorityDashboard() {
       {/* Village Risk Matrix */}
       <Card className="bg-slate-900/80 border-slate-800">
         <h3 className="text-base font-black text-white mb-4">Maharashtra Village Stratification</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-              <tr>
-                <th className="py-3 px-4">Village Node</th>
-                <th className="py-3 px-4">District</th>
-                <th className="py-3 px-4">Monitored Herd</th>
-                <th className="py-3 px-4">Active Reports</th>
-                <th className="py-3 px-4">Vaccination %</th>
-                <th className="py-3 px-4">Risk Index</th>
-                <th className="py-3 px-4">Containment Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {(dashboardData?.villages || []).map((v, idx) => (
-                <tr key={idx} className="hover:bg-slate-800/40 transition">
-                  <td className="py-3.5 px-4 font-bold text-white">{v.village}</td>
-                  <td className="py-3.5 px-4 text-slate-400">{v.district}</td>
-                  <td className="py-3.5 px-4">{v.monitored_animals}</td>
-                  <td className="py-3.5 px-4 font-bold text-emerald-400">{v.active_health_reports}</td>
-                  <td className="py-3.5 px-4">{v.vaccination_coverage}%</td>
-                  <td className="py-3.5 px-4">
-                    <span className="font-bold text-white">{v.risk_index}</span>
-                    <span className="text-[10px] text-slate-500">/100</span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      v.cluster_status?.includes('CRITICAL') 
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' 
-                        : v.cluster_status?.includes('WATCH') 
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    }`}>
-                      {v.cluster_status}
-                    </span>
-                  </td>
+        {loading ? (
+          <div className="py-8">
+            <LoadingState message="Aggregating village-level risk indices from state surveillance nodes..." />
+          </div>
+        ) : error ? (
+          <div className="py-8">
+            <ErrorState message={error} onRetry={fetchAuthorityData} />
+          </div>
+        ) : (dashboardData?.villages || []).length === 0 ? (
+          <div className="py-8">
+            <EmptyState 
+              title="No Village Surveillance Records" 
+              description="No active clusters or high-risk animal clusters reported in monitored talukas." 
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="py-3 px-4">Village Node</th>
+                  <th className="py-3 px-4">District</th>
+                  <th className="py-3 px-4">Monitored Herd</th>
+                  <th className="py-3 px-4">Active Reports</th>
+                  <th className="py-3 px-4">Vaccination %</th>
+                  <th className="py-3 px-4">Risk Index</th>
+                  <th className="py-3 px-4">Containment Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {(dashboardData?.villages || []).map((v, idx) => (
+                  <tr key={idx} className="hover:bg-slate-800/40 transition">
+                    <td className="py-3.5 px-4 font-bold text-white">{v.village}</td>
+                    <td className="py-3.5 px-4 text-slate-400">{v.district}</td>
+                    <td className="py-3.5 px-4">{v.monitored_animals}</td>
+                    <td className="py-3.5 px-4 font-bold text-emerald-400">{v.active_health_reports}</td>
+                    <td className="py-3.5 px-4">{v.vaccination_coverage}%</td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-white">{v.risk_index}</span>
+                      <span className="text-[10px] text-slate-500">/100</span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                        v.cluster_status?.includes('CRITICAL') 
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' 
+                          : v.cluster_status?.includes('WATCH') 
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      }`}>
+                        {v.cluster_status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       {/* Emergency Multilingual Broadcast Modal */}

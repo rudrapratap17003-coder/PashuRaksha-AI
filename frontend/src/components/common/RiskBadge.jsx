@@ -28,6 +28,8 @@ export default function RiskBadge({
 
   return (
     <span
+      title={`${config.label} Risk ${score !== null ? `(${score}/100)` : ''} • Pattern flag only — veterinary verification required.`}
+      aria-label={`${config.label} risk level ${score !== null ? `${score} out of 100` : ''}`}
       className={`inline-flex items-center space-x-1.5 rounded-full border shadow-sm ${config.badge} ${sizeClasses} ${className}`}
     >
       {showIcon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}

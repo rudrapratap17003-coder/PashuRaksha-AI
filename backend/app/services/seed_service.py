@@ -52,96 +52,146 @@ BREEDS = {
 }
 
 
-def seed_database(db: Session):
+def reset_database(db: Session):
+    """
+    Cleans all transactional tables and re-seeds deterministic baseline data.
+    Safe and repeatable for SIH 2026 jury presentations without corrupting SQLite state.
+    """
+    from app.models.vet_action import VeterinaryAction
+    db.query(CaseTimelineEvent).delete()
+    db.query(LabReferral).delete()
+    db.query(VeterinaryAction).delete()
+    db.query(Notification).delete()
+    db.query(Alert).delete()
+    db.query(OutbreakCluster).delete()
+    db.query(RiskAssessment).delete()
+    db.query(HealthReport).delete()
+    db.query(Vaccination).delete()
+    db.query(Animal).delete()
+    db.query(Farm).delete()
+    db.commit()
+
+    seed_database(db, force_reseed=True)
+    return {
+        "status": "success",
+        "message": "SIH Demonstration database cleanly reset to baseline state.",
+        "scenario": "Suspected FMD outbreak in Baramati",
+        "demo_animal": {
+            "animal_id": "COW-101",
+            "name": "Gauri",
+            "species": "Cattle (Cow)",
+            "breed": "Gir",
+            "age": 4.5,
+            "owner": "Ramesh Patil",
+            "village": "Baramati",
+            "district": "Pune"
+        }
+    }
+
+
+def seed_database(db: Session, force_reseed: bool = False):
     """Seed database with Maharashtra livestock demo data."""
-    if db.query(User).first() is not None:
+    first_user = db.query(User).first()
+    if first_user is not None and not force_reseed:
+        if first_user.password_hash and not first_user.password_hash.startswith("$2b$"):
+            from app.services.auth_service import AuthService
+            valid_hash = AuthService.hash_password("password123")
+            for u in db.query(User).all():
+                if not (u.password_hash and u.password_hash.startswith("$2b$")):
+                    u.password_hash = valid_hash
+            db.commit()
         return  # Already seeded
 
     print("[SEED] Seeding PASHURAKSHA AI database with Maharashtra demo data...")
+    from app.services.auth_service import AuthService
+    demo_password_hash = AuthService.hash_password("password123")
 
     # ─── USERS ───
-    users = []
-    # Farmers (15)
-    for i, name in enumerate(FARMER_NAMES):
-        v = VILLAGES[i % len(VILLAGES)]
-        farmer = User(
-            id=f"usr-farmer-{i+1}",
-            name=name,
-            phone=f"98765{43210+i}",
-            email=f"farmer{i+1}@pashuraksha.ai",
-            password_hash="hashed_demo_password",
-            role="farmer",
-            village=v["name"],
-            district=v["district"],
-            state="Maharashtra",
-            latitude=v["lat"] + random.uniform(-0.01, 0.01),
-            longitude=v["lng"] + random.uniform(-0.01, 0.01),
+    if first_user is None:
+        users = []
+        # Farmers (15)
+        for i, name in enumerate(FARMER_NAMES):
+            v = VILLAGES[i % len(VILLAGES)]
+            farmer = User(
+                id=f"usr-farmer-{i+1}",
+                name=name,
+                phone=f"98765{43210+i}",
+                email=f"farmer{i+1}@pashuraksha.ai",
+                password_hash=demo_password_hash,
+                role="farmer",
+                village=v["name"],
+                district=v["district"],
+                state="Maharashtra",
+                latitude=v["lat"] + random.uniform(-0.01, 0.01),
+                longitude=v["lng"] + random.uniform(-0.01, 0.01),
+            )
+            users.append(farmer)
+
+        # Veterinarians (4)
+        vet_data = [
+            ("Dr. Priya Sharma", "Baramati", "Pune"), ("Dr. Arun Joshi", "Sinnar", "Nashik"),
+            ("Dr. Meena Kulkarni", "Shrigonda", "Ahmednagar"), ("Dr. Sagar Patil", "Karad", "Satara"),
+        ]
+        for i, (name, village, district) in enumerate(vet_data):
+            v_geo = next((v for v in VILLAGES if v["name"] == village), VILLAGES[0])
+            vet = User(
+                id=f"usr-vet-{i+1}", name=name, phone=f"98765{43220+i}",
+                email=f"vet{i+1}@pashuraksha.ai", password_hash=demo_password_hash,
+                role="veterinarian", village=village, district=district,
+                state="Maharashtra", latitude=v_geo["lat"], longitude=v_geo["lng"],
+            )
+            users.append(vet)
+
+        # Field Workers (3)
+        fw_data = [
+            ("Ankita Jadhav", "Baramati", "Pune"), ("Rohit Gaikwad", "Sinnar", "Nashik"),
+            ("Prashant Mane", "Shrigonda", "Ahmednagar"),
+        ]
+        for i, (name, village, district) in enumerate(fw_data):
+            v_geo = next((v for v in VILLAGES if v["name"] == village), VILLAGES[0])
+            fw = User(
+                id=f"usr-fw-{i+1}", name=name, phone=f"98765{43250+i}",
+                email=f"fieldworker{i+1}@pashuraksha.ai", password_hash=demo_password_hash,
+                role="field_worker", village=village, district=district,
+                state="Maharashtra", latitude=v_geo["lat"], longitude=v_geo["lng"],
+            )
+            users.append(fw)
+
+        # Lab Technicians (2)
+        lab_data = [("Dr. Suhas Kulkarni", "Pune Lab", "Pune"), ("Dr. Rajan Nair", "Nashik Lab", "Nashik")]
+        for i, (name, village, district) in enumerate(lab_data):
+            lab = User(
+                id=f"usr-lab-{i+1}", name=name, phone=f"98765{43240+i}",
+                email=f"lab{i+1}@pashuraksha.ai", password_hash=demo_password_hash,
+                role="laboratory", village=village, district=district,
+                state="Maharashtra", latitude=18.5204, longitude=73.8567,
+            )
+            users.append(lab)
+
+        # Government Officials (2)
+        gov_data = [("S. Deshmukh (IAS)", "Pune HQ", "Pune"), ("M. Kadam", "Nashik HQ", "Nashik")]
+        for i, (name, village, district) in enumerate(gov_data):
+            gov = User(
+                id=f"usr-auth-{i+1}", name=name, phone=f"98765{43230+i}",
+                email=f"officer{i+1}@pashuraksha.ai", password_hash=demo_password_hash,
+                role="authority", village=village, district=district,
+                state="Maharashtra", latitude=18.5204, longitude=73.8567,
+            )
+            users.append(gov)
+
+        # Admin
+        admin = User(
+            id="usr-admin-1", name="System Admin", phone="9876500000",
+            email="admin@pashuraksha.ai", password_hash=demo_password_hash,
+            role="admin", village="Pune", district="Pune", state="Maharashtra",
+            latitude=18.5204, longitude=73.8567,
         )
-        users.append(farmer)
+        users.append(admin)
 
-    # Veterinarians (4)
-    vet_data = [
-        ("Dr. Priya Sharma", "Baramati", "Pune"), ("Dr. Arun Joshi", "Sinnar", "Nashik"),
-        ("Dr. Meena Kulkarni", "Shrigonda", "Ahmednagar"), ("Dr. Sagar Patil", "Karad", "Satara"),
-    ]
-    for i, (name, village, district) in enumerate(vet_data):
-        v_geo = next((v for v in VILLAGES if v["name"] == village), VILLAGES[0])
-        vet = User(
-            id=f"usr-vet-{i+1}", name=name, phone=f"98765{43220+i}",
-            email=f"vet{i+1}@pashuraksha.ai", password_hash="hashed_demo_password",
-            role="veterinarian", village=village, district=district,
-            state="Maharashtra", latitude=v_geo["lat"], longitude=v_geo["lng"],
-        )
-        users.append(vet)
-
-    # Field Workers (3)
-    fw_data = [
-        ("Ankita Jadhav", "Baramati", "Pune"), ("Rohit Gaikwad", "Sinnar", "Nashik"),
-        ("Prashant Mane", "Shrigonda", "Ahmednagar"),
-    ]
-    for i, (name, village, district) in enumerate(fw_data):
-        v_geo = next((v for v in VILLAGES if v["name"] == village), VILLAGES[0])
-        fw = User(
-            id=f"usr-fw-{i+1}", name=name, phone=f"98765{43250+i}",
-            email=f"fieldworker{i+1}@pashuraksha.ai", password_hash="hashed_demo_password",
-            role="field_worker", village=village, district=district,
-            state="Maharashtra", latitude=v_geo["lat"], longitude=v_geo["lng"],
-        )
-        users.append(fw)
-
-    # Lab Technicians (2)
-    lab_data = [("Dr. Suhas Kulkarni", "Pune Lab", "Pune"), ("Dr. Rajan Nair", "Nashik Lab", "Nashik")]
-    for i, (name, village, district) in enumerate(lab_data):
-        lab = User(
-            id=f"usr-lab-{i+1}", name=name, phone=f"98765{43240+i}",
-            email=f"lab{i+1}@pashuraksha.ai", password_hash="hashed_demo_password",
-            role="laboratory", village=village, district=district,
-            state="Maharashtra", latitude=18.5204, longitude=73.8567,
-        )
-        users.append(lab)
-
-    # Government Officials (2)
-    gov_data = [("S. Deshmukh (IAS)", "Pune HQ", "Pune"), ("M. Kadam", "Nashik HQ", "Nashik")]
-    for i, (name, village, district) in enumerate(gov_data):
-        gov = User(
-            id=f"usr-auth-{i+1}", name=name, phone=f"98765{43230+i}",
-            email=f"officer{i+1}@pashuraksha.ai", password_hash="hashed_demo_password",
-            role="authority", village=village, district=district,
-            state="Maharashtra", latitude=18.5204, longitude=73.8567,
-        )
-        users.append(gov)
-
-    # Admin
-    admin = User(
-        id="usr-admin-1", name="System Admin", phone="9876500000",
-        email="admin@pashuraksha.ai", password_hash="hashed_demo_password",
-        role="admin", village="Pune", district="Pune", state="Maharashtra",
-        latitude=18.5204, longitude=73.8567,
-    )
-    users.append(admin)
-
-    db.add_all(users)
-    db.commit()
+        db.add_all(users)
+        db.commit()
+    else:
+        users = db.query(User).all()
 
     # ─── FARMS (30+) ───
     farms = []
@@ -175,27 +225,48 @@ def seed_database(db: Session):
         num_animals = random.randint(5, 15)
         for _ in range(num_animals):
             anim_idx += 1
-            species = random.choices(species_list, weights=species_weights, k=1)[0]
-            breed = random.choice(BREEDS[species])
-            prefix = prefixes[species]
-            risk_score = random.choices([random.uniform(0, 25), random.uniform(26, 50), random.uniform(51, 75), random.uniform(76, 100)], weights=[0.5, 0.25, 0.15, 0.1], k=1)[0]
-            risk_level = "LOW" if risk_score < 30 else "MODERATE" if risk_score < 60 else "HIGH" if risk_score < 80 else "CRITICAL"
+            if anim_idx == 1:
+                # Deterministic SIH Demo Cow: "Gauri" (COW-101) owned by Ramesh Patil in Baramati
+                animal = Animal(
+                    id="anim-001",
+                    animal_id="COW-101",
+                    owner_id=farmer.id,
+                    owner_name=farmer.name,
+                    species="Cattle (Cow)",
+                    breed="Gir",
+                    age=4.5,
+                    gender="female",
+                    weight=420.0,
+                    vaccination_status="Due soon",
+                    previous_diseases="None",
+                    milk_production=14.5,
+                    village="Baramati",
+                    district="Pune",
+                    current_risk_score=12.0,
+                    current_risk_level="LOW",
+                )
+            else:
+                species = random.choices(species_list, weights=species_weights, k=1)[0]
+                breed = random.choice(BREEDS[species])
+                prefix = prefixes[species]
+                risk_score = random.choices([random.uniform(0, 25), random.uniform(26, 50), random.uniform(51, 75), random.uniform(76, 100)], weights=[0.5, 0.25, 0.15, 0.1], k=1)[0]
+                risk_level = "LOW" if risk_score < 30 else "MODERATE" if risk_score < 60 else "HIGH" if risk_score < 80 else "CRITICAL"
 
-            animal = Animal(
-                id=f"anim-{anim_idx:03d}",
-                animal_id=f"{prefix}-{100+anim_idx}",
-                owner_id=farmer.id, owner_name=farmer.name,
-                species=species, breed=breed,
-                age=round(random.uniform(0.5, 12), 1),
-                gender=random.choice(["male", "female", "female", "female"]),
-                weight=round(random.uniform(30, 600), 1) if species != "Poultry" else round(random.uniform(1.5, 4.5), 1),
-                vaccination_status=random.choice(["Up to date", "Up to date", "Due soon", "Overdue"]),
-                previous_diseases=random.choice(["None", "None", "None", "Mild fever (treated)", "Mastitis (treated)", "FMD (recovered)"]),
-                milk_production=round(random.uniform(5, 20), 1) if species in ("Cattle (Cow)", "Buffalo") and random.random() > 0.3 else 0,
-                village=farmer.village, district=farmer.district,
-                current_risk_score=round(risk_score, 1),
-                current_risk_level=risk_level,
-            )
+                animal = Animal(
+                    id=f"anim-{anim_idx:03d}",
+                    animal_id=f"{prefix}-{100+anim_idx}",
+                    owner_id=farmer.id, owner_name=farmer.name,
+                    species=species, breed=breed,
+                    age=round(random.uniform(0.5, 12), 1),
+                    gender=random.choice(["male", "female", "female", "female"]),
+                    weight=round(random.uniform(30, 600), 1) if species != "Poultry" else round(random.uniform(1.5, 4.5), 1),
+                    vaccination_status=random.choice(["Up to date", "Up to date", "Due soon", "Overdue"]),
+                    previous_diseases=random.choice(["None", "None", "None", "Mild fever (treated)", "Mastitis (treated)", "FMD (recovered)"]),
+                    milk_production=round(random.uniform(5, 20), 1) if species in ("Cattle (Cow)", "Buffalo") and random.random() > 0.3 else 0,
+                    village=farmer.village, district=farmer.district,
+                    current_risk_score=round(risk_score, 1),
+                    current_risk_level=risk_level,
+                )
             animals.append(animal)
     db.add_all(animals)
     db.commit()
@@ -206,8 +277,39 @@ def seed_database(db: Session):
         ("Brucellosis S19", 365), ("Anthrax", 365), ("PPR", 365),
         ("Black Quarter", 180), ("Theileriosis", 365),
     ]
-    vaccinations = []
+    vaccinations = [
+        # Explicit baseline vaccinations for demo animal COW-101
+        Vaccination(
+            id="vac-fmd-101",
+            animal_id="COW-101",
+            vaccine_name="FMD (Foot & Mouth Disease)",
+            vaccination_date=date.today() - timedelta(days=185),
+            next_due_date=date.today() - timedelta(days=5),
+            status="due",
+            notes="National Animal Disease Control Programme (NADCP) booster overdue by 5 days.",
+        ),
+        Vaccination(
+            id="vac-hsbq-101",
+            animal_id="COW-101",
+            vaccine_name="HS + BQ Combined",
+            vaccination_date=date.today() - timedelta(days=90),
+            next_due_date=date.today() + timedelta(days=90),
+            status="completed",
+            notes="Administered by Baramati Mobile Veterinary Clinic.",
+        ),
+        Vaccination(
+            id="vac-bruc-101",
+            animal_id="COW-101",
+            vaccine_name="Brucellosis S19",
+            vaccination_date=date.today() - timedelta(days=320),
+            next_due_date=date.today() + timedelta(days=45),
+            status="completed",
+            notes="Calfhood vaccination recorded.",
+        ),
+    ]
     for i, animal in enumerate(animals[:80]):
+        if animal.animal_id == "COW-101":
+            continue
         num_vac = random.randint(1, 3)
         for j in range(num_vac):
             vaccine_name, interval = random.choice(vaccines_list)
@@ -247,7 +349,8 @@ def seed_database(db: Session):
         village_name = report_villages[i % len(report_villages)]
         v_geo = next((v for v in VILLAGES if v["name"] == village_name), VILLAGES[0])
         farmer = next((u for u in users[:15] if u.village == village_name), users[0])
-        animal = next((a for a in animals if a.village == village_name), animals[0])
+        # Never attach baseline background reports to COW-101 so COW-101 is pristine for demo step 1
+        animal = next((a for a in animals if a.village == village_name and a.animal_id != "COW-101"), animals[1])
         days_ago = random.randint(0, 14)
 
         risk_score = random.uniform(30, 95) if combo["severity"] == "severe" else random.uniform(15, 65)
@@ -267,6 +370,7 @@ def seed_database(db: Session):
             difficulty_breathing=combo.get("difficulty_breathing", False),
             salivation=combo.get("salivation", False), lesions=combo.get("lesions", False),
             swelling=combo.get("swelling", False),
+            other_symptoms="[SYNTHETIC DEMO DATA] Synthetic training/eval record",
             severity=combo["severity"],
             duration_days=random.randint(1, 7),
             number_of_animals_affected=num_affected,
@@ -347,7 +451,7 @@ def seed_database(db: Session):
 
     # ─── LAB REFERRALS (8) ───
     lab_referrals = [
-        LabReferral(id="lab-001", case_id="rep-101", report_id="rep-101", animal_id="COW-101",
+        LabReferral(id="lab-001", case_id="rep-103", report_id="rep-103", animal_id="COW-103",
                     sample_type="Nasal Swab", test_requested="RT-PCR for BVD/IBR",
                     priority="high", veterinarian_id="usr-vet-1", veterinarian_name="Dr. Priya Sharma",
                     village="Baramati", district="Pune", status="completed", result="positive",
@@ -391,36 +495,36 @@ def seed_database(db: Session):
 
     # ─── CASE TIMELINE EVENTS ───
     timeline_events = [
-        # Case rep-101 full timeline
-        CaseTimelineEvent(case_id="rep-101", event_type="report_created", title="Health Report Filed",
-                          description="Farmer Ramesh Patil reported fever, cough, reduced appetite for COW-101.",
-                          actor_name="Ramesh Patil", actor_role="farmer",
+        # Case rep-103 full timeline
+        CaseTimelineEvent(case_id="rep-103", event_type="report_created", title="Health Report Filed",
+                          description="Farmer Suresh Jadhav reported fever, cough, reduced appetite for COW-103.",
+                          actor_name="Suresh Jadhav", actor_role="farmer",
                           created_at=datetime.utcnow() - timedelta(days=7)),
-        CaseTimelineEvent(case_id="rep-101", event_type="ai_triage", title="AI Risk Assessment: HIGH (72/100)",
+        CaseTimelineEvent(case_id="rep-103", event_type="ai_triage", title="AI Risk Assessment: HIGH (72/100)",
                           description="Risk engine detected respiratory symptom pattern. Possible BRD.",
                           actor_name="PASHURAKSHA AI", actor_role="system",
                           created_at=datetime.utcnow() - timedelta(days=7, hours=-1)),
-        CaseTimelineEvent(case_id="rep-101", event_type="risk_identified", title="High Risk Alert Generated",
+        CaseTimelineEvent(case_id="rep-103", event_type="risk_identified", title="High Risk Alert Generated",
                           description="Alert dispatched to veterinarian and authority.",
                           actor_name="Alert Engine", actor_role="system",
                           created_at=datetime.utcnow() - timedelta(days=7, hours=-2)),
-        CaseTimelineEvent(case_id="rep-101", event_type="vet_assigned", title="Veterinarian Assigned",
+        CaseTimelineEvent(case_id="rep-103", event_type="vet_assigned", title="Veterinarian Assigned",
                           description="Dr. Priya Sharma assigned to investigate case.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
                           created_at=datetime.utcnow() - timedelta(days=6)),
-        CaseTimelineEvent(case_id="rep-101", event_type="field_visit", title="Field Visit Conducted",
+        CaseTimelineEvent(case_id="rep-103", event_type="field_visit", title="Field Visit Conducted",
                           description="Physical examination confirmed respiratory distress. Temperature: 104.2°F.",
                           actor_name="Ankita Jadhav", actor_role="field_worker",
                           created_at=datetime.utcnow() - timedelta(days=5)),
-        CaseTimelineEvent(case_id="rep-101", event_type="sample_collected", title="Sample Collected & Sent to Lab",
+        CaseTimelineEvent(case_id="rep-103", event_type="sample_collected", title="Sample Collected & Sent to Lab",
                           description="Nasal swab collected for RT-PCR testing. Priority: HIGH.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
                           created_at=datetime.utcnow() - timedelta(days=5, hours=-2)),
-        CaseTimelineEvent(case_id="rep-101", event_type="lab_result", title="Lab Result: POSITIVE (BVD)",
+        CaseTimelineEvent(case_id="rep-103", event_type="lab_result", title="Lab Result: POSITIVE (BVD)",
                           description="BVD virus RNA detected by RT-PCR. Isolation and supportive treatment recommended.",
                           actor_name="Dr. Suhas Kulkarni", actor_role="laboratory",
                           created_at=datetime.utcnow() - timedelta(days=2)),
-        CaseTimelineEvent(case_id="rep-101", event_type="treatment", title="Treatment Initiated",
+        CaseTimelineEvent(case_id="rep-103", event_type="treatment", title="Treatment Initiated",
                           description="Antipyretic + antibiotic therapy started. Animal isolated from herd.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
                           created_at=datetime.utcnow() - timedelta(days=2, hours=-4)),
@@ -486,7 +590,7 @@ def seed_database(db: Session):
                      priority="high", related_id="clust-001", related_type="cluster"),
         Notification(user_id="usr-vet-1", target_role="veterinarian", category="vet_action",
                      title="New Case Assignment", message="High-priority case in Baramati requires your attention.",
-                     priority="high", related_id="rep-101", related_type="report"),
+                     priority="high", related_id="rep-103", related_type="report"),
         Notification(user_id="usr-auth-1", target_role="authority", category="cluster_warning",
                      title="Cluster Alert: Baramati", message="Critical outbreak cluster detected. Review surveillance dashboard.",
                      priority="urgent", related_id="clust-001", related_type="cluster"),

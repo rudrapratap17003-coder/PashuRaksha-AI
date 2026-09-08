@@ -5,7 +5,9 @@ from datetime import datetime
 
 class UserRole(str, Enum):
     FARMER = "farmer"
+    FIELD_WORKER = "field_worker"
     VETERINARIAN = "veterinarian"
+    LABORATORY = "laboratory"
     AUTHORITY = "authority"
     ADMIN = "admin"
 

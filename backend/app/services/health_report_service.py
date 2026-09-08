@@ -262,5 +262,6 @@ class HealthReportService:
             risk_score=rep.risk_score,
             risk_level=rep.risk_level,
             possible_disease_concern=rep.possible_disease_concern,
-            recommendation=rep.recommendation
+            recommendation=rep.recommendation,
+            contributing_factors=factors
         )

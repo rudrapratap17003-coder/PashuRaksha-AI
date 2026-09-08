@@ -33,6 +33,7 @@ import EmergencyPanicModal from '../components/common/EmergencyPanicModal'
 import SurveillanceBackground from '../components/background/SurveillanceBackground'
 import MaharashtraHeader from '../components/common/MaharashtraHeader'
 import AIAssistant from '../components/common/AIAssistant'
+import BackendStatusBanner from '../components/common/BackendStatusBanner'
 import apiClient from '../services/api'
 
 export default function DashboardLayout({ user, onLogout }) {
@@ -113,6 +114,7 @@ export default function DashboardLayout({ user, onLogout }) {
     <div className="min-h-screen bg-white text-slate-800 flex flex-col font-sans relative">
       <SurveillanceBackground />
       <MaharashtraHeader />
+      <BackendStatusBanner />
       <DemoScenarioBar />
       <EmergencyAlarmBanner />
 
@@ -135,8 +137,8 @@ export default function DashboardLayout({ user, onLogout }) {
                 <span className="text-sm font-extrabold text-slate-900 leading-none block">
                   PASHURAKSHA <span className="text-sky-600">AI</span>
                 </span>
-                <span className="text-[10px] font-medium text-slate-500 block">
-                  Government of Maharashtra
+                <span className="text-[10px] font-medium text-slate-500 block truncate max-w-[200px] sm:max-w-none">
+                  Prototype developed for SIH Problem Statement SIH26128
                 </span>
               </div>
             </Link>

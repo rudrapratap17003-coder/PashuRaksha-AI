@@ -21,12 +21,14 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
 import Badge from '../../components/common/Badge'
+import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 
 export default function LabDashboard() {
   const [referrals, setReferrals] = useState([])
   const [stats, setStats] = useState({ pending: 0, received: 0, processing: 0, completed: 0, high_priority: 0 })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedReferral, setSelectedReferral] = useState(null)
@@ -40,76 +42,17 @@ export default function LabDashboard() {
 
   const fetchLabData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const [dashRes, refRes] = await Promise.all([
         apiClient.get('/lab/dashboard'),
         apiClient.get('/lab/referrals')
       ])
-      setStats(dashRes.data)
-      setReferrals(refRes.data)
-    } catch {
-      // Fallback Maharashtra demo data
-      setStats({ pending: 2, received: 2, processing: 2, completed: 2, high_priority: 4 })
-      setReferrals([
-        {
-          id: 'lab-001',
-          case_id: 'rep-101',
-          animal_id: 'COW-101',
-          sample_type: 'Nasal Swab',
-          test_requested: 'RT-PCR for BVD/IBR Respiratory Complex',
-          priority: 'high',
-          veterinarian_name: 'Dr. Priya Sharma',
-          village: 'Baramati',
-          district: 'Pune',
-          status: 'completed',
-          result: 'positive',
-          result_notes: 'BVD virus RNA confirmed via TaqMan RT-PCR (Ct: 22.4). Highly contagious.',
-          collection_date: '2026-08-28T10:00:00'
-        },
-        {
-          id: 'lab-002',
-          case_id: 'rep-102',
-          animal_id: 'BUF-102',
-          sample_type: 'Epithelial Swab',
-          test_requested: 'FMD Virus Serotyping (ELISA + RT-PCR)',
-          priority: 'urgent',
-          veterinarian_name: 'Dr. Priya Sharma',
-          village: 'Baramati',
-          district: 'Pune',
-          status: 'processing',
-          result: 'pending',
-          collection_date: '2026-08-29T14:30:00'
-        },
-        {
-          id: 'lab-003',
-          case_id: 'rep-104',
-          animal_id: 'GOAT-104',
-          sample_type: 'Blood (EDTA)',
-          test_requested: 'Pasteurella multocida Culture & Gram Staining',
-          priority: 'high',
-          veterinarian_name: 'Dr. Arun Joshi',
-          village: 'Shirur',
-          district: 'Pune',
-          status: 'received',
-          result: 'pending',
-          collection_date: '2026-08-29T16:00:00'
-        },
-        {
-          id: 'lab-004',
-          case_id: 'rep-105',
-          animal_id: 'COW-105',
-          sample_type: 'Milk Sample',
-          test_requested: 'California Mastitis Test (CMT) & Antibiogram',
-          priority: 'normal',
-          veterinarian_name: 'Dr. Meena Kulkarni',
-          village: 'Sinnar',
-          district: 'Nashik',
-          status: 'completed',
-          result: 'positive',
-          result_notes: 'Staphylococcus aureus isolated. Ceftriaxone sensitivity confirmed.',
-          collection_date: '2026-08-26T11:00:00'
-        }
-      ])
+      setStats(dashRes.data || { pending: 0, received: 0, processing: 0, completed: 0, high_priority: 0 })
+      setReferrals(Array.isArray(refRes.data) ? refRes.data : [])
+    } catch (err) {
+      console.warn('Failed to load lab data from backend:', err)
+      setError(err?.response?.data?.detail || err?.message || 'Failed to fetch diagnostic referrals.')
     } finally {
       setLoading(false)
     }
@@ -240,101 +183,112 @@ export default function LabDashboard() {
           </div>
         </div>
 
-        {/* Samples Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-              <tr>
-                <th className="py-3 px-4">Sample Ref</th>
-                <th className="py-3 px-4">Animal / Location</th>
-                <th className="py-3 px-4">Sample Type & Test</th>
-                <th className="py-3 px-4">Referring Officer</th>
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4">Status & Result</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {filteredReferrals.map((ref) => (
-                <tr key={ref.id} className="hover:bg-slate-800/40 transition">
-                  <td className="py-3.5 px-4">
-                    <span className="font-mono font-bold text-emerald-400">{ref.id}</span>
-                    <span className="block text-[10px] text-slate-500">Case: {ref.case_id || 'Direct'}</span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="font-bold text-white block">{ref.animal_id}</span>
-                    <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-slate-500" />
-                      <span>{ref.village}, {ref.district}</span>
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="font-bold text-slate-200 block">{ref.sample_type}</span>
-                    <span className="text-[11px] text-teal-400 block">{ref.test_requested}</span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="text-slate-300">{ref.veterinarian_name || 'Taluka Vet'}</span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
-                      ref.priority === 'urgent' 
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' 
-                        : ref.priority === 'high' 
-                        ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
-                        : 'bg-slate-800 text-slate-300 border-slate-700'
-                    }`}>
-                      {ref.priority?.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize ${
-                        ref.status === 'completed' 
-                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'
-                          : ref.status === 'processing' 
-                          ? 'bg-sky-950 text-sky-300 border border-sky-500/30 animate-pulse'
-                          : 'bg-amber-950 text-amber-300 border border-amber-500/30'
-                      }`}>
-                        {ref.status}
-                      </span>
-                      {ref.result !== 'pending' && (
-                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded uppercase ${
-                          ref.result === 'positive' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
-                        }`}>
-                          {ref.result}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => {
-                        setSelectedReferral(ref)
-                        setResultForm({
-                          status: ref.status === 'pending' ? 'processing' : 'completed',
-                          result: ref.result || 'positive',
-                          result_notes: ref.result_notes || ''
-                        })
-                        setResultModalOpen(true)
-                      }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
-                    >
-                      Update Findings
-                    </Button>
-                  </td>
+        {/* Samples Table / State Feedback */}
+        {loading ? (
+          <div className="py-8">
+            <LoadingState message="Connecting to Diagnostic LIMS & fetching active test referrals..." />
+          </div>
+        ) : error ? (
+          <div className="py-8">
+            <ErrorState message={error} onRetry={fetchLabData} />
+          </div>
+        ) : filteredReferrals.length === 0 ? (
+          <div className="py-8">
+            <EmptyState 
+              title="No Diagnostic Referrals Found" 
+              description={searchTerm || statusFilter !== 'all' ? "No referrals match the selected filters or search terms." : "All diagnostic bio-samples have been processed or none are pending."} 
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="py-3 px-4">Sample Ref</th>
+                  <th className="py-3 px-4">Animal / Location</th>
+                  <th className="py-3 px-4">Sample Type & Test</th>
+                  <th className="py-3 px-4">Referring Officer</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Status & Result</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredReferrals.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <Microscope className="w-10 h-10 mx-auto mb-2 opacity-40 text-slate-400" />
-              <p>No diagnostic referrals found matching your query.</p>
-            </div>
-          )}
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {filteredReferrals.map((ref) => (
+                  <tr key={ref.id} className="hover:bg-slate-800/40 transition">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-bold text-emerald-400">{ref.id}</span>
+                      <span className="block text-[10px] text-slate-500">Case: {ref.case_id || 'Direct'}</span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-white block">{ref.animal_id}</span>
+                      <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
+                        <MapPin className="w-3 h-3 text-slate-500" />
+                        <span>{ref.village}, {ref.district}</span>
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-slate-200 block">{ref.sample_type}</span>
+                      <span className="text-[11px] text-teal-400 block">{ref.test_requested}</span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="text-slate-300">{ref.veterinarian_name || 'Taluka Vet'}</span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                        ref.priority === 'urgent' 
+                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' 
+                          : ref.priority === 'high' 
+                          ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                          : 'bg-slate-800 text-slate-300 border-slate-700'
+                      }`}>
+                        {ref.priority?.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize ${
+                          ref.status === 'completed' 
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'
+                            : ref.status === 'processing' 
+                            ? 'bg-sky-950 text-sky-300 border border-sky-500/30 animate-pulse'
+                            : 'bg-amber-950 text-amber-300 border border-amber-500/30'
+                        }`}>
+                          {ref.status}
+                        </span>
+                        {ref.result !== 'pending' && (
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded uppercase ${
+                            ref.result === 'positive' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {ref.result}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => {
+                          setSelectedReferral(ref)
+                          setResultForm({
+                            status: ref.status === 'pending' ? 'processing' : 'completed',
+                            result: ref.result || 'positive',
+                            result_notes: ref.result_notes || ''
+                          })
+                          setResultModalOpen(true)
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                      >
+                        Update Findings
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       {/* Result Entry Modal */}
@@ -359,6 +313,22 @@ export default function LabDashboard() {
             </div>
 
             <form onSubmit={handleUpdateResult} className="space-y-4">
+              {/* 1-Click Demo Fill */}
+              <button
+                type="button"
+                onClick={() => {
+                  setResultForm({
+                    status: 'completed',
+                    result: 'positive',
+                    result_notes: 'POSITIVE - FMD Serotype O. Aphthovirus RNA confirmed via TaqMan RT-PCR (Ct: 21.4). Validated by Dr. Suhas Kulkarni.'
+                  })
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black text-xs flex items-center justify-center space-x-1.5 shadow-md"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>⚡ Pre-Fill: POSITIVE - FMD Serotype O (Demo)</span>
+              </button>
+
               <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-xs space-y-1">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Test Requested:</span>

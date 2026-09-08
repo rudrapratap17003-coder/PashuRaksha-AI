@@ -36,8 +36,8 @@ const SLIDES = [
           </div>
           <div className="p-5 rounded-3xl bg-white border border-sky-100 text-center space-y-2 shadow-sm">
             <span className="text-3xl">🏛️</span>
-            <h4 className="text-sm font-bold text-slate-900">Target Beneficiary State</h4>
-            <p className="text-xs text-sky-600 font-bold">Government of Maharashtra</p>
+            <h4 className="text-sm font-bold text-slate-900">Target State Context</h4>
+            <p className="text-xs text-sky-600 font-bold">Maharashtra Rural Livestock Network</p>
           </div>
           <div className="p-5 rounded-3xl bg-white border border-sky-100 text-center space-y-2 shadow-sm">
             <span className="text-3xl">⚡</span>

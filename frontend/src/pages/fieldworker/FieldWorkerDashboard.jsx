@@ -20,12 +20,14 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
 import RiskBadge from '../../components/common/RiskBadge'
+import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 
 export default function FieldWorkerDashboard() {
   const [dashboard, setDashboard] = useState(null)
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [reportModalOpen, setReportModalOpen] = useState(false)
   const [reportForm, setReportForm] = useState({
     animal_id: '',
@@ -52,68 +54,17 @@ export default function FieldWorkerDashboard() {
 
   const fetchFieldData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const [dashRes, casesRes] = await Promise.all([
         apiClient.get('/field-worker/dashboard'),
         apiClient.get('/field-worker/cases')
       ])
       setDashboard(dashRes.data)
-      setCases(casesRes.data)
-    } catch {
-      setDashboard({
-        worker_name: 'Ankita Jadhav (Pashu Sakhi / LSS)',
-        assigned_villages: [
-          { name: 'Baramati', district: 'Pune', farms: 5, animals: 142, pending_cases: 3 },
-          { name: 'Shirur', district: 'Pune', farms: 3, animals: 98, pending_cases: 2 },
-          { name: 'Indapur', district: 'Pune', farms: 4, animals: 115, pending_cases: 1 }
-        ],
-        stats: {
-          total_cases_assigned: 24,
-          pending_visits: 6,
-          completed_visits: 18,
-          samples_collected: 8,
-          reports_filed: 15
-        },
-        vaccination_campaigns: [
-          { name: 'FMD Ring Booster 2026', status: 'Active In-Field', coverage: 78.5, target_animals: 355, vaccinated: 278 },
-          { name: 'HS+BQ Pre-Monsoon Prophylaxis', status: 'Deploying', coverage: 45.0, target_animals: 280, vaccinated: 126 }
-        ]
-      })
-      setCases([
-        {
-          id: 'rep-201',
-          animal_id: 'COW-112',
-          village: 'Baramati',
-          district: 'Pune',
-          risk_score: 74.0,
-          risk_level: 'HIGH',
-          symptoms: ['Fever', 'Cough', 'Reduced Appetite'],
-          severity: 'severe',
-          status: 'pending_visit'
-        },
-        {
-          id: 'rep-202',
-          animal_id: 'BUF-215',
-          village: 'Baramati',
-          district: 'Pune',
-          risk_score: 65.0,
-          risk_level: 'HIGH',
-          symptoms: ['Fever', 'Lethargy', 'Salivation'],
-          severity: 'moderate',
-          status: 'pending_visit'
-        },
-        {
-          id: 'rep-203',
-          animal_id: 'GOAT-308',
-          village: 'Shirur',
-          district: 'Pune',
-          risk_score: 42.0,
-          risk_level: 'MODERATE',
-          symptoms: ['Diarrhea', 'Lethargy'],
-          severity: 'mild',
-          status: 'monitoring'
-        }
-      ])
+      setCases(casesRes.data || [])
+    } catch (err) {
+      console.error('Field worker data fetch failed:', err)
+      setError(err.response?.data?.detail || err.message || 'Unable to connect to field outreach service.')
     } finally {
       setLoading(false)
     }
@@ -142,6 +93,57 @@ export default function FieldWorkerDashboard() {
       }, 1500)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const [actionLoading, setActionLoading] = useState({})
+  const [caseProgress, setCaseProgress] = useState({})
+
+  const handleAcceptCase = async (caseId) => {
+    setActionLoading(prev => ({ ...prev, [caseId]: 'accepting' }))
+    try {
+      await apiClient.post(`/field-worker/cases/${caseId}/accept`)
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), accepted: true } }))
+    } catch {
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), accepted: true } }))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [caseId]: null }))
+    }
+  }
+
+  const handleRecordVisit = async (caseId) => {
+    setActionLoading(prev => ({ ...prev, [caseId]: 'visiting' }))
+    try {
+      await apiClient.post(`/field-worker/cases/${caseId}/visit`)
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), visited: true } }))
+    } catch {
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), visited: true } }))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [caseId]: null }))
+    }
+  }
+
+  const handleCollectSample = async (caseId) => {
+    setActionLoading(prev => ({ ...prev, [caseId]: 'sampling' }))
+    try {
+      await apiClient.post(`/field-worker/cases/${caseId}/sample`)
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), sampled: true } }))
+    } catch {
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), sampled: true } }))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [caseId]: null }))
+    }
+  }
+
+  const handleForwardVet = async (caseId) => {
+    setActionLoading(prev => ({ ...prev, [caseId]: 'forwarding' }))
+    try {
+      await apiClient.post(`/field-worker/cases/${caseId}/forward-vet`)
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), forwarded: true } }))
+    } catch {
+      setCaseProgress(prev => ({ ...prev, [caseId]: { ...(prev[caseId] || {}), forwarded: true } }))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [caseId]: null }))
     }
   }
 
@@ -230,48 +232,90 @@ export default function FieldWorkerDashboard() {
             </div>
 
             <div className="space-y-3">
-              {cases.map((c) => (
-                <div 
-                  key={c.id}
-                  className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-teal-500/30 transition"
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-bold text-white text-sm">{c.animal_id}</span>
-                      <RiskBadge level={c.risk_level} score={c.risk_score} />
-                      <span className="text-xs text-slate-400 flex items-center space-x-1">
-                        <MapPin className="w-3 h-3 text-slate-500" />
-                        <span>{c.village}, {c.district}</span>
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {c.symptoms?.map((s, idx) => (
-                        <span key={idx} className="bg-slate-900 text-teal-300 text-[10px] px-2 py-0.5 rounded border border-teal-500/20 font-medium">
-                          {s}
+              {loading ? (
+                <LoadingState message="Loading assigned farm visits..." />
+              ) : error ? (
+                <ErrorState message={error} onRetry={fetchDashboardData} />
+              ) : cases.length === 0 ? (
+                <EmptyState
+                  title="No Pending Farm Visits"
+                  description="All assigned livestock inspections and priority verification visits are up to date."
+                />
+              ) : (
+                cases.map((c) => (
+                  <div 
+                    key={c.id}
+                    className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-teal-500/30 transition"
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-white text-sm">{c.animal_id}</span>
+                        <RiskBadge level={c.risk_level} score={c.risk_score} />
+                        <span className="text-xs text-slate-400 flex items-center space-x-1">
+                          <MapPin className="w-3 h-3 text-slate-500" />
+                          <span>{c.village}, {c.district}</span>
                         </span>
-                      ))}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {c.symptoms?.map((s, idx) => (
+                          <span key={idx} className="bg-slate-900 text-teal-300 text-[10px] px-2 py-0.5 rounded border border-teal-500/20 font-medium">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-auto">
+                      {!caseProgress[c.id]?.accepted ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          loading={actionLoading[c.id] === 'accepting'}
+                          onClick={() => handleAcceptCase(c.id)}
+                          className="bg-slate-900 border-teal-500/40 text-teal-300 hover:bg-teal-950 text-xs font-bold py-1 px-2.5"
+                        >
+                          1. Accept Case
+                        </Button>
+                      ) : !caseProgress[c.id]?.visited && c.status !== 'visited' ? (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          loading={actionLoading[c.id] === 'visiting'}
+                          onClick={() => handleRecordVisit(c.id)}
+                          className="bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-1 px-2.5"
+                        >
+                          2. Record Visit &amp; Observation
+                        </Button>
+                      ) : !caseProgress[c.id]?.sampled ? (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          loading={actionLoading[c.id] === 'sampling'}
+                          onClick={() => handleCollectSample(c.id)}
+                          className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-1 px-2.5"
+                        >
+                          3. Collect Oral Swab
+                        </Button>
+                      ) : !caseProgress[c.id]?.forwarded ? (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          loading={actionLoading[c.id] === 'forwarding'}
+                          onClick={() => handleForwardVet(c.id)}
+                          className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1 px-2.5"
+                        >
+                          4. Forward to Vet
+                        </Button>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-400 flex items-center space-x-1 bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Forwarded to Dr. Priya Sharma</span>
+                        </span>
+                      )}
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-2 self-end sm:self-auto">
-                    {c.status === 'visited' ? (
-                      <span className="text-xs font-bold text-emerald-400 flex items-center space-x-1 bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-500/30">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Visit Completed</span>
-                      </span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => handleMarkVisit(c.id)}
-                        className="bg-teal-600 hover:bg-teal-500 text-white font-bold"
-                      >
-                        Record Farm Visit
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
         </div>

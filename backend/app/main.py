@@ -26,6 +26,7 @@ from app.routes import (
     weather_router,
     treatment_router,
     nutrition_router,
+    demo_router,
 )
 
 @asynccontextmanager
@@ -103,6 +104,7 @@ app.include_router(ai_assistant_router, prefix=api_v1)
 app.include_router(weather_router, prefix=api_v1)
 app.include_router(treatment_router, prefix=api_v1)
 app.include_router(nutrition_router, prefix=api_v1)
+app.include_router(demo_router, prefix=api_v1)
 
 @app.get("/", tags=["Core & Health"])
 def read_root():

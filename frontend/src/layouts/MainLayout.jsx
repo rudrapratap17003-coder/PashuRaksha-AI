@@ -7,6 +7,7 @@ import DemoScenarioBar from '../components/common/DemoScenarioBar'
 import EmergencyAlarmBanner from '../components/common/EmergencyAlarmBanner'
 import MaharashtraHeader from '../components/common/MaharashtraHeader'
 import AIAssistant from '../components/common/AIAssistant'
+import BackendStatusBanner from '../components/common/BackendStatusBanner'
 
 export default function MainLayout({ user, onLogout }) {
   const navigate = useNavigate()
@@ -15,6 +16,9 @@ export default function MainLayout({ user, onLogout }) {
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Official Government of Maharashtra Header */}
       <MaharashtraHeader />
+
+      {/* Backend Health Status Banner */}
+      <BackendStatusBanner />
 
       {/* Floating Jury Scenario Bar */}
       <DemoScenarioBar />
@@ -32,7 +36,7 @@ export default function MainLayout({ user, onLogout }) {
                 PASHURAKSHA <span className="text-sky-600">AI</span>
               </span>
               <span className="block text-[10px] font-semibold text-slate-500">
-                Government of Maharashtra • SIH26128
+                Prototype developed for SIH Problem Statement SIH26128
               </span>
             </div>
           </Link>

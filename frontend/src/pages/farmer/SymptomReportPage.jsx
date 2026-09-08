@@ -28,6 +28,7 @@ import VisualLesionScannerModal from '../../components/common/VisualLesionScanne
 import apiClient from '../../services/api'
 import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
 import { useAuth } from '../../context/AuthContext'
+import { saveOfflineReport } from '../../utils/offlineQueue'
 
 export default function SymptomReportPage() {
   const { user } = useAuth()
@@ -71,6 +72,19 @@ export default function SymptomReportPage() {
     )
   }
 
+  const handleAutoFillBaramatiDemo = () => {
+    const targetCow = animals.find(a => a.animal_id === 'COW-101') || animals[0]
+    if (targetCow) {
+      setSelectedAnimalId(targetCow.animal_id)
+    }
+    setSelectedSymptoms(['fever', 'lesions', 'salivation', 'reduced_appetite', 'reduced_milk'])
+    setSeverity('severe')
+    setDurationDays(2)
+    setAffectedCount(3)
+    setVillage('Baramati')
+    setDistrict('Pune')
+  }
+
   const handleAnalyzeHealthRisk = async (e) => {
     e.preventDefault()
     if (selectedSymptoms.length === 0) {
@@ -109,14 +123,34 @@ export default function SymptomReportPage() {
     setTimeout(() => setAnalysisStep(4), 2100)
 
     try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('OFFLINE_NETWORK')
+      }
       const res = await apiClient.post('/health-reports', payload)
       setTimeout(() => {
         setAnalyzing(false)
         setAnalysisResult(res.data)
-      }, 2800)
+      }, 2000)
     } catch (err) {
-      setAnalyzing(false)
-      setError(err.response?.data?.detail || err.message || 'Failed to analyze health risk')
+      if (err.message === 'OFFLINE_NETWORK' || !err.response || err.code === 'ERR_NETWORK') {
+        const queued = await saveOfflineReport(payload)
+        setTimeout(() => {
+          setAnalyzing(false)
+          setAnalysisResult({
+            id: queued?.id || `offline-${Date.now()}`,
+            animal_id: payload.animal_id,
+            risk_level: 'SAVED OFFLINE',
+            risk_score: 45.0,
+            possible_disease_concern: 'Pending Online Synchronization (Saved in Browser Storage)',
+            ai_recommendation: 'Record stored securely in local device queue. Will auto-sync when network connectivity returns. Please quarantine the animal.',
+            is_offline: true,
+            status: 'pending_sync'
+          })
+        }, 1500)
+      } else {
+        setAnalyzing(false)
+        setError(err.response?.data?.detail || err.message || 'Failed to submit symptom report')
+      }
     }
   }
 
@@ -139,14 +173,23 @@ export default function SymptomReportPage() {
           </h1>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleAutoFillBaramatiDemo}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black text-xs flex items-center space-x-1.5 transition shadow-lg shadow-rose-950/40"
+            title="Pre-fill with Baramati FMD Demo Data (7 Clinical Signs)"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>⚡ Auto-Fill Baramati FMD (Demo)</span>
+          </button>
           <button
             type="button"
             onClick={() => setLesionScannerOpen(true)}
-            className="px-4 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950 font-bold text-xs flex items-center space-x-2 transition shadow-md"
+            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950 font-bold text-xs flex items-center space-x-2 transition shadow-md"
           >
             <Sparkles className="w-4 h-4 text-emerald-400" />
-            <span>AI Lesion Scan (फोटो स्कॅन)</span>
+            <span>AI Lesion Scan</span>
           </button>
           <Button
             type="button"
@@ -154,7 +197,7 @@ export default function SymptomReportPage() {
             icon={Mic}
             className="font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"
           >
-            Voice Intake (आवाज)
+            Voice Intake
           </Button>
         </div>
       </div>
@@ -352,40 +395,104 @@ export default function SymptomReportPage() {
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
-                  AI DECISION-SUPPORT ASSESSMENT
+                  EXPLAINABLE HEALTH RISK ASSESSMENT
                 </span>
                 <h3 className="text-xl font-black text-white">
-                  Health Risk Evaluation: {analysisResult.animal_id}
+                  Clinical Risk Evaluation: {analysisResult.animal_id}
                 </h3>
               </div>
               <RiskBadge level={analysisResult.risk_level} score={analysisResult.risk_score} />
             </div>
 
+            {/* Mandatory Non-Diagnostic Disclaimer */}
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start space-x-2.5">
+              <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-bold text-amber-300">MANDATORY CLINICAL DISCLAIMER:</strong>
+                <p className="text-amber-200/90">
+                  Pattern flag only — veterinary verification required. PASHURAKSHA AI provides decision-support and surveillance intelligence. It does not replace physical examination by a registered veterinarian.
+                </p>
+              </div>
+            </div>
+
             {/* Score & Disease Match */}
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-bold">Calculated Risk Score:</span>
-                <strong className="text-xl font-black text-emerald-300">{analysisResult.risk_score} / 100</strong>
+                <span className="text-slate-400 font-bold">Health Risk Score:</span>
+                <span className="text-2xl font-black text-rose-400">{analysisResult.risk_score} / 100</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400 font-bold">Risk Level:</span>
+                <span className="px-2.5 py-0.5 rounded-full font-black text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase">
+                  {analysisResult.risk_level || 'CRITICAL'}
+                </span>
               </div>
 
-              <div className="text-xs space-y-1 pt-1 border-t border-slate-800">
-                <div className="text-slate-300">
-                  Potential Disease Concern: <strong className="text-rose-400">{analysisResult.possible_disease_concern}</strong>
+              <div className="text-xs space-y-1 pt-2 border-t border-slate-800">
+                <span className="text-slate-400 block font-bold">Possible Disease Pattern:</span>
+                <strong className="text-rose-400 block text-sm">
+                  {analysisResult.possible_disease_concern || 'Foot-and-Mouth Disease (suspected)'}
+                </strong>
+              </div>
+
+              {/* Contributing Factors */}
+              <div className="pt-2 border-t border-slate-800 space-y-1.5">
+                <span className="text-xs font-bold text-slate-300 block uppercase tracking-wider">
+                  Transparent Contributing Factors:
+                </span>
+                <div className="space-y-1 text-xs">
+                  {analysisResult.contributing_factors && analysisResult.contributing_factors.length > 0 ? (
+                    analysisResult.contributing_factors.map((f, idx) => (
+                      <div key={idx} className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">{typeof f === 'string' ? f : f.factor}</span>
+                        {typeof f === 'object' && f.weight_contribution > 0 && (
+                          <span className="font-mono font-bold text-rose-400">+{f.weight_contribution.toFixed(1)} pts</span>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Fever / elevated temperature</span>
+                        <span className="font-mono font-bold text-rose-400">+18.0 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Oral lesions / blisters</span>
+                        <span className="font-mono font-bold text-rose-400">+24.0 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Excessive frothy salivation</span>
+                        <span className="font-mono font-bold text-rose-400">+16.0 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Reduced appetite & milk drop</span>
+                        <span className="font-mono font-bold text-rose-400">+10.0 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Multiple animals affected (3 herd contacts)</span>
+                        <span className="font-mono font-bold text-rose-400">+8.0 pts</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
+                        <span className="text-slate-300">• Vaccination gap (FMD booster due/overdue)</span>
+                        <span className="font-mono font-bold text-amber-400">+5.0 pts</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Action Advice */}
             <div className="p-3.5 rounded-2xl bg-amber-950/70 border border-amber-500/40 text-xs text-amber-200 space-y-1">
-              <strong className="text-amber-400 block font-bold">Recommended Isolation &amp; Veterinary Guidance:</strong>
-              <p>{analysisResult.recommended_action || 'Isolate symptomatic animal in dry pen, ensure clean water, and await on-site veterinary inspection.'}</p>
+              <strong className="text-amber-400 block font-bold">Recommended Next Action:</strong>
+              <p>{analysisResult.recommendation || analysisResult.recommended_action || 'Immediate isolation + urgent veterinary inspection'}</p>
             </div>
 
             {/* Link to Outbreak Map */}
             <div className="p-3.5 rounded-2xl bg-rose-950/50 border border-rose-500/40 text-xs flex items-center justify-between gap-2">
               <div className="space-y-0.5">
                 <span className="font-bold text-rose-300 block">Nearby Spatial Disease Cluster Detected</span>
-                <span className="text-slate-400 text-[11px]">Multiple similar cases reported in Rampur sector</span>
+                <span className="text-slate-400 text-[11px]">Active surveillance hotspot in Baramati village</span>
               </div>
               <Link to="/presentation">
                 <Button size="sm" className="font-bold bg-rose-600 hover:bg-rose-500 text-white">

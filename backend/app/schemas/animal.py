@@ -17,6 +17,7 @@ class AnimalBase(BaseModel):
 
 class AnimalCreate(AnimalBase):
     owner_id: Optional[str] = Field(None, example="usr-101")
+    owner_name: Optional[str] = Field(None, example="Ramesh Patil")
 
 class AnimalUpdate(BaseModel):
     species: Optional[str] = None

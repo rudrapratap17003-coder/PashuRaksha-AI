@@ -125,9 +125,9 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              <strong>PASHURAKSHA AI</strong> — Built for <strong>Government of Maharashtra</strong>. 
-              Early detection of animal diseases using AI, camera scanning, voice reporting in Marathi, 
-              and emergency ambulance dispatch.
+              <strong>PASHURAKSHA AI</strong> — <strong>Prototype developed for SIH Problem Statement SIH26128</strong>. 
+              Early detection of animal diseases using explainable risk scoring, visual screening overlay, voice intake in Marathi, 
+              and coordinated veterinary triage across Maharashtra talukas.
             </p>
 
             {/* CTAs — Large, Easy to Tap */}

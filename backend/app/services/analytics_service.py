@@ -14,26 +14,36 @@ from datetime import datetime, timedelta
 
 class AnalyticsService:
     @staticmethod
-    def get_overview(db: Session):
+    def get_overview(db: Session, current_user=None):
         total_animals = db.query(Animal).count()
         total_reports = db.query(HealthReport).count()
         active_clusters = db.query(OutbreakCluster).filter(OutbreakCluster.status == "active").count()
         total_vaccinations = db.query(Vaccination).count()
         completed_vaccinations = db.query(Vaccination).filter(Vaccination.status == "completed").count()
         high_risk_reports = db.query(HealthReport).filter(HealthReport.risk_level.in_(["HIGH", "CRITICAL"])).count()
+        avg_risk_score = round(float(db.query(func.avg(HealthReport.risk_score)).scalar() or 42.5), 1)
 
-        # Use DB data or realistic Maharashtra demo data
+        # Calculate actual farm count or fallback to unique owners
+        from app.models.farm import Farm
+        farm_count = db.query(Farm).count()
+        if farm_count == 0:
+            farm_count = db.query(Animal.owner_id).distinct().count()
+
+        # Actual database metrics without artificial inflation
+        coverage = round((completed_vaccinations / max(total_vaccinations, 1)) * 100, 1) if total_vaccinations > 0 else 0.0
+        resolved = max(0, total_reports - high_risk_reports)
+
         return {
-            "total_animals": max(total_animals, 1247),
-            "total_reports": max(total_reports, 438),
-            "total_farms": 34,
-            "active_clusters": max(active_clusters, 2),
-            "avg_risk_score": 42.5,
-            "mortality_count": 12,
-            "vaccination_coverage": round((completed_vaccinations / max(total_vaccinations, 1)) * 100, 1) if total_vaccinations > 0 else 78.4,
-            "cases_resolved": max(total_reports - high_risk_reports, 380),
-            "total_vaccinations": max(total_vaccinations, 892),
-            "high_risk_cases": max(high_risk_reports, 18),
+            "total_animals": total_animals,
+            "total_reports": total_reports,
+            "total_farms": max(farm_count, 1),
+            "active_clusters": active_clusters,
+            "avg_risk_score": avg_risk_score,
+            "mortality_count": db.query(HealthReport).filter(HealthReport.severity == "severe").count(),
+            "vaccination_coverage": coverage,
+            "cases_resolved": resolved,
+            "total_vaccinations": total_vaccinations,
+            "high_risk_cases": high_risk_reports,
             "pending_lab_results": db.query(LabReferral).filter(LabReferral.status.in_(["pending", "processing"])).count(),
         }
 

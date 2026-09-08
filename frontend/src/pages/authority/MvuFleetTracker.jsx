@@ -84,13 +84,13 @@ export default function MvuFleetTracker() {
         <div>
           <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Radio className="w-4 h-4 text-sky-400 animate-pulse" />
-            <span>1962 Pashu Sanjeevani • फिरता पशुवैद्यकीय दवाखाना GPS Fleet</span>
+            <span>1962 Pashu Sanjeevani • Simulated Cold-Chain Telemetry &amp; GPS Dispatch (Prototype Simulation)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Mobile Veterinary Unit (MVU) Live Dispatcher
+            Mobile Veterinary Unit (MVU) Dispatcher
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-            Real-time GPS tracking, telemetry, cold-box monitoring, and emergency SOS routing for Government of Maharashtra mobile veterinary ambulances.
+            Simulated GPS tracking, cold-box vaccine temperature telemetry, and emergency SOS routing prototype for mobile veterinary ambulances.
           </p>
         </div>
       </div>
@@ -157,11 +157,11 @@ export default function MvuFleetTracker() {
                 </span>
               </div>
 
-              {/* IoT Telemetry Strip */}
+              {/* Simulated Cold-Chain Telemetry Strip */}
               <div className="grid grid-cols-3 gap-2.5 text-center bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs">
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold block flex items-center justify-center gap-1">
-                    <Thermometer className="w-3 h-3 text-sky-400" /> Cold-Box
+                    <Thermometer className="w-3 h-3 text-sky-400" /> Cold-Box (Simulated)
                   </span>
                   <strong className="text-lg font-black text-sky-300">{selectedUnit.coldBoxTemp}°C</strong>
                   <span className="text-[9px] text-emerald-400 block">Safe Vax Window</span>

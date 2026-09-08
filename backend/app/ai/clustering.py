@@ -4,14 +4,14 @@ from datetime import datetime, timedelta
 
 class OutbreakClusterEngine:
     """
-    PASHURAKSHA AI — Spatial-Temporal Outbreak & Cluster Detection Engine.
-    Groups individual rural health reports using Great-Circle Haversine distance
-    and symptom vector similarity to detect emerging livestock disease hotspots.
+    PASHURAKSHA AI — Spatial-Temporal Outbreak Detection Engine.
+    Deterministic clustering based on Great-Circle Haversine spatial proximity
+    and a strict 14-day temporal rolling window. (Rule/Geometry based, not an ungrounded black-box ML model).
     """
 
     EARTH_RADIUS_KM = 6371.0
     DEFAULT_EPS_KM = 10.0  # Spatial proximity threshold: 10 km
-    DEFAULT_TIME_WINDOW_DAYS = 14  # Temporal window: 14 days
+    DEFAULT_TIME_WINDOW_DAYS = 14  # Strict temporal window: 14 days
 
     @classmethod
     def haversine_distance(cls, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -32,19 +32,57 @@ class OutbreakClusterEngine:
         cls,
         reports: List[Dict[str, Any]],
         eps_km: float = DEFAULT_EPS_KM,
+        time_window_days: int = DEFAULT_TIME_WINDOW_DAYS,
         min_cases: int = 2,
     ) -> List[Dict[str, Any]]:
         """
         Executes spatial-temporal density grouping across geo-tagged health reports.
+        Strictly enforces:
+        1. Temporal window: Discards reports older than time_window_days (default 14 days).
+        2. Coordinate validation: Discards reports with missing, null, or out-of-range lat/lng.
         """
         if not reports or len(reports) < min_cases:
             return []
 
-        # Filter valid geo-tagged reports
-        valid_reports = [
-            r for r in reports
-            if r.get("latitude") is not None and r.get("longitude") is not None
-        ]
+        now = datetime.utcnow()
+        cutoff_date = now - timedelta(days=time_window_days)
+
+        # 1. Discard reports older than 14 days & discard reports with invalid coordinates
+        valid_reports = []
+        for r in reports:
+            lat = r.get("latitude")
+            lng = r.get("longitude")
+            if lat is None or lng is None:
+                continue
+            try:
+                lat = float(lat)
+                lng = float(lng)
+                if not (-90.0 <= lat <= 90.0 and -180.0 <= lng <= 180.0):
+                    continue
+            except (ValueError, TypeError):
+                continue
+
+            reported_at = r.get("reported_at")
+            if reported_at:
+                if isinstance(reported_at, str):
+                    try:
+                        rep_dt = datetime.fromisoformat(reported_at.replace("Z", ""))
+                    except Exception:
+                        rep_dt = now
+                elif isinstance(reported_at, datetime):
+                    rep_dt = reported_at
+                else:
+                    rep_dt = now
+
+                # Discard if older than temporal window
+                if rep_dt < cutoff_date:
+                    continue
+
+            # Store sanitized coordinates
+            r_copy = dict(r)
+            r_copy["latitude"] = lat
+            r_copy["longitude"] = lng
+            valid_reports.append(r_copy)
 
         if len(valid_reports) < min_cases:
             return []
@@ -174,6 +212,10 @@ class OutbreakClusterEngine:
             "disease_concern": primary_concern,
             "latitude": round(avg_lat, 4),
             "longitude": round(avg_lon, 4),
+            "centroid": {
+                "latitude": round(avg_lat, 4),
+                "longitude": round(avg_lon, 4),
+            },
             "radius_km": radius_km,
             "case_count": case_count,
             "affected_animals_count": total_affected_animals,

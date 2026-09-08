@@ -58,7 +58,7 @@ export default function SitrepGeneratorModal({ isOpen, onClose }) {
             {/* Gov Header */}
             <div className="text-center border-b-2 border-emerald-900 pb-4 space-y-1">
               <div className="text-xs font-black uppercase tracking-widest text-emerald-800">
-                GOVERNMENT OF MAHARASHTRA • DEPARTMENT OF ANIMAL HUSBANDRY
+                Prototype developed for SIH Problem Statement SIH26128 • SYNTHETIC DEMO DATA
               </div>
               <h1 className="text-xl font-black text-slate-900">
                 STATE LIVESTOCK HEALTH SURVEILLANCE & OUTBREAK SITUATION REPORT (SITREP #04)

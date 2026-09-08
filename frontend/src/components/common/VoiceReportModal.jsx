@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import { Mic, MicOff, X, Sparkles, CheckCircle2, Volume2, ArrowRight, Activity, Radio } from 'lucide-react'
+import { Mic, MicOff, X, Sparkles, CheckCircle2, Volume2, ArrowRight, Activity, Radio, AlertCircle } from 'lucide-react'
 import Card from './Card'
 import Button from './Button'
 import Badge from './Badge'
 import apiClient from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
+import { saveOfflineReport } from '../../utils/offlineQueue'
 
-export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
+export default function VoiceReportModal({ isOpen, onClose, onSuccess, defaultAnimalId = 'COW-101' }) {
   if (!isOpen) return null
 
+  const { user } = useAuth()
   const [language, setLanguage] = useState('mr') // 'mr' | 'hi' | 'en'
   const [recording, setRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [extractedSymptoms, setExtractedSymptoms] = useState([])
   const [step, setStep] = useState('idle') // 'idle' | 'listening' | 'analyzed' | 'submitted'
   const [submitting, setSubmitting] = useState(false)
+  const [isDemoFallback, setIsDemoFallback] = useState(false)
+  const [recognitionSource, setRecognitionSource] = useState(null) // 'browser' | 'fallback'
+  const [animalId, setAnimalId] = useState(defaultAnimalId)
 
   const sampleTranscripts = {
     mr: {
@@ -35,6 +41,8 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
     setStep('listening')
     setTranscript('')
     setExtractedSymptoms([])
+    setIsDemoFallback(false)
+    setRecognitionSource('browser')
 
     // Check if Web Speech API is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -48,6 +56,7 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
           setExtractedSymptoms(sampleTranscripts[language].symptoms)
           setRecording(false)
           setStep('analyzed')
+          setRecognitionSource('browser')
         }
         recognition.onerror = () => {
           fallbackSimulatedSpeech()
@@ -63,37 +72,48 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
   }
 
   const fallbackSimulatedSpeech = () => {
+    setIsDemoFallback(true)
+    setRecognitionSource('fallback')
     setTimeout(() => {
       setTranscript(sampleTranscripts[language].text)
       setRecording(false)
       setStep('analyzed')
       setExtractedSymptoms(sampleTranscripts[language].symptoms)
-    }, 2400)
+    }, 1800)
   }
 
   const handleLodgeVoiceReport = async () => {
     setSubmitting(true)
+    const symText = (extractedSymptoms || []).join(' ').toLowerCase()
+    const payload = {
+      animal_id: animalId,
+      species: 'Cattle (Cow)',
+      reported_by: user?.id || 'usr-farmer-1',
+      reporter_name: user?.name || 'Farmer',
+      village: user?.village || 'Baramati',
+      district: user?.district || 'Pune',
+      fever: symText.includes('fever') || symText.includes('ताप') || symText.includes('बुखार'),
+      lesions: symText.includes('lesion') || symText.includes('blister') || symText.includes('फोड') || symText.includes('छाले'),
+      salivation: symText.includes('saliv') || symText.includes('लाळ') || symText.includes('लार'),
+      reduced_appetite: symText.includes('appetite') || symText.includes('चारा') || symText.includes('भूख'),
+      severity: 'severe',
+      duration_days: 2,
+      number_of_animals_affected: 2
+    }
+
     try {
-      await apiClient.post('/health-reports', {
-        animal_id: 'COW-101',
-        species: 'Cattle (Cow)',
-        reporter_name: 'Ramesh Patil',
-        village: 'Baramati',
-        district: 'Pune',
-        fever: true,
-        lesions: true,
-        salivation: true,
-        reduced_appetite: true,
-        severity: 'severe',
-        duration_days: 2,
-        number_of_animals_affected: 2
-      })
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('OFFLINE_NETWORK')
+      }
+      await apiClient.post('/health-reports', payload)
       setStep('submitted')
       setTimeout(() => {
         if (onSuccess) onSuccess()
         onClose()
       }, 1500)
-    } catch {
+    } catch (err) {
+      // Offline fallback: save to IndexedDB queue
+      await saveOfflineReport(payload)
       setStep('submitted')
       setTimeout(() => {
         if (onSuccess) onSuccess()
@@ -127,7 +147,7 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <button onClick={onClose} aria-label="Close voice intake modal" className="p-1.5 text-slate-400 hover:text-white rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-500">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -177,7 +197,7 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
             </div>
             <div>
               <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
-                Listening to dialect audio...
+                {recognitionSource === 'browser' ? 'Listening to microphone (Speech recognition: Browser)...' : 'Processing dialect speech sample (Demo fallback)...'}
               </span>
               <p className="text-xs text-slate-400 mt-1 italic">
                 "{sampleTranscripts[language].text}"
@@ -188,28 +208,72 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
 
         {step === 'analyzed' && (
           <div className="space-y-4 animate-in fade-in">
-            <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Recognized Voice Transcript:
-              </span>
-              <p className="text-xs text-slate-200 leading-relaxed italic">
-                "{transcript}"
-              </p>
+            {recognitionSource === 'browser' ? (
+              <div className="p-2.5 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  Speech recognition: Browser
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono">Live Microphone Input</span>
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-amber-950/70 border border-amber-500/40 text-amber-300 text-xs flex items-center justify-between">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  Demo fallback
+                </span>
+                <span className="text-[10px] text-amber-400 font-mono">Simulated Speech Sample</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+              <span className="text-slate-400">Animal Tag / कानाचा टॅग:</span>
+              <input
+                type="text"
+                value={animalId}
+                onChange={(e) => setAnimalId(e.target.value)}
+                className="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-emerald-400 font-bold text-xs w-28 text-center"
+              />
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Recognized Voice Transcript (Edit if needed):
+                </span>
+                <span className="text-[10px] text-slate-400">Review before submit</span>
+              </div>
+              <textarea
+                rows={2}
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
+              />
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center space-x-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Extracted Clinical Signs:</span>
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+                <span className="flex items-center space-x-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Extracted Clinical Signs:</span>
+                </span>
+                <span className="text-[10px] text-slate-400">Click × to remove</span>
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {extractedSymptoms.map((sym, idx) => (
                   <span
                     key={idx}
-                    className="bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 text-xs px-3 py-1 rounded-xl font-bold flex items-center space-x-1"
+                    className="bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 text-xs px-2.5 py-1 rounded-xl font-bold flex items-center space-x-1.5"
                   >
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                     <span>{sym}</span>
+                    <button
+                      type="button"
+                      onClick={() => setExtractedSymptoms(prev => prev.filter((_, i) => i !== idx))}
+                      className="text-emerald-400 hover:text-white p-0.5 rounded"
+                      title="Remove symptom"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </span>
                 ))}
               </div>
@@ -222,7 +286,7 @@ export default function VoiceReportModal({ isOpen, onClose, onSuccess }) {
               icon={ArrowRight}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
             >
-              Submit Clinical Report (CRITICAL 88/100)
+              Submit Voice Intake for Assessment
             </Button>
           </div>
         )}

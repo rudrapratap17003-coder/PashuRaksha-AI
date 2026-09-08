@@ -63,10 +63,10 @@ class AIAssistantService:
         elif any(kw in q for kw in ["vaccination", "vaccine", "coverage", "immunization"]):
             vac_count = db.query(Vaccination).count()
             completed = db.query(Vaccination).filter(Vaccination.status == "completed").count()
-            coverage = round((completed / max(vac_count, 1)) * 100, 1) if vac_count > 0 else 78.4
+            coverage = round((completed / max(vac_count, 1)) * 100, 1) if vac_count > 0 else 0.0
             answer = (f"Current vaccination status:\n"
                       f"• Overall coverage: {coverage}%\n"
-                      f"• Total vaccinations recorded: {max(vac_count, 892)}\n"
+                      f"• Total vaccinations recorded: {vac_count}\n"
                       f"• Key vaccines: FMD (annual), HS+BQ (pre-monsoon), Brucellosis (one-time)\n\n"
                       f"Villages below 80% coverage that need immediate attention:\n"
                       f"• Baramati: 72.5% (below target)\n"
@@ -84,7 +84,7 @@ class AIAssistantService:
                 ])
                 answer = f"Active outbreak clusters detected:\n{cluster_info}\n\nRecommended actions: Establish containment zones, conduct ring vaccination, restrict animal movement in affected areas, and deploy rapid response teams."
             else:
-                answer = "Active cluster detected in Baramati (Pune): 14 cases affecting 23 animals across 3 farms. Cluster score: 82/100 (CRITICAL). A 5km containment zone with ring vaccination is recommended."
+                answer = "No active critical clusters detected at this time. Standard routine monitoring active."
             sources = ["Cluster Detection Engine", "Spatial Analysis"]
 
         # Disease information
@@ -114,11 +114,12 @@ class AIAssistantService:
             animals = db.query(Animal).count()
             reports = db.query(HealthReport).count()
             alerts_count = db.query(Alert).filter(Alert.is_read == False).count()
+            active_c = db.query(OutbreakCluster).filter(OutbreakCluster.status == "active").count()
             answer = (f"Platform Overview:\n"
-                      f"• Animals Monitored: {max(animals, 1247)}\n"
-                      f"• Health Reports Filed: {max(reports, 438)}\n"
-                      f"• Unread Alerts: {max(alerts_count, 8)}\n"
-                      f"• Active Clusters: 2\n"
+                      f"• Animals Monitored: {animals}\n"
+                      f"• Health Reports Filed: {reports}\n"
+                      f"• Unread Alerts: {alerts_count}\n"
+                      f"• Active Clusters: {active_c}\n"
                       f"• Villages Covered: 15\n"
                       f"• Districts: Pune, Nashik, Ahmednagar, Satara, Kolhapur")
             sources = ["System Analytics"]

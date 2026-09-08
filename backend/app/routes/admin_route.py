@@ -4,6 +4,7 @@ Administration routes for system management.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.dependencies import require_admin
 from app.models.user import User
 from app.models.animal import Animal
 from app.models.health_report import HealthReport
@@ -16,20 +17,16 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 
 
 @router.get("/users")
-def get_users(role: str = Query(None), db: Session = Depends(get_db)):
-    """List all users, optionally filtered by role."""
+def get_users(
+    role: str = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """List all users, optionally filtered by role. Admin only."""
     query = db.query(User)
     if role:
         query = query.filter(User.role == role)
     users = query.all()
-    if not users:
-        return [
-            {"id": "usr-farmer-1", "name": "Ramesh Kumar", "role": "farmer", "village": "Baramati", "district": "Pune", "phone": "9876543210", "status": "active"},
-            {"id": "usr-vet-1", "name": "Dr. Priya Sharma", "role": "veterinarian", "village": "Shirur", "district": "Pune", "phone": "9876543220", "status": "active"},
-            {"id": "usr-auth-1", "name": "S. Deshmukh", "role": "authority", "village": "Pune HQ", "district": "Pune", "phone": "9876543230", "status": "active"},
-            {"id": "usr-lab-1", "name": "Dr. Kulkarni", "role": "laboratory", "village": "Pune Lab", "district": "Pune", "phone": "9876543240", "status": "active"},
-            {"id": "usr-fw-1", "name": "Ankita Jadhav", "role": "field_worker", "village": "Baramati", "district": "Pune", "phone": "9876543250", "status": "active"},
-        ]
     return [
         {
             "id": u.id, "name": u.name, "role": u.role,
@@ -41,7 +38,13 @@ def get_users(role: str = Query(None), db: Session = Depends(get_db)):
 
 
 @router.put("/users/{user_id}")
-def update_user(user_id: str, data: dict, db: Session = Depends(get_db)):
+def update_user(
+    user_id: str,
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Modify user role or profile. Admin only."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -53,29 +56,47 @@ def update_user(user_id: str, data: dict, db: Session = Depends(get_db)):
 
 
 @router.get("/stats")
-def get_stats(db: Session = Depends(get_db)):
-    """System-wide statistics for admin dashboard."""
+def get_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """System-wide statistics derived directly from live database. Admin only."""
+    user_count = db.query(User).count()
+    farmer_count = db.query(User).filter(User.role == "farmer").count()
+    vet_count = db.query(User).filter(User.role == "veterinarian").count()
+    animal_count = db.query(Animal).count()
+    report_count = db.query(HealthReport).count()
+    active_clusters = db.query(OutbreakCluster).filter(OutbreakCluster.status == "active").count()
+    vaccination_count = db.query(Vaccination).count()
+    alert_count = db.query(Alert).count()
+    lab_referral_count = db.query(LabReferral).count()
+
+    # Determine unique villages & districts from actual data
+    villages_count = db.query(User.village).distinct().count()
+    districts_count = db.query(User.district).distinct().count()
+
     return {
-        "user_count": max(db.query(User).count(), 28),
-        "farmer_count": max(db.query(User).filter(User.role == "farmer").count(), 15),
-        "vet_count": max(db.query(User).filter(User.role == "veterinarian").count(), 4),
-        "animal_count": max(db.query(Animal).count(), 1247),
-        "report_count": max(db.query(HealthReport).count(), 438),
-        "active_clusters": max(db.query(OutbreakCluster).filter(OutbreakCluster.status == "active").count(), 2),
-        "vaccination_count": max(db.query(Vaccination).count(), 892),
-        "alert_count": max(db.query(Alert).count(), 45),
-        "lab_referral_count": db.query(LabReferral).count(),
-        "villages_covered": 15,
-        "districts_covered": 5,
+        "user_count": user_count,
+        "farmer_count": farmer_count,
+        "vet_count": vet_count,
+        "animal_count": animal_count,
+        "report_count": report_count,
+        "active_clusters": active_clusters,
+        "vaccination_count": vaccination_count,
+        "alert_count": alert_count,
+        "lab_referral_count": lab_referral_count,
+        "villages_covered": max(villages_count, 1),
+        "districts_covered": max(districts_count, 1),
+        "data_mode": "SYNTHETIC DEMO DATA" if not current_user.email.endswith(".gov.in") else "PRODUCTION"
     }
 
 
 @router.get("/risk-rules")
-def get_risk_rules():
-    """Current risk engine configuration and weights."""
+def get_risk_rules(current_user: User = Depends(require_admin)):
+    """Current risk engine configuration and weights. Admin only."""
     return {
         "engine_version": "1.0.0",
-        "disclaimer": "Prototype risk scoring - not a clinical diagnostic tool",
+        "disclaimer": "Explainable risk scoring - not a clinical diagnostic tool",
         "symptom_weights": {
             "difficulty_breathing": 26,
             "lesions": 24,
@@ -108,22 +129,17 @@ def get_risk_rules():
 
 
 @router.get("/villages")
-def get_villages():
-    """List managed villages with metadata."""
+def get_villages(current_user: User = Depends(require_admin)):
+    """List managed villages with metadata. Admin only."""
+    from app.services.seed_service import VILLAGES
     return [
-        {"name": "Baramati", "taluka": "Baramati", "district": "Pune", "farms": 5, "animals": 142, "lat": 18.1515, "lng": 74.5772},
-        {"name": "Shirur", "taluka": "Shirur", "district": "Pune", "farms": 3, "animals": 98, "lat": 18.8264, "lng": 74.3789},
-        {"name": "Indapur", "taluka": "Indapur", "district": "Pune", "farms": 4, "animals": 115, "lat": 18.1101, "lng": 75.0273},
-        {"name": "Junnar", "taluka": "Junnar", "district": "Pune", "farms": 2, "animals": 76, "lat": 19.2094, "lng": 73.8765},
-        {"name": "Maval", "taluka": "Maval", "district": "Pune", "farms": 2, "animals": 65, "lat": 18.7565, "lng": 73.5135},
-        {"name": "Sinnar", "taluka": "Sinnar", "district": "Nashik", "farms": 3, "animals": 108, "lat": 19.8435, "lng": 73.9969},
-        {"name": "Igatpuri", "taluka": "Igatpuri", "district": "Nashik", "farms": 2, "animals": 82, "lat": 19.6948, "lng": 73.5628},
-        {"name": "Dindori", "taluka": "Dindori", "district": "Nashik", "farms": 2, "animals": 68, "lat": 20.2107, "lng": 73.8402},
-        {"name": "Shrigonda", "taluka": "Shrigonda", "district": "Ahmednagar", "farms": 3, "animals": 95, "lat": 18.6155, "lng": 74.6978},
-        {"name": "Parner", "taluka": "Parner", "district": "Ahmednagar", "farms": 2, "animals": 72, "lat": 19.0025, "lng": 74.4409},
-        {"name": "Karad", "taluka": "Karad", "district": "Satara", "farms": 2, "animals": 88, "lat": 17.2862, "lng": 74.1838},
-        {"name": "Wai", "taluka": "Wai", "district": "Satara", "farms": 1, "animals": 55, "lat": 17.9535, "lng": 73.8912},
-        {"name": "Karvir", "taluka": "Karvir", "district": "Kolhapur", "farms": 2, "animals": 92, "lat": 16.6958, "lng": 74.2245},
-        {"name": "Hatkanangale", "taluka": "Hatkanangale", "district": "Kolhapur", "farms": 1, "animals": 58, "lat": 16.7600, "lng": 74.4308},
-        {"name": "Barshi", "taluka": "Barshi", "district": "Solapur", "farms": 1, "animals": 45, "lat": 18.2336, "lng": 75.6924},
+        {
+            "name": v["name"],
+            "taluka": v["taluka"],
+            "district": v["district"],
+            "lat": v["lat"],
+            "lng": v["lng"],
+            "status": "active"
+        }
+        for v in VILLAGES
     ]

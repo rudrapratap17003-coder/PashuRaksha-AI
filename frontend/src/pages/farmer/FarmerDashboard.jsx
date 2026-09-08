@@ -17,6 +17,7 @@ import RiskBadge from '../../components/common/RiskBadge'
 import VoiceReportModal from '../../components/common/VoiceReportModal'
 import WeatherWidget from '../../components/common/WeatherWidget'
 import EconomicLossCalculator from '../../components/farmer/EconomicLossCalculator'
+import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
@@ -27,21 +28,24 @@ export default function FarmerDashboard() {
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
   const [lossCalcOpen, setLossCalcOpen] = useState(false)
   const [language, setLanguage] = useState('mr')
 
   const fetchFarmerData = async () => {
     setLoading(true)
+    setError(null)
     try {
-      const [animRes, alertRes] = await Promise.allSettled([
+      const [animRes, alertRes] = await Promise.all([
         apiClient.get('/animals'),
         apiClient.get('/alerts?role=farmer'),
       ])
-      if (animRes.status === 'fulfilled') setAnimals(animRes.value.data)
-      if (alertRes.status === 'fulfilled') setAlerts(alertRes.value.data)
-    } catch {
-      // Fallback
+      setAnimals(animRes.data || [])
+      setAlerts(alertRes.data || [])
+    } catch (err) {
+      console.error('Farmer data fetch failed:', err)
+      setError(err.response?.data?.detail || err.message || 'Unable to connect to live livestock registry.')
     } finally {
       setLoading(false)
     }
@@ -213,44 +217,52 @@ export default function FarmerDashboard() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {(animals.length > 0 ? animals : [
-              { id: 'anim-101', animal_id: 'COW-101', species: 'Cattle (Cow)', breed: 'Gir', current_risk_level: 'LOW', current_risk_score: 12.0, vaccination_status: 'Up to date' },
-              { id: 'anim-102', animal_id: 'BUF-204', species: 'Buffalo', breed: 'Murrah', current_risk_level: 'HIGH', current_risk_score: 74.0, vaccination_status: 'Due soon' },
-              { id: 'anim-103', animal_id: 'GOAT-305', species: 'Goat', breed: 'Sirohi', current_risk_level: 'LOW', current_risk_score: 8.0, vaccination_status: 'Up to date' },
-              { id: 'anim-104', animal_id: 'COW-108', species: 'Cattle (Cow)', breed: 'Dangi', current_risk_level: 'LOW', current_risk_score: 15.0, vaccination_status: 'Up to date' },
-            ]).map((animal) => (
-              <Link
-                key={animal.id}
-                to={`/farmer/animals/${animal.animal_id}`}
-                className="group bg-white border border-slate-200 hover:border-sky-400 rounded-2xl p-4 shadow-sm card-hover block space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
-                      <PawPrint className="w-5 h-5" />
+          {loading ? (
+            <LoadingState message="Loading your registered livestock..." />
+          ) : error ? (
+            <ErrorState error={error} onRetry={fetchFarmerData} />
+          ) : animals.length === 0 ? (
+            <EmptyState
+              title="No Livestock Registered"
+              message="No animals are registered under your farmer account yet. Register your cattle to initiate AI health monitoring."
+              actionText={t.addAnimal}
+              onAction={() => window.location.href = '/farmer/animals/add'}
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {animals.map((animal) => (
+                <Link
+                  key={animal.id}
+                  to={`/farmer/animals/${animal.animal_id}`}
+                  className="group bg-white border border-slate-200 hover:border-sky-400 rounded-2xl p-4 shadow-sm card-hover block space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                        <PawPrint className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id}</span>
+                        <span className="text-xs text-slate-500">{animal.breed} • {animal.species}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id}</span>
-                      <span className="text-xs text-slate-500">{animal.breed} • {animal.species}</span>
-                    </div>
+                    <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
                   </div>
-                  <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
-                </div>
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-                  <span className="flex items-center space-x-1.5">
-                    <Syringe className="w-4 h-4 text-sky-600" />
-                    <span>{animal.vaccination_status}</span>
-                  </span>
-                  <span className="text-sky-600 font-semibold flex items-center space-x-1">
-                    <span>View</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                    <span className="flex items-center space-x-1.5">
+                      <Syringe className="w-4 h-4 text-sky-600" />
+                      <span>{animal.vaccination_status || 'Up to date'}</span>
+                    </span>
+                    <span className="text-sky-600 font-semibold flex items-center space-x-1">
+                      <span>View</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Alerts */}

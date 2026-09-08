@@ -47,7 +47,15 @@ export default function LoginPage() {
       else if (userRole === USER_ROLES.ADMIN) navigate('/admin/dashboard')
       else navigate('/farmer/dashboard')
     } catch (err) {
-      setError(err.message || 'Invalid credentials')
+      // Distinguish between backend unreachable and auth failure
+      const msg = err.message || 'Authentication failed'
+      if (msg === 'Network Error' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Unable to connect')) {
+        setError('Cannot connect to PASHURAKSHA AI server. Please make sure the backend is running at 127.0.0.1:8000.')
+      } else if (msg.includes('Invalid credentials') || msg.includes('Incorrect password') || msg.includes('not found')) {
+        setError('Invalid email or password.')
+      } else {
+        setError(msg)
+      }
     }
   }
 
@@ -64,7 +72,7 @@ export default function LoginPage() {
               <PashuLogo size="lg" />
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900">PASHURAKSHA AI</h2>
-            <p className="text-sm text-slate-500">Government of Maharashtra • Livestock Health Portal</p>
+            <p className="text-xs text-slate-500 font-medium">Prototype developed for SIH Problem Statement SIH26128</p>
           </div>
 
           {/* Role Selector — Big Buttons */}

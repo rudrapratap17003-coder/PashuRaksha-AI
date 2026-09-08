@@ -19,9 +19,9 @@ const SAMPLE_LESION_CASES = [
     title: 'Oral Mucosal Vesicles & Erosions',
     organ: 'Mouth / Tongue',
     species: 'Cattle (Cow)',
-    detectedSign: 'Ruptured vesicle on dental pad & tongue',
-    confidence: 96.4,
-    suspectedDisease: 'Foot and Mouth Disease (FMD)',
+    detectedSign: 'Ruptured vesicle on dental pad & tongue (Reference Specimen)',
+    screeningConfidence: 'High Pattern Similarity',
+    suspectedDisease: 'Foot and Mouth Disease (FMD) Pattern',
     severity: 'Severe / Acute',
     symptomsMatched: {
       fever: true,
@@ -30,7 +30,7 @@ const SAMPLE_LESION_CASES = [
       reduced_appetite: true,
       reduced_milk: true
     },
-    recommendation: 'Immediate strict isolation. High risk of transmission. Report to local veterinary officer.',
+    recommendation: 'Strict herd isolation advised. Submit swab for RT-PCR lab confirmation. Report to taluka veterinary officer.',
     imagePlaceholder: 'oral_lesion_fmd'
   },
   {
@@ -38,9 +38,9 @@ const SAMPLE_LESION_CASES = [
     title: 'Nodular Cutaneous Lesions',
     organ: 'Skin / Neck & Flank',
     species: 'Cattle (Bullock)',
-    detectedSign: 'Circumscribed firm nodules (2-5 cm)',
-    confidence: 94.1,
-    suspectedDisease: 'Lumpy Skin Disease (LSD)',
+    detectedSign: 'Circumscribed firm nodules (2-5 cm) (Reference Specimen)',
+    screeningConfidence: 'High Pattern Similarity',
+    suspectedDisease: 'Lumpy Skin Disease (LSD) Pattern',
     severity: 'Moderate',
     symptomsMatched: {
       fever: true,
@@ -56,9 +56,9 @@ const SAMPLE_LESION_CASES = [
     title: 'Interdigital Cleft Ulceration',
     organ: 'Hoof / Coronary Band',
     species: 'Buffalo',
-    detectedSign: 'Coronary band erosions with lameness',
-    confidence: 91.8,
-    suspectedDisease: 'Vesicular Pododermatitis / FMD',
+    detectedSign: 'Coronary band erosions with lameness (Reference Specimen)',
+    screeningConfidence: 'Moderate Pattern Similarity',
+    suspectedDisease: 'Vesicular Pododermatitis / FMD Pattern',
     severity: 'Severe',
     symptomsMatched: {
       fever: true,
@@ -73,16 +73,16 @@ const SAMPLE_LESION_CASES = [
     title: 'Udder Asymmetry & Erythema',
     organ: 'Mammary Gland (Teat)',
     species: 'Cattle (Crossbred)',
-    detectedSign: 'Swollen quarter with milk clotting',
-    confidence: 89.2,
-    suspectedDisease: 'Acute Clinical Mastitis',
+    detectedSign: 'Swollen quarter with milk clotting (Reference Specimen)',
+    screeningConfidence: 'Moderate Pattern Similarity',
+    suspectedDisease: 'Acute Clinical Mastitis Pattern',
     severity: 'High',
     symptomsMatched: {
       swelling: true,
       reduced_milk: true,
       fever: false
     },
-    recommendation: 'Perform California Mastitis Test (CMT). Administer intramammary antibiotic infusion.',
+    recommendation: 'Perform California Mastitis Test (CMT). Administer intramammary antibiotic infusion under veterinary prescription.',
     imagePlaceholder: 'mastitis_udder'
   }
 ]
@@ -109,12 +109,20 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
       setScanning(true)
       setTimeout(() => {
         setScanResult({
-          ...SAMPLE_LESION_CASES[0],
-          title: 'Uploaded Lesion Scan',
-          confidence: 92.5
+          id: 'custom-upload',
+          title: 'Uploaded Field Image',
+          organ: 'Unspecified Field Image',
+          species: 'Unverified Subject',
+          detectedSign: 'Image uploaded without calibrated lesion marker. Prototype screening cannot reliably assess this image.',
+          screeningConfidence: 'DEMO SCREENING RESULT',
+          suspectedDisease: 'Prototype screening cannot reliably assess this image.',
+          severity: 'Requires Veterinary Inspection',
+          symptomsMatched: {},
+          recommendation: 'Visual pattern cannot confirm disease from arbitrary photo. A licensed veterinarian must physically examine the animal and collect diagnostic swabs.',
+          statusState: 'unsupported image'
         })
         setScanning(false)
-      }, 1000)
+      }, 900)
     }
   }
 
@@ -131,17 +139,17 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
             </div>
             <div>
               <h2 className="text-base font-black text-white flex items-center gap-2">
-                Pashu-Drishti AI • Visual Lesion Scanner
+                Pashu-Drishti • Visual Screening Prototype
                 <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-                  Computer Vision Assist
+                  Screening Overlay
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Upload or capture photos of oral ulcers, skin nodules, or hoof lesions for instant AI classification
+                Visual screening overlay & specimen atlas to assist field workers and veterinarians in symptom documentation
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <button onClick={onClose} aria-label="Close visual screening modal" className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition focus-visible:ring-2 focus-visible:ring-emerald-500">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -182,12 +190,12 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
 
           {/* Scanner Viewport & AI Inference Results */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* Visual Viewport with Simulated Neural Bounding Box */}
+            {/* Visual Viewport with Simulated Screening Overlay */}
             <div className="md:col-span-6 bg-slate-950 rounded-3xl border border-slate-800 p-4 relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
               {scanning ? (
                 <div className="space-y-3 text-center">
                   <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mx-auto" />
-                  <p className="text-xs text-emerald-300 font-bold animate-pulse">Running CNN Feature Extraction & Segmentation...</p>
+                  <p className="text-xs text-emerald-300 font-bold animate-pulse">Running Visual Screening Simulation...</p>
                 </div>
               ) : (
                 <div className="w-full h-full relative flex flex-col items-center justify-center">
@@ -196,14 +204,14 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                     {/* Simulated Anatomical Graphic Background */}
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
                     
-                    {/* Neural Bounding Box */}
+                    {/* Visual Screening Overlay */}
                     <div className="absolute w-44 h-36 border-2 border-emerald-400 rounded-xl bg-emerald-500/10 backdrop-blur-xs flex flex-col justify-between p-2 animate-pulse">
                       <div className="flex items-center justify-between text-[10px] font-mono bg-emerald-950/90 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30">
                         <span>{scanResult.organ}</span>
-                        <span>{scanResult.confidence}%</span>
+                        <span>{scanResult.screeningConfidence || 'Pattern Ref'}</span>
                       </div>
                       <div className="text-[9px] text-emerald-200 bg-slate-950/80 px-1 py-0.5 rounded self-start">
-                        ROI: [x:120, y:85, w:180, h:140]
+                        SCREENING REGION [x:120, y:85]
                       </div>
                     </div>
 
@@ -222,10 +230,10 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Diagnostic Inference
+                    Visual Screening Result
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold">
-                    Confidence: {scanResult.confidence}%
+                    {scanResult.screeningConfidence || 'Visual Pattern Match'}
                   </span>
                 </div>
 
@@ -236,7 +244,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
 
                 <div className="grid grid-cols-2 gap-2 text-xs bg-slate-900/80 p-3 rounded-xl border border-slate-800">
                   <div>
-                    <span className="text-slate-500 block text-[10px]">Severity Level:</span>
+                    <span className="text-slate-500 block text-[10px]">Assessment Status:</span>
                     <strong className="text-rose-400">{scanResult.severity}</strong>
                   </div>
                   <div>
@@ -247,7 +255,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
 
                 <div className="text-xs text-slate-300 space-y-1">
                   <span className="font-bold text-amber-300 flex items-center gap-1 text-[11px]">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Immediate Action Required:
+                    <AlertTriangle className="w-3.5 h-3.5" /> Clinical Guidance:
                   </span>
                   <p className="text-[11px] text-slate-400 leading-relaxed">{scanResult.recommendation}</p>
                 </div>
@@ -258,9 +266,9 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
 
         {/* Footer */}
         <div className="px-6 py-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
-          <span className="text-xs text-slate-400 flex items-center gap-1.5">
-            <Info className="w-4 h-4 text-emerald-400" />
-            AI computer vision provides decision-support; verify with clinical exam.
+          <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+            <Info className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <span>Prototype visual screening. Veterinary verification required.</span>
           </span>
           <div className="flex items-center space-x-3">
             <button onClick={onClose} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:text-white transition">

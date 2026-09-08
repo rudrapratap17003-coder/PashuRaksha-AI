@@ -3,6 +3,7 @@ import jwt
 import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.models.user import User
@@ -18,44 +19,40 @@ class AuthService:
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        if not hashed_password:
+        if not hashed_password or not plain_password:
             return False
         try:
             plain_bytes = plain_password.encode('utf-8')[:72]
             hashed_bytes = hashed_password.encode('utf-8')
             return bcrypt.checkpw(plain_bytes, hashed_bytes)
         except Exception:
-            return plain_password == hashed_password
+            # Safe backward-compatibility for seeded demo strings ONLY when DEMO_MODE is True
+            if settings.DEMO_MODE and hashed_password in ("hashed_demo_password", "password123"):
+                return plain_password == "password123"
+            return False
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         to_encode = data.copy()
+        now = datetime.utcnow()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = now + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         
-        to_encode.update({"exp": expire, "iat": datetime.utcnow()})
+        to_encode.update({"exp": expire, "iat": now})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
 
     @staticmethod
     def register(db: Session, user_in: UserCreate) -> UserResponse:
+        email = (user_in.email or "").strip().lower()
         # Check if email exists
-        existing = db.query(User).filter(User.email.ilike(user_in.email)).first()
+        existing = db.query(User).filter(User.email.ilike(email)).first()
         if existing:
-            return UserResponse(
-                id=existing.id,
-                name=existing.name,
-                phone=existing.phone,
-                email=existing.email,
-                role=existing.role,
-                village=existing.village,
-                district=existing.district,
-                state=existing.state,
-                latitude=existing.latitude,
-                longitude=existing.longitude,
-                created_at=existing.created_at
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An account with this email address already exists."
             )
 
         user_id = f"usr-{str(uuid.uuid4())[:8]}"
@@ -65,12 +62,12 @@ class AuthService:
             id=user_id,
             name=user_in.name,
             phone=user_in.phone,
-            email=user_in.email,
+            email=email,
             password_hash=hashed_password,
             role=user_in.role.value if hasattr(user_in.role, 'value') else user_in.role,
             village=user_in.village,
             district=user_in.district,
-            state=user_in.state,
+            state=user_in.state or "Maharashtra",
             latitude=user_in.latitude,
             longitude=user_in.longitude,
         )
@@ -93,13 +90,22 @@ class AuthService:
 
     @staticmethod
     def login(db: Session, login_in: UserLogin) -> TokenResponse:
-        user = db.query(User).filter(User.email.ilike(login_in.email)).first()
+        email = (login_in.email or "").strip().lower()
+        password = login_in.password or ""
+
+        user = db.query(User).filter(User.email.ilike(email)).first()
         
         if not user:
-            # Fallback for demo experience
-            user = db.query(User).first()
-            if not user:
-                raise ValueError("No users found in database")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials: user not found."
+            )
+
+        if not AuthService.verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials: incorrect password."
+            )
 
         token_data = {
             "sub": user.id,

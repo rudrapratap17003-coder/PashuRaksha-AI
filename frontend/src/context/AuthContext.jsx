@@ -14,15 +14,7 @@ export function AuthProvider({ children }) {
         return null
       }
     }
-    // Default demo user is Farmer for immediate exploratory testing
-    return {
-      id: 'usr-farmer-1',
-      name: 'Ramesh Kumar',
-      email: 'farmer.ramesh@pashuraksha.ai',
-      role: USER_ROLES.FARMER,
-      village: 'Rampur',
-      district: 'Jaipur Rural',
-    }
+    return null
   })
 
   const [token, setToken] = useState(() => localStorage.getItem('pashuraksha_token'))
@@ -39,18 +31,9 @@ export function AuthProvider({ children }) {
       localStorage.setItem('pashuraksha_user', JSON.stringify(userData))
       return userData
     } catch (err) {
-      // Fallback for offline demo resilience
-      const fallbackUser = {
-        id: 'demo-user-1',
-        name: email.includes('vet') ? 'Dr. Sharma' : email.includes('auth') ? 'R. Verma' : 'Ramesh Kumar',
-        email,
-        role: email.includes('vet') ? USER_ROLES.VETERINARIAN : email.includes('auth') ? USER_ROLES.AUTHORITY : USER_ROLES.FARMER,
-        village: 'Rampur',
-        district: 'Jaipur Rural',
-      }
-      setUser(fallbackUser)
-      localStorage.setItem('pashuraksha_user', JSON.stringify(fallbackUser))
-      return fallbackUser
+      // Security: Failed login must fail. Never create or fall back to fake users.
+      const errorMsg = err?.response?.data?.detail || err?.message || 'Authentication failed'
+      throw new Error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -59,34 +42,27 @@ export function AuthProvider({ children }) {
   const register = async (formData) => {
     setLoading(true)
     try {
-      const response = await apiClient.post('/auth/register', formData)
-      const userData = response.data
+      await apiClient.post('/auth/register', formData)
       return await login(formData.email, formData.password)
     } catch (err) {
-      // Fallback for offline resilience
-      const mockUser = {
-        id: 'usr-new-1',
-        name: formData.name || 'New User',
-        email: formData.email,
-        role: formData.role || USER_ROLES.FARMER,
-        village: formData.village || 'Rampur',
-        district: formData.district || 'Jaipur Rural',
-      }
-      setUser(mockUser)
-      localStorage.setItem('pashuraksha_user', JSON.stringify(mockUser))
-      return mockUser
+      const errorMsg = err?.response?.data?.detail || err?.message || 'Registration failed'
+      throw new Error(errorMsg)
     } finally {
       setLoading(false)
     }
   }
 
   const loginAsRole = async (role) => {
-    let email = 'farmer.ramesh@pashuraksha.ai'
-    if (role === USER_ROLES.VETERINARIAN) {
-      email = 'dr.sharma@pashuraksha.ai'
-    } else if (role === USER_ROLES.AUTHORITY) {
-      email = 'officer.verma@pashuraksha.ai'
+    // These emails must match the seeded users in seed_service.py
+    const roleEmailMap = {
+      [USER_ROLES.FARMER]: 'farmer1@pashuraksha.ai',
+      [USER_ROLES.FIELD_WORKER]: 'fieldworker1@pashuraksha.ai',
+      [USER_ROLES.VETERINARIAN]: 'vet1@pashuraksha.ai',
+      [USER_ROLES.LABORATORY]: 'lab1@pashuraksha.ai',
+      [USER_ROLES.AUTHORITY]: 'officer1@pashuraksha.ai',
+      [USER_ROLES.ADMIN]: 'admin@pashuraksha.ai',
     }
+    const email = roleEmailMap[role] || 'farmer1@pashuraksha.ai'
     return await login(email, 'password123')
   }
 

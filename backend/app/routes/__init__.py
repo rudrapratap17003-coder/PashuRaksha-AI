@@ -17,3 +17,4 @@ from .ai_assistant import router as ai_assistant_router
 from .weather import router as weather_router
 from .treatment import router as treatment_router
 from .nutrition import router as nutrition_router
+from .demo import router as demo_router

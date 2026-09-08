@@ -27,6 +27,7 @@ import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
 import OutbreakMap from '../../components/map/OutbreakMap'
 import VetCaseModal from '../../components/vet/VetCaseModal'
+import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
@@ -36,95 +37,20 @@ export default function VetDashboard() {
   const { scenarioData, currentScenario } = useScenario()
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [selectedCase, setSelectedCase] = useState(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
   const fetchVetCases = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await apiClient.get('/vet/cases')
-      setCases(res.data)
-    } catch {
-      // Fallback Maharashtra Clinical Triage Cases
-      setCases([
-        {
-          id: 'rep-101',
-          report_id: 'rep-101',
-          animal_id: 'COW-101',
-          species: 'Cattle (Cow)',
-          breed: 'Gir',
-          farmer_name: 'Ramesh Patil',
-          farmer_phone: '9876543210',
-          village: 'Baramati',
-          district: 'Pune',
-          symptoms: ['Fever', 'Cough', 'Difficulty Breathing', 'Reduced Appetite'],
-          severity: 'severe',
-          duration_days: 3,
-          risk_score: 74.0,
-          risk_level: 'HIGH',
-          possible_disease_concern: 'Possible Bovine Respiratory Disease',
-          status: 'pending',
-          lab_referral: true
-        },
-        {
-          id: 'rep-102',
-          report_id: 'rep-102',
-          animal_id: 'BUF-102',
-          species: 'Buffalo',
-          breed: 'Murrah',
-          farmer_name: 'Suresh Jadhav',
-          farmer_phone: '9876543211',
-          village: 'Baramati',
-          district: 'Pune',
-          symptoms: ['Fever', 'Lesions', 'Salivation'],
-          severity: 'severe',
-          duration_days: 4,
-          risk_score: 88.0,
-          risk_level: 'CRITICAL',
-          possible_disease_concern: 'Vesicular Triad • Suspected FMD',
-          status: 'investigating',
-          lab_referral: true
-        },
-        {
-          id: 'rep-104',
-          report_id: 'rep-104',
-          animal_id: 'GOAT-104',
-          species: 'Goat',
-          breed: 'Sirohi',
-          farmer_name: 'Ganesh More',
-          farmer_phone: '9876543212',
-          village: 'Shirur',
-          district: 'Pune',
-          symptoms: ['Fever', 'Swelling', 'Difficulty Breathing'],
-          severity: 'severe',
-          duration_days: 2,
-          risk_score: 79.0,
-          risk_level: 'HIGH',
-          possible_disease_concern: 'Suspected Hemorrhagic Septicemia',
-          status: 'pending',
-          lab_referral: false
-        },
-        {
-          id: 'rep-105',
-          report_id: 'rep-105',
-          animal_id: 'COW-105',
-          species: 'Cattle (Cow)',
-          breed: 'Sahiwal',
-          farmer_name: 'Manoj Shinde',
-          farmer_phone: '9876543213',
-          village: 'Sinnar',
-          district: 'Nashik',
-          symptoms: ['Fever', 'Reduced Milk Drop'],
-          severity: 'moderate',
-          duration_days: 2,
-          risk_score: 48.0,
-          risk_level: 'MODERATE',
-          possible_disease_concern: 'Acute Mastitis Concern',
-          status: 'investigated',
-          lab_referral: true
-        }
-      ])
+      setCases(Array.isArray(res.data) ? res.data : [])
+    } catch (err) {
+      console.warn('Failed to load vet cases:', err)
+      setError(err?.response?.data?.detail || err?.message || 'Failed to fetch clinical triage queue.')
     } finally {
       setLoading(false)
     }
@@ -240,68 +166,79 @@ export default function VetDashboard() {
 
             {/* Cases List */}
             <div className="space-y-3">
-              {filteredCases.map((c) => (
-                <div
-                  key={c.id}
-                  className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 space-y-3 hover:border-sky-500/30 transition"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-mono font-bold text-white text-sm">{c.animal_id}</span>
-                        <RiskBadge level={c.risk_level} score={c.risk_score} />
+              {loading ? (
+                <LoadingState message="Loading prioritized clinical cases from triage engine..." />
+              ) : error ? (
+                <ErrorState message={error} onRetry={fetchVetCases} />
+              ) : filteredCases.length === 0 ? (
+                <EmptyState
+                  title="No Cases in Clinical Queue"
+                  description={statusFilter !== 'all' || searchTerm ? "No clinical cases match the active filter criteria." : "All registered animal triage cases have been attended to."}
+                />
+              ) : (
+                filteredCases.map((c) => (
+                  <div
+                    key={c.id}
+                    className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 space-y-3 hover:border-sky-500/30 transition"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-mono font-bold text-white text-sm">{c.animal_id}</span>
+                          <RiskBadge level={c.risk_level} score={c.risk_score} />
+                        </div>
+                        <p className="text-xs text-slate-300 font-semibold mt-0.5">
+                          {c.breed} {c.species} • Owner: <strong className="text-white">{c.farmer_name}</strong>
+                        </p>
+                        <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
+                          <MapPin className="w-3 h-3 text-slate-500" />
+                          <span>{c.village}, {c.district}</span>
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-300 font-semibold mt-0.5">
-                        {c.breed} {c.species} • Owner: <strong className="text-white">{c.farmer_name}</strong>
-                      </p>
-                      <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
-                        <MapPin className="w-3 h-3 text-slate-500" />
-                        <span>{c.village}, {c.district}</span>
-                      </span>
+
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-slate-500 block">Case #{c.id}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize mt-1 inline-block ${
+                          c.status === 'pending' ? 'bg-rose-950 text-rose-300 border border-rose-500/30' : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {c.status}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-[10px] font-mono text-slate-500 block">Case #{c.id}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize mt-1 inline-block ${
-                        c.status === 'pending' ? 'bg-rose-950 text-rose-300 border border-rose-500/30' : 'bg-slate-800 text-slate-300'
-                      }`}>
-                        {c.status}
-                      </span>
+                    {/* Symptoms Tags */}
+                    <div className="flex flex-wrap gap-1">
+                      {c.symptoms?.map((s, idx) => (
+                        <span key={idx} className="bg-slate-900 text-sky-300 text-[10px] px-2 py-0.5 rounded border border-sky-500/20 font-medium">
+                          {s}
+                        </span>
+                      ))}
                     </div>
-                  </div>
 
-                  {/* Symptoms Tags */}
-                  <div className="flex flex-wrap gap-1">
-                    {c.symptoms?.map((s, idx) => (
-                      <span key={idx} className="bg-slate-900 text-sky-300 text-[10px] px-2 py-0.5 rounded border border-sky-500/20 font-medium">
-                        {s}
+                    <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                      <span className="text-xs text-amber-300 font-bold truncate max-w-[240px]">
+                        {c.possible_disease_concern}
                       </span>
-                    ))}
-                  </div>
 
-                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-xs text-amber-300 font-bold truncate max-w-[240px]">
-                      {c.possible_disease_concern}
-                    </span>
-
-                    <div className="flex items-center space-x-2">
-                      <Link to={`/vet/cases/${c.id}`}>
-                        <Button size="sm" variant="outline" icon={ExternalLink} className="text-xs bg-slate-900 border-slate-700 text-slate-300">
-                          Full Timeline
+                      <div className="flex items-center space-x-2">
+                        <Link to={`/vet/cases/${c.id}`}>
+                          <Button size="sm" variant="outline" icon={ExternalLink} className="text-xs bg-slate-900 border-slate-700 text-slate-300">
+                            Full Timeline
+                          </Button>
+                        </Link>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => setSelectedCase(c)}
+                          className="text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold"
+                        >
+                          Action Desk
                         </Button>
-                      </Link>
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => setSelectedCase(c)}
-                        className="text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold"
-                      >
-                        Action Desk
-                      </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
         </div>

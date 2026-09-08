@@ -24,6 +24,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
   const [clinicName, setClinicName] = useState('Taluka Veterinary Polyclinic, Baramati, Dist. Pune')
   const [prescription, setPrescription] = useState(null)
   const [protocols, setProtocols] = useState({})
+  const [vetConfirmed, setVetConfirmed] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -62,29 +63,30 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900 border border-emerald-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-4xl max-h-[92vh] bg-slate-900 border border-emerald-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex-shrink-0">
               <Stethoscope className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-white flex items-center gap-2">
-                AI Clinical Prescription & Treatment Protocol
+              <h2 className="text-sm sm:text-base font-black text-white flex flex-wrap items-center gap-1.5 sm:gap-2">
+                Veterinary Clinical Decision Support
                 <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-                  Dept of Animal Husbandry, GoM
+                  Clinical Reference Only
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
-                Automated clinical dosage calculation tailored to species & estimated body weight
+              <p className="text-[11px] sm:text-xs text-slate-400 line-clamp-1 sm:line-clamp-none">
+                Automated clinical reference & dosage advisory tailored to species & estimated body weight
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            aria-label="Close prescription advisory modal"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -134,9 +136,9 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               <div className="border-b-2 border-emerald-800 pb-3 flex items-start justify-between">
                 <div>
                   <div className="text-[11px] font-black uppercase text-emerald-800 tracking-wider">
-                    Government of Maharashtra • Department of Animal Husbandry
+                    Prototype developed for SIH Problem Statement SIH26128 • Clinical Decision Support
                   </div>
-                  <h3 className="text-lg font-black text-slate-900">OFFICIAL VETERINARY PRESCRIPTION SLIP</h3>
+                  <h3 className="text-lg font-black text-slate-900">VETERINARY CLINICAL REFERENCE & DOSAGE ADVISORY</h3>
                   <p className="text-xs text-slate-600 font-medium">{prescription.veterinarian.polyclinic}</p>
                 </div>
                 <div className="text-right">
@@ -146,6 +148,17 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
                   <span className="text-[10px] text-slate-500 mt-1 block">
                     Date: {new Date(prescription.issued_at).toLocaleDateString('en-IN')}
                   </span>
+                </div>
+              </div>
+
+              {/* Safety Disclaimer Banner */}
+              <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs flex items-start gap-2 print:border-slate-400">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold">CLINICAL DECISION SUPPORT REFERENCE</p>
+                  <p className="text-[11px] leading-relaxed">
+                    AI-assisted clinical reference only. Final diagnosis, treatment, and dosage decisions must be made by a licensed veterinarian following clinical examination.
+                  </p>
                 </div>
               </div>
 
@@ -241,10 +254,18 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
         </div>
 
         {/* Modal Actions */}
-        <div className="px-6 py-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
-          <span className="text-xs text-slate-400">
-            Complies with Maharashtra Veterinary Council & DAH guidelines
-          </span>
+        <div className="px-6 py-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <label className="flex items-center space-x-2 text-xs text-amber-300 font-medium cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={vetConfirmed}
+              onChange={(e) => setVetConfirmed(e.target.checked)}
+              className="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
+            />
+            <span>
+              I, licensed veterinarian, confirm this clinical dosage reference for Case #{caseData?.id || '101'}.
+            </span>
+          </label>
           <div className="flex items-center space-x-3">
             {prescription && (
               <WhatsAppShareButton
@@ -259,11 +280,16 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               <Printer className="w-4 h-4" /> Print / Save PDF
             </button>
             <button
+              disabled={!vetConfirmed}
               onClick={() => {
                 if (onPrescriptionCreated) onPrescriptionCreated(prescription)
                 onClose()
               }}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-950"
+              className={`px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg ${
+                vetConfirmed
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-950 cursor-pointer'
+                  : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60'
+              }`}
             >
               <CheckCircle2 className="w-4 h-4" /> Attach to Case File
             </button>
