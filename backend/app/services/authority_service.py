@@ -18,8 +18,8 @@ class AuthorityService:
             VillageRiskSummary(
                 village="Baramati",
                 district="Pune",
-                monitored_animals=db.query(Animal).filter(Animal.village == "Baramati").count() or 35,
-                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Baramati").count() or 14,
+                monitored_animals=db.query(Animal).filter(Animal.village == "Baramati").count(),
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Baramati").count(),
                 cluster_status="CRITICAL HOTSPOT",
                 risk_index=84.0,
                 vaccination_coverage=72.5
@@ -27,8 +27,8 @@ class AuthorityService:
             VillageRiskSummary(
                 village="Shirur",
                 district="Pune",
-                monitored_animals=db.query(Animal).filter(Animal.village == "Shirur").count() or 28,
-                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Shirur").count() or 8,
+                monitored_animals=db.query(Animal).filter(Animal.village == "Shirur").count(),
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Shirur").count(),
                 cluster_status="ACTIVE SURVEILLANCE",
                 risk_index=65.0,
                 vaccination_coverage=81.0
@@ -36,8 +36,8 @@ class AuthorityService:
             VillageRiskSummary(
                 village="Sinnar",
                 district="Nashik",
-                monitored_animals=db.query(Animal).filter(Animal.village == "Sinnar").count() or 22,
-                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Sinnar").count() or 6,
+                monitored_animals=db.query(Animal).filter(Animal.village == "Sinnar").count(),
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Sinnar").count(),
                 cluster_status="WATCHLIST",
                 risk_index=48.0,
                 vaccination_coverage=88.5
@@ -45,8 +45,8 @@ class AuthorityService:
             VillageRiskSummary(
                 village="Indapur",
                 district="Pune",
-                monitored_animals=db.query(Animal).filter(Animal.village == "Indapur").count() or 26,
-                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Indapur").count() or 4,
+                monitored_animals=db.query(Animal).filter(Animal.village == "Indapur").count(),
+                active_health_reports=db.query(HealthReport).filter(HealthReport.village == "Indapur").count(),
                 cluster_status="NORMAL",
                 risk_index=35.0,
                 vaccination_coverage=91.0

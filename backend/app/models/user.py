@@ -14,7 +14,7 @@ class User(Base):
     role = Column(String(50), nullable=False, default="farmer", index=True)
     village = Column(String(255), nullable=True)
     district = Column(String(255), nullable=True)
-    state = Column(String(255), default="Rajasthan")
+    state = Column(String(255), default="Maharashtra")
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

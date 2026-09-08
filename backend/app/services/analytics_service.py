@@ -21,7 +21,8 @@ class AnalyticsService:
         total_vaccinations = db.query(Vaccination).count()
         completed_vaccinations = db.query(Vaccination).filter(Vaccination.status == "completed").count()
         high_risk_reports = db.query(HealthReport).filter(HealthReport.risk_level.in_(["HIGH", "CRITICAL"])).count()
-        avg_risk_score = round(float(db.query(func.avg(HealthReport.risk_score)).scalar() or 42.5), 1)
+        avg_risk_val = db.query(func.avg(HealthReport.risk_score)).scalar()
+        avg_risk_score = round(float(avg_risk_val), 1) if avg_risk_val is not None else 0.0
 
         # Calculate actual farm count or fallback to unique owners
         from app.models.farm import Farm
@@ -36,7 +37,7 @@ class AnalyticsService:
         return {
             "total_animals": total_animals,
             "total_reports": total_reports,
-            "total_farms": max(farm_count, 1),
+            "total_farms": farm_count,
             "active_clusters": active_clusters,
             "avg_risk_score": avg_risk_score,
             "mortality_count": db.query(HealthReport).filter(HealthReport.severity == "severe").count(),

@@ -1,12 +1,12 @@
 """
 Treatment & AI Clinical Advisory Service
 Provides standard veterinary treatment protocols, dosage calculation engines,
-and official Government of Maharashtra Animal Husbandry Department prescription generator.
+and veterinary clinical decision support prescription references (SIH 2026 Prototype).
 """
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-# Standard Veterinary Disease Treatment Protocols (Approved by Dept. of Animal Husbandry, GoM)
+# Standard Veterinary Disease Treatment Protocols (SIH 2026 Prototype Reference)
 TREATMENT_PROTOCOLS: Dict[str, Dict[str, Any]] = {
     "FMD": {
         "disease_name": "Foot and Mouth Disease (लाळ-खुरकूत)",

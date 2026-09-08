@@ -79,8 +79,8 @@ class AnimalService:
             vaccination_status=animal_in.vaccination_status or "Up to date",
             previous_diseases=animal_in.previous_diseases or "None",
             milk_production=animal_in.milk_production,
-            village=animal_in.village or (owner.village if owner else "Rampur"),
-            district=animal_in.district or (owner.district if owner else "Jaipur Rural"),
+            village=animal_in.village or (owner.village if owner else "Baramati"),
+            district=animal_in.district or (owner.district if owner else "Pune"),
             current_risk_score=0.0,
             current_risk_level="LOW",
         )
