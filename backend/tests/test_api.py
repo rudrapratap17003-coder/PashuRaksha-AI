@@ -302,3 +302,63 @@ def test_sih_demo_scenario_lifecycle():
     repeat_reset = client.post("/api/v1/demo/reset")
     assert repeat_reset.status_code == 200
     assert client.get("/api/v1/demo/state").json()["current_step"] == 1
+
+
+# 11. Phase 3: Core Case Workflow, Explainable Risk Engine & Timeline Verification
+def test_phase3_core_case_workflow_and_timeline(farmer_headers, vet_headers):
+    # Step 1: Farmer files health report
+    report_payload = {
+        "animal_id": "COW-101",
+        "fever": True,
+        "lesions": True,
+        "salivation": True,
+        "reduced_milk": True,
+        "reduced_appetite": True,
+        "severity": "severe",
+        "duration_days": 2,
+        "number_of_animals_affected": 3,
+        "village": "Baramati",
+        "district": "Pune"
+    }
+    report_res = client.post("/api/v1/health-reports", json=report_payload, headers=farmer_headers)
+    assert report_res.status_code == 201
+    rep_data = report_res.json()
+    case_id = rep_data["id"]
+    assert case_id.startswith("rep-")
+    assert rep_data["risk_score"] >= 80.0
+    assert rep_data["risk_level"] == "CRITICAL"
+    assert len(rep_data["contributing_factors"]) >= 4
+
+    # Step 2: Verify explainable risk assessment was stored and linked
+    risk_res = client.get(f"/api/v1/risk-assessments/{case_id}", headers=farmer_headers)
+    assert risk_res.status_code == 200
+    risk_data = risk_res.json()
+    assert risk_data["report_id"] == case_id
+    assert risk_data["risk_score"] == rep_data["risk_score"]
+    assert "disclaimer" in risk_data
+
+    # Step 3: Verify initial case timeline events were created automatically
+    tl_res = client.get(f"/api/v1/cases/{case_id}/timeline", headers=vet_headers)
+    assert tl_res.status_code == 200
+    tl_events = tl_res.json()
+    assert len(tl_events) >= 2
+    event_types = [e["event_type"] for e in tl_events]
+    assert "report_created" in event_types
+    assert "ai_triage" in event_types
+
+    # Step 4: Downstream Vet reviews case and logs action
+    action_payload = {
+        "action": "Clinical Examination & Biosecurity Advisory",
+        "notes": "Oral lesions inspected. Quarantine ring advised.",
+        "lab_referral": True,
+        "status": "investigated"
+    }
+    action_res = client.post(f"/api/v1/vet/cases/{case_id}/action", json=action_payload, headers=vet_headers)
+    assert action_res.status_code == 200
+
+    # Step 5: Verify timeline updated with vet action
+    tl_res_updated = client.get(f"/api/v1/cases/{case_id}/timeline", headers=vet_headers)
+    assert tl_res_updated.status_code == 200
+    updated_events = tl_res_updated.json()
+    assert len(updated_events) > len(tl_events)
+

@@ -7,6 +7,7 @@ from app.models.risk_assessment import RiskAssessment
 from app.models.animal import Animal
 from app.models.user import User
 from app.models.alert import Alert
+from app.models.case_timeline import CaseTimelineEvent
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
 from app.ai.risk_engine import ExplainableRiskEngine
 from app.ai.disease_model import DiseasePatternModel
@@ -208,16 +209,39 @@ class HealthReportService:
             contributing_factors=factors,
             recommendation=rec,
             cluster_detected=report_in.number_of_animals_affected > 1,
-            cluster_name="Rampur Village Cluster #1" if report_in.number_of_animals_affected > 1 else None,
+            cluster_name="Baramati Outbreak Watch" if report_in.number_of_animals_affected > 1 else None,
         )
         db.add(risk)
+
+        # Initialize Case Timeline Events for unified downstream lifecycle
+        tl_event1 = CaseTimelineEvent(
+            case_id=rep.id,
+            event_type="report_created",
+            title="Health Report Filed",
+            description=f"Farmer {reporter_name} filed symptom report for {animal.animal_id if animal else rep.animal_id} ({rep.village}, {rep.district}). Severity: {rep.severity}.",
+            actor_name=reporter_name,
+            actor_role="farmer",
+            created_at=rep.reported_at
+        )
+        db.add(tl_event1)
+
+        tl_event2 = CaseTimelineEvent(
+            case_id=rep.id,
+            event_type="ai_triage",
+            title=f"Explainable Risk Score: {level} ({score}/100)",
+            description=f"Explainable health risk engine evaluated clinical indicators: {primary_disease} differential alignment. Recommendation: {rec}",
+            actor_name="PASHURAKSHA AI",
+            actor_role="system",
+            created_at=rep.reported_at
+        )
+        db.add(tl_event2)
 
         # Update animal's current risk score
         if animal:
             animal.current_risk_score = score
             animal.current_risk_level = level
 
-        # If high/critical risk, create an alert
+        # If high/critical risk, create alert and timeline event
         if score >= 60.0:
             alert = Alert(
                 id=f"alt-{str(uuid.uuid4())[:8]}",
@@ -230,6 +254,17 @@ class HealthReportService:
                 village=rep.village,
             )
             db.add(alert)
+
+            tl_event3 = CaseTimelineEvent(
+                case_id=rep.id,
+                event_type="risk_identified",
+                title=f"High Risk Alert Generated for {rep.village}",
+                description=f"Priority alert dispatched to area veterinary polyclinic and field worker team for {animal.animal_id if animal else rep.animal_id}.",
+                actor_name="Alert Engine",
+                actor_role="system",
+                created_at=rep.reported_at
+            )
+            db.add(tl_event3)
 
         db.commit()
 

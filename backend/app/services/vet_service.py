@@ -66,21 +66,40 @@ class VetService:
 
     @staticmethod
     def add_action(db: Session, case_id: str, action_in: VetActionCreate) -> Optional[VetCaseResponse]:
-        # Extract report ID or case reference
-        # Look up by health report
+        # Determine associated report_id
+        rep = db.query(HealthReport).filter(
+            (HealthReport.id == case_id) | (HealthReport.id.like(f"%{case_id.replace('case-', '')}%"))
+        ).first()
+        report_id = rep.id if rep else (case_id if case_id.startswith("rep-") else None)
+
         vact = VeterinaryAction(
             id=f"vact-{str(uuid.uuid4())[:8]}",
             case_id=case_id,
+            report_id=report_id,
             action=action_in.action,
             notes=action_in.notes,
             lab_referral=action_in.lab_referral,
             status=action_in.status,
         )
         db.add(vact)
+
+        # Add Timeline Event for downstream tracking
+        from app.models.case_timeline import CaseTimelineEvent
+        tl_target_id = report_id or case_id
+        event = CaseTimelineEvent(
+            case_id=tl_target_id,
+            event_type="clinical_review",
+            title="Veterinarian Clinical Examination",
+            description=f"Action: {action_in.action}. Notes: {action_in.notes or 'Clinical review completed.'}",
+            actor_name="Dr. Priya Sharma",
+            actor_role="veterinarian"
+        )
+        db.add(event)
+
         db.commit()
 
         cases = VetService.get_priority_cases(db)
         for c in cases:
-            if c.id == case_id or c.report_id == case_id:
+            if c.id == case_id or c.report_id == case_id or (rep and c.report_id == rep.id):
                 return c
         return cases[0] if cases else None
