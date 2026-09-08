@@ -380,6 +380,7 @@ def seed_database(db: Session, force_reseed: bool = False):
             risk_score=round(risk_score, 1), risk_level=risk_level,
             possible_disease_concern=combo["concern"],
             recommendation="Veterinary assessment recommended. Isolate affected animals." if risk_level in ("HIGH", "CRITICAL") else "Monitor and report if symptoms worsen.",
+            status="RISK_ASSESSED",
             reported_at=datetime.utcnow() - timedelta(days=days_ago),
         )
         reports.append(report)

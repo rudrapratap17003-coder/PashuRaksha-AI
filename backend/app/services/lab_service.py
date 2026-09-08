@@ -59,17 +59,17 @@ class LabService:
         )
         db.add(referral)
 
-        # Add timeline event
-        if data.case_id or data.report_id:
-            event = CaseTimelineEvent(
-                case_id=data.case_id or data.report_id,
-                event_type="sample_collected",
-                title="Laboratory Referral Created",
-                description=f"Sample: {data.sample_type}. Test: {data.test_requested}. Priority: {data.priority}.",
+        # Transition case to LAB_PENDING
+        case_ref = data.case_id or data.report_id
+        if case_ref:
+            from app.services.case_service import CaseService, CaseStatus
+            CaseService.transition_status(
+                db, case_ref, CaseStatus.LAB_PENDING.value,
+                actor_name=data.veterinarian_name or "Attending Veterinarian",
                 actor_role="veterinarian",
-                actor_name=data.veterinarian_name,
+                action="Laboratory Referral Created",
+                notes=f"Sample: {data.sample_type}. Test: {data.test_requested}. Priority: {data.priority}."
             )
-            db.add(event)
 
         db.commit()
         db.refresh(referral)
@@ -89,19 +89,31 @@ class LabService:
         if data.result_notes is not None:
             referral.result_notes = data.result_notes
 
-        # Add timeline event for result
+        # Advance Case State
         if data.result and data.result != "pending":
             case_ref = referral.case_id or referral.report_id
             if case_ref:
+                from app.services.case_service import CaseService, CaseStatus
                 result_label = "POSITIVE (FMD Serotype O)" if (data.result == "positive" and "FMD" in (referral.test_requested or "")) else data.result.upper()
-                event = CaseTimelineEvent(
-                    case_id=case_ref,
-                    event_type="lab_result",
-                    title=f"Lab Result: {result_label}",
-                    description=f"Test: {referral.test_requested}. Result: {data.result}. {data.result_notes or ''}",
+                
+                # Step to LAB_RESULT
+                CaseService.transition_status(
+                    db, case_ref, CaseStatus.LAB_RESULT.value,
+                    actor_name="Central Diagnostic Laboratory",
                     actor_role="laboratory",
+                    action=f"Lab Result: {result_label}",
+                    notes=f"Test: {referral.test_requested}. Result: {data.result}. {data.result_notes or ''}"
                 )
-                db.add(event)
+
+                # If positive result, immediately escalate to AUTHORITY_REVIEW
+                if data.result == "positive":
+                    CaseService.transition_status(
+                        db, case_ref, CaseStatus.AUTHORITY_REVIEW.value,
+                        actor_name="Surveillance Dispatch Engine",
+                        actor_role="system",
+                        action="Escalated to District Animal Husbandry Authority",
+                        notes="Confirmed positive diagnostic result triggers district outbreak protocols and ring vaccination response."
+                    )
 
             # If confirmed positive for FMD or high-consequence vesicular disease, trigger outbreak cluster & authority alert
             if data.result == "positive":

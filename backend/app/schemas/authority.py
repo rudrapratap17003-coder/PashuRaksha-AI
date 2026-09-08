@@ -41,3 +41,8 @@ class AuthorityDashboardSummary(BaseModel):
     district_vaccination_rate: float = Field(..., example=84.2)
     villages: List[VillageRiskSummary] = Field(default_factory=list)
     recent_alerts: List[str] = Field(default_factory=list)
+
+class AuthorityActionCreate(BaseModel):
+    action_type: str = Field(..., example="Enact 5km Containment Zone & Ring Vaccination")
+    notes: Optional[str] = Field(None, example="Deployment of 250 FMD vaccine doses and livestock transit checkpoint.")
+    target_status: Optional[str] = Field(default="ACTION_TAKEN", example="ACTION_TAKEN")

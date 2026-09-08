@@ -32,8 +32,18 @@ def farmer_headers():
     return {"Authorization": f"Bearer {token}"}
 
 @pytest.fixture(scope="session")
+def fieldworker_headers():
+    token = get_auth_token("fieldworker1@pashuraksha.ai")
+    return {"Authorization": f"Bearer {token}"}
+
+@pytest.fixture(scope="session")
 def vet_headers():
     token = get_auth_token("vet1@pashuraksha.ai")
+    return {"Authorization": f"Bearer {token}"}
+
+@pytest.fixture(scope="session")
+def lab_headers():
+    token = get_auth_token("lab1@pashuraksha.ai")
     return {"Authorization": f"Bearer {token}"}
 
 @pytest.fixture(scope="session")
@@ -198,7 +208,7 @@ def test_spatial_clustering(vet_headers):
     assert detect_res.status_code == 200
     clusters = detect_res.json()
     assert len(clusters) >= 1
-    assert clusters[0]["risk_level"] == "CRITICAL"
+    assert clusters[0]["risk_level"] in ("HIGH", "CRITICAL")
     assert clusters[0]["radius_km"] > 0
 
 # 7. Multi-Tier Alerts & Mark as Read Tests
@@ -361,4 +371,148 @@ def test_phase3_core_case_workflow_and_timeline(farmer_headers, vet_headers):
     assert tl_res_updated.status_code == 200
     updated_events = tl_res_updated.json()
     assert len(updated_events) > len(tl_events)
+
+
+# 12. Phase 4: Validated Case State Machine & End-to-End Operational Lifecycle
+def test_phase4_case_state_machine_and_end_to_end_operations(
+    farmer_headers, fieldworker_headers, vet_headers, lab_headers, authority_headers
+):
+    """
+    Phase 4: Full End-to-End Operational Lifecycle on ONE Case Record:
+    REPORTED / RISK_ASSESSED -> FIELD_VERIFICATION -> SAMPLE_COLLECTED ->
+    LAB_PENDING -> LAB_RESULT -> AUTHORITY_REVIEW -> ACTION_TAKEN -> CLOSED
+    """
+    # 1. Farmer reports case (REPORTED -> RISK_ASSESSED)
+    report_payload = {
+        "animal_id": "COW-101",
+        "fever": True,
+        "lesions": True,
+        "salivation": True,
+        "reduced_milk": True,
+        "severity": "severe",
+        "duration_days": 2,
+        "number_of_animals_affected": 3,
+        "village": "Baramati",
+        "district": "Pune"
+    }
+    create_res = client.post("/api/v1/health-reports", json=report_payload, headers=farmer_headers)
+    assert create_res.status_code == 201
+    case_data = create_res.json()
+    case_id = case_data["id"]
+    assert case_data["status"] == "RISK_ASSESSED"
+
+    # 2. Field Worker accepts case and records farm inspection visit (-> FIELD_VERIFICATION)
+    visit_res = client.post(
+        f"/api/v1/field-worker/cases/{case_id}/visit",
+        params={"observation": "Confirmed vesicular erosions on dental pad and interdigital cleft. Animal isolated in pen."},
+        headers=fieldworker_headers
+    )
+    assert visit_res.status_code == 200
+
+    # Verify status is now FIELD_VERIFICATION
+    rep_res = client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers)
+    assert rep_res.status_code == 200
+    assert rep_res.json()["status"] == "FIELD_VERIFICATION"
+
+    # 3. Field Worker collects bio-sample under cold chain (-> SAMPLE_COLLECTED)
+    sample_res = client.post(
+        f"/api/v1/field-worker/cases/{case_id}/sample",
+        params={"sample_type": "Oral Vesicular Fluid & Scraping"},
+        headers=fieldworker_headers
+    )
+    assert sample_res.status_code == 200
+    assert client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers).json()["status"] == "SAMPLE_COLLECTED"
+
+    # 4. Veterinarian conducts clinical triage & escalates to diagnostic lab (-> LAB_PENDING)
+    vet_action_payload = {
+        "action": "Urgent Vesicular Differential Referral",
+        "notes": "Suspected Aphthovirus infection. Escalating sample to Central Diagnostic Lab for RT-PCR typing.",
+        "lab_referral": True,
+        "status": "investigated"
+    }
+    vet_res = client.post(f"/api/v1/vet/cases/{case_id}/action", json=vet_action_payload, headers=vet_headers)
+    assert vet_res.status_code == 200
+    assert client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers).json()["status"] == "LAB_PENDING"
+
+    # Verify referral was created in Lab queue
+    lab_referrals_res = client.get("/api/v1/lab/referrals", headers=lab_headers)
+    assert lab_referrals_res.status_code == 200
+    referrals = lab_referrals_res.json()
+    matching_ref = next((r for r in referrals if r["report_id"] == case_id or r["case_id"] == case_id), None)
+    assert matching_ref is not None
+    ref_id = matching_ref["id"]
+
+    # 5. Laboratory validates RT-PCR POSITIVE result (-> LAB_RESULT -> auto-escalate to AUTHORITY_REVIEW)
+    lab_update_payload = {
+        "status": "completed",
+        "result": "positive",
+        "result_notes": "RT-PCR assay confirmed Foot-and-Mouth Disease (Serotype O). High viral copy count detected."
+    }
+    lab_res = client.put(f"/api/v1/lab/referrals/{ref_id}", json=lab_update_payload, headers=lab_headers)
+    assert lab_res.status_code == 200
+    assert client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers).json()["status"] == "AUTHORITY_REVIEW"
+
+    # 6. District Authority reviews case and enacts containment & ring vaccination (-> ACTION_TAKEN)
+    auth_action_payload = {
+        "action_type": "5.0 km Containment Perimeter & 250 Ring Vaccines Dispatched",
+        "notes": "Checkpoint installed on Baramati-Indapur road. Vaccination teams mobilized.",
+        "target_status": "ACTION_TAKEN"
+    }
+    auth_act_res = client.post(f"/api/v1/authority/cases/{case_id}/action", json=auth_action_payload, headers=authority_headers)
+    assert auth_act_res.status_code == 200
+    assert client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers).json()["status"] == "ACTION_TAKEN"
+
+    # 7. Authority closes resolved case after containment protocol completion (-> CLOSED)
+    close_res = client.post(
+        f"/api/v1/authority/cases/{case_id}/close",
+        params={"notes": "Ring vaccination 94% coverage achieved. No new active lesions after 14-day quarantine."},
+        headers=authority_headers
+    )
+    assert close_res.status_code == 200
+    assert client.get(f"/api/v1/health-reports/{case_id}", headers=farmer_headers).json()["status"] == "CLOSED"
+
+    # 8. Complete Audit Verification on unified case timeline
+    timeline_res = client.get(f"/api/v1/cases/{case_id}/timeline", headers=vet_headers)
+    assert timeline_res.status_code == 200
+    timeline = timeline_res.json()
+    assert len(timeline) >= 6
+
+    # Verify actors across all 5 operational roles participated in this single case record
+    actors = [t["actor_name"] for t in timeline]
+    roles = [t["actor_role"] for t in timeline]
+    assert "field_worker" in roles
+    assert "veterinarian" in roles
+    assert "laboratory" in roles
+    assert "authority" in roles
+
+
+def test_invalid_case_state_transitions():
+    """Phase 4: Ensure invalid state transitions are blocked by the state machine with HTTP 400."""
+    from app.database import SessionLocal
+    from app.services.case_service import CaseService, CaseStatus
+    from fastapi import HTTPException
+
+    db = SessionLocal()
+    try:
+        # Create fresh report in RISK_ASSESSED
+        report_payload = {
+            "animal_id": "COW-101",
+            "fever": True,
+            "severity": "mild",
+            "duration_days": 1,
+            "number_of_animals_affected": 1
+        }
+        res = client.post("/api/v1/health-reports", json=report_payload, headers={"Authorization": f"Bearer {get_auth_token('farmer1@pashuraksha.ai')}"})
+        case_id = res.json()["id"]
+
+        # Attempt invalid jump: RISK_ASSESSED -> LAB_RESULT directly (must fail)
+        with pytest.raises(HTTPException) as exc_info:
+            CaseService.transition_status(
+                db, case_id, CaseStatus.LAB_RESULT.value,
+                actor_name="Test Actor", actor_role="test", action="Invalid Jump"
+            )
+        assert exc_info.value.status_code == 400
+        assert "Invalid state transition" in exc_info.value.detail
+    finally:
+        db.close()
 

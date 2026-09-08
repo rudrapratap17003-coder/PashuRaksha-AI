@@ -83,18 +83,59 @@ class VetService:
         )
         db.add(vact)
 
-        # Add Timeline Event for downstream tracking
-        from app.models.case_timeline import CaseTimelineEvent
-        tl_target_id = report_id or case_id
-        event = CaseTimelineEvent(
-            case_id=tl_target_id,
-            event_type="clinical_review",
-            title="Veterinarian Clinical Examination",
-            description=f"Action: {action_in.action}. Notes: {action_in.notes or 'Clinical review completed.'}",
-            actor_name="Dr. Priya Sharma",
-            actor_role="veterinarian"
-        )
-        db.add(event)
+        # Transition Case State
+        if rep or report_id:
+            from app.services.case_service import CaseService, CaseStatus
+            target_id = rep.id if rep else report_id
+            
+            if action_in.lab_referral:
+                new_status = CaseStatus.LAB_PENDING.value
+                # Create lab referral record if not exists
+                from app.models.lab_referral import LabReferral
+                existing_ref = db.query(LabReferral).filter(
+                    (LabReferral.report_id == target_id) | (LabReferral.case_id == case_id)
+                ).first()
+                if not existing_ref:
+                    lab_ref = LabReferral(
+                        id=f"lab-{str(uuid.uuid4())[:8]}",
+                        case_id=case_id,
+                        report_id=target_id,
+                        animal_id=rep.animal_id if rep else "ANI-101",
+                        sample_type="Epithelial Scraping / Swab",
+                        test_requested="RT-PCR for FMDV / Vesicular Panel",
+                        priority="urgent",
+                        veterinarian_name="Dr. Priya Sharma",
+                        village=rep.village if rep else "Baramati",
+                        district=rep.district if rep else "Pune",
+                        status="pending"
+                    )
+                    db.add(lab_ref)
+            elif action_in.status == "closed":
+                new_status = CaseStatus.CLOSED.value
+            elif action_in.status in ("investigated", "treated"):
+                new_status = CaseStatus.ACTION_TAKEN.value
+            else:
+                new_status = CaseStatus.VET_REVIEW.value
+
+            CaseService.transition_status(
+                db, target_id, new_status,
+                actor_name="Dr. Priya Sharma",
+                actor_role="veterinarian",
+                action=action_in.action,
+                notes=action_in.notes
+            )
+        else:
+            # Fallback Timeline Event for untracked report ID
+            from app.models.case_timeline import CaseTimelineEvent
+            event = CaseTimelineEvent(
+                case_id=case_id,
+                event_type="clinical_review",
+                title="Veterinarian Clinical Examination",
+                description=f"Action: {action_in.action}. Notes: {action_in.notes or 'Clinical review completed.'}",
+                actor_name="Dr. Priya Sharma",
+                actor_role="veterinarian"
+            )
+            db.add(event)
 
         db.commit()
 

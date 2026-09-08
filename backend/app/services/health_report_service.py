@@ -49,7 +49,8 @@ class HealthReportService:
                 risk_score=r.risk_score,
                 risk_level=r.risk_level,
                 possible_disease_concern=r.possible_disease_concern,
-                recommendation=r.recommendation
+                recommendation=r.recommendation,
+                status=getattr(r, "status", "RISK_ASSESSED") or "RISK_ASSESSED"
             )
             for r in reports
         ]
@@ -88,7 +89,8 @@ class HealthReportService:
             risk_score=r.risk_score,
             risk_level=r.risk_level,
             possible_disease_concern=r.possible_disease_concern,
-            recommendation=r.recommendation
+            recommendation=r.recommendation,
+            status=getattr(r, "status", "RISK_ASSESSED") or "RISK_ASSESSED"
         )
 
     @staticmethod
@@ -298,5 +300,6 @@ class HealthReportService:
             risk_level=rep.risk_level,
             possible_disease_concern=rep.possible_disease_concern,
             recommendation=rep.recommendation,
+            status=getattr(rep, "status", "RISK_ASSESSED") or "RISK_ASSESSED",
             contributing_factors=factors
         )

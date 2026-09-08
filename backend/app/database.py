@@ -75,6 +75,17 @@ def init_db():
     import app.models  # Ensure all models are registered
     Base.metadata.create_all(bind=engine)
     
+    # Automatically add missing columns in SQLite (schema migration safety)
+    try:
+        with engine.connect() as conn:
+            result = conn.exec_driver_sql("PRAGMA table_info(health_reports)")
+            cols = [row[1] for row in result.fetchall()]
+            if cols and "status" not in cols:
+                conn.exec_driver_sql("ALTER TABLE health_reports ADD COLUMN status VARCHAR DEFAULT 'RISK_ASSESSED'")
+                conn.commit()
+    except Exception as e:
+        logger.debug(f"SQLite schema migration notice: {e}")
+
     # Run seeder
     from app.services.seed_service import seed_database
     db = SessionLocal()

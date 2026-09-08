@@ -52,4 +52,5 @@ class HealthReportResponse(HealthReportBase):
     risk_level: Optional[str] = Field("HIGH", example="HIGH")
     possible_disease_concern: Optional[str] = Field("Possible Bovine Respiratory Disease / Elevated Viral Concern", example="Possible Bovine Respiratory Disease / Elevated Viral Concern")
     recommendation: Optional[str] = Field("Veterinary assessment recommended.", example="Veterinary assessment recommended.")
+    status: Optional[str] = Field("RISK_ASSESSED", example="RISK_ASSESSED")
     contributing_factors: Optional[list] = None

@@ -39,5 +39,6 @@ class HealthReport(Base):
     risk_level = Column(String(20), default="LOW")
     possible_disease_concern = Column(String(255), nullable=True)
     recommendation = Column(Text, nullable=True)
+    status = Column(String(50), default="RISK_ASSESSED", index=True)
     
     reported_at = Column(DateTime, default=datetime.utcnow, index=True)

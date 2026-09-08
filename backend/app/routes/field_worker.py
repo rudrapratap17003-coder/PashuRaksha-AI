@@ -10,6 +10,7 @@ from app.models.health_report import HealthReport
 from app.models.animal import Animal
 from app.models.farm import Farm
 from app.services.timeline_service import TimelineService
+from app.services.case_service import CaseService, CaseStatus
 from app.schemas.case_timeline import CaseTimelineEventCreate
 from app.schemas.health_report import HealthReportCreate
 
@@ -76,7 +77,7 @@ def get_cases(
                 "district": r.district, "risk_score": r.risk_score,
                 "risk_level": r.risk_level, "symptoms": _get_symptom_list(r),
                 "severity": r.severity, "reported_at": r.reported_at.isoformat() if r.reported_at else None,
-                "status": "pending" if r.risk_level in ("HIGH", "CRITICAL") else "monitoring",
+                "status": getattr(r, "status", "RISK_ASSESSED") or ("pending" if r.risk_level in ("HIGH", "CRITICAL") else "monitoring"),
             }
             for r in reports
         ]
@@ -90,7 +91,14 @@ def record_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_field_worker)
 ):
-    """Record a farm visit with timeline event."""
+    """Record a farm visit with timeline event and transition case to FIELD_VERIFICATION."""
+    CaseService.transition_status(
+        db, case_id, CaseStatus.FIELD_VERIFICATION.value,
+        actor_name=current_user.name or "Field Worker",
+        actor_role="field_worker",
+        action="Field Visit Conducted",
+        notes=event_data.description if event_data else "Field worker visited the farm for assessment."
+    )
     if event_data:
         return TimelineService.add_event(
             db, case_id, event_data.event_type, event_data.title,
@@ -110,6 +118,13 @@ def accept_case(
     current_user: User = Depends(require_field_worker)
 ):
     """Field worker accepts assigned case for on-site inspection."""
+    CaseService.transition_status(
+        db, case_id, CaseStatus.FIELD_VERIFICATION.value,
+        actor_name=current_user.name or "Field Worker",
+        actor_role="field_worker",
+        action="Case Accepted for Field Inspection",
+        notes=f"Field Worker {current_user.name or 'Ankita Jadhav'} accepted case for on-site verification."
+    )
     return TimelineService.add_event(
         db, case_id, "case_accepted", "Case Accepted for Field Inspection",
         f"Field Worker {current_user.name or 'Ankita Jadhav'} accepted case for immediate on-site verification in {current_user.village or 'Baramati'}.",
@@ -124,7 +139,14 @@ def record_case_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_field_worker)
 ):
-    """Record farm visit observations."""
+    """Record farm visit observations and advance case state."""
+    CaseService.transition_status(
+        db, case_id, CaseStatus.FIELD_VERIFICATION.value,
+        actor_name=current_user.name or "Field Worker",
+        actor_role="field_worker",
+        action="Farm Inspection Conducted",
+        notes=observation
+    )
     return TimelineService.add_event(
         db, case_id, "field_visit", "Farm Inspection Conducted",
         observation,
@@ -139,7 +161,14 @@ def record_sample_collection(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_field_worker)
 ):
-    """Record biological sample collection under cold-chain protocol."""
+    """Record biological sample collection and transition to SAMPLE_COLLECTED."""
+    CaseService.transition_status(
+        db, case_id, CaseStatus.SAMPLE_COLLECTED.value,
+        actor_name=current_user.name or "Field Worker",
+        actor_role="field_worker",
+        action=f"Bio-Sample Collected: {sample_type}",
+        notes=f"Collected sterile {sample_type} from lesions under strict biosecurity cold chain for immediate laboratory transmission."
+    )
     return TimelineService.add_event(
         db, case_id, "sample_collected", f"Bio-Sample Collected: {sample_type}",
         f"Collected sterile {sample_type} from lesions under strict biosecurity cold chain for immediate laboratory transmission.",
@@ -154,7 +183,14 @@ def forward_case_to_vet(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_field_worker)
 ):
-    """Forward verified field case to attending veterinarian."""
+    """Forward verified field case to attending veterinarian and transition to VET_REVIEW."""
+    CaseService.transition_status(
+        db, case_id, CaseStatus.VET_REVIEW.value,
+        actor_name=current_user.name or "Field Worker",
+        actor_role="field_worker",
+        action="Case Forwarded to Attending Veterinarian",
+        notes=notes
+    )
     return TimelineService.add_event(
         db, case_id, "forward_vet", "Case Forwarded to Attending Veterinarian",
         notes,
