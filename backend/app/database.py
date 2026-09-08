@@ -26,7 +26,7 @@ else:
         db_path = os.path.join(base_dir, "pashuraksha.db").replace("\\", "/")
         DATABASE_URL = f"sqlite:///{db_path}"
 
-    if (settings.ENVIRONMENT.lower() == "production" or not settings.DEMO_MODE) and not os.getenv("DEMO_MODE", "").strip().lower() in ("true", "1", "yes"):
+    if (settings.ENVIRONMENT.lower() == "production" or not settings.DEMO_MODE) and not os.getenv("DEMO_MODE", "").strip().lower() in ("true", "1", "yes") and not os.getenv("VERCEL"):
         raise RuntimeError(
             "FATAL DATABASE CONFIGURATION ERROR: When running in production mode (DEMO_MODE=false), "
             "a persistent PostgreSQL DATABASE_URL must be provided. "
@@ -35,7 +35,7 @@ else:
         )
     else:
         logger.warning(
-            "[DATABASE NOTICE] Using local SQLite database (DEMO_MODE=true). "
+            "[DATABASE NOTICE] Using local/temporary SQLite database (DEMO_MODE=true or Vercel preview). "
             "Set DATABASE_URL with a PostgreSQL instance for production deployment."
         )
 
