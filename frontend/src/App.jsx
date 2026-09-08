@@ -62,43 +62,43 @@ function AppRoutes() {
         }
       >
         {/* 1. Farmer Portal Routes */}
-        <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
-        <Route path="/farmer/animals" element={<FarmerAnimalsPage />} />
-        <Route path="/farmer/animals/add" element={<AddAnimalPage />} />
-        <Route path="/farmer/animals/:animalId" element={<AnimalProfilePage />} />
-        <Route path="/farmer/report" element={<SymptomReportPage />} />
-        <Route path="/farmer/vaccinations" element={<FarmerVaccinationsPage />} />
-        <Route path="/farmer/alerts" element={<FarmerAlertsPage />} />
-        <Route path="/farmer/herd" element={<HerdManagement />} />
-        <Route path="/farmer/knowledge" element={<DiseaseKnowledgeBase />} />
-        <Route path="/farmer/nutrition" element={<NutritionAdvisorPage />} />
-        <Route path="/farmer/breeds" element={<BreedRegistryPage />} />
+        <Route path="/farmer/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><FarmerDashboard /></ProtectedRoute>} />
+        <Route path="/farmer/animals" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><FarmerAnimalsPage /></ProtectedRoute>} />
+        <Route path="/farmer/animals/add" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><AddAnimalPage /></ProtectedRoute>} />
+        <Route path="/farmer/animals/:animalId" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><AnimalProfilePage /></ProtectedRoute>} />
+        <Route path="/farmer/report" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><SymptomReportPage /></ProtectedRoute>} />
+        <Route path="/farmer/vaccinations" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><FarmerVaccinationsPage /></ProtectedRoute>} />
+        <Route path="/farmer/alerts" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><FarmerAlertsPage /></ProtectedRoute>} />
+        <Route path="/farmer/herd" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><HerdManagement /></ProtectedRoute>} />
+        <Route path="/farmer/knowledge" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><DiseaseKnowledgeBase /></ProtectedRoute>} />
+        <Route path="/farmer/nutrition" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><NutritionAdvisorPage /></ProtectedRoute>} />
+        <Route path="/farmer/breeds" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><BreedRegistryPage /></ProtectedRoute>} />
 
         {/* 2. Field Worker / Pashu Sakhi Portal */}
-        <Route path="/field-worker/dashboard" element={<FieldWorkerDashboard />} />
-        <Route path="/field-worker/*" element={<FieldWorkerDashboard />} />
+        <Route path="/field-worker/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerDashboard /></ProtectedRoute>} />
+        <Route path="/field-worker/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerDashboard /></ProtectedRoute>} />
 
         {/* 3. Veterinarian Clinical Portal */}
-        <Route path="/vet/dashboard" element={<VetDashboard user={user} />} />
-        <Route path="/vet/cases/:caseId" element={<CaseDetailsPage />} />
-        <Route path="/vet/cases" element={<VetDashboard user={user} />} />
-        <Route path="/vet/amr" element={<AmrSurveillanceDesk />} />
-        <Route path="/vet/*" element={<VetDashboard user={user} />} />
+        <Route path="/vet/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN]}><VetDashboard user={user} /></ProtectedRoute>} />
+        <Route path="/vet/cases/:caseId" element={<ProtectedRoute allowedRoles={[USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN]}><CaseDetailsPage /></ProtectedRoute>} />
+        <Route path="/vet/cases" element={<ProtectedRoute allowedRoles={[USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN]}><VetDashboard user={user} /></ProtectedRoute>} />
+        <Route path="/vet/amr" element={<ProtectedRoute allowedRoles={[USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN]}><AmrSurveillanceDesk /></ProtectedRoute>} />
+        <Route path="/vet/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN]}><VetDashboard user={user} /></ProtectedRoute>} />
 
         {/* 4. Diagnostic Laboratory Portal */}
-        <Route path="/lab/dashboard" element={<LabDashboard />} />
-        <Route path="/lab/*" element={<LabDashboard />} />
+        <Route path="/lab/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.LABORATORY, USER_ROLES.ADMIN]}><LabDashboard /></ProtectedRoute>} />
+        <Route path="/lab/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.LABORATORY, USER_ROLES.ADMIN]}><LabDashboard /></ProtectedRoute>} />
 
         {/* 5. Public Health Authority Portal */}
-        <Route path="/authority/dashboard" element={<AuthorityDashboard user={user} />} />
-        <Route path="/authority/cold-chain" element={<ColdChainLogisticsPage />} />
-        <Route path="/authority/mvu-fleet" element={<MvuFleetTracker />} />
-        <Route path="/authority/market-biosecurity" element={<MarketBiosecurityPage />} />
-        <Route path="/authority/*" element={<AuthorityDashboard user={user} />} />
+        <Route path="/authority/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><AuthorityDashboard user={user} /></ProtectedRoute>} />
+        <Route path="/authority/cold-chain" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><ColdChainLogisticsPage /></ProtectedRoute>} />
+        <Route path="/authority/mvu-fleet" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><MvuFleetTracker /></ProtectedRoute>} />
+        <Route path="/authority/market-biosecurity" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><MarketBiosecurityPage /></ProtectedRoute>} />
+        <Route path="/authority/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><AuthorityDashboard user={user} /></ProtectedRoute>} />
 
         {/* 6. System Administration Console */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/*" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}><AdminDashboard /></ProtectedRoute>} />
       </Route>
 
       {/* 404 Catch-All */}

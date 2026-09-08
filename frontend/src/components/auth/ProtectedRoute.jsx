@@ -22,10 +22,13 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role) && user.role !== 'admin') {
-    // If logged in as another role, redirect to their home
+    // If logged in as another role, redirect to their designated home dashboard
     if (user.role === 'farmer') return <Navigate to="/farmer/dashboard" replace />
+    if (user.role === 'field_worker') return <Navigate to="/field-worker/dashboard" replace />
     if (user.role === 'veterinarian') return <Navigate to="/vet/dashboard" replace />
+    if (user.role === 'laboratory') return <Navigate to="/lab/dashboard" replace />
     if (user.role === 'authority') return <Navigate to="/authority/dashboard" replace />
+    if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />
     return <Navigate to="/" replace />
   }
 

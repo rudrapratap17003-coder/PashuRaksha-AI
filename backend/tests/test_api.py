@@ -88,6 +88,35 @@ def test_authentication_and_jwt(farmer_headers):
     forbidden_res = client.get("/api/v1/authority/dashboard", headers=farmer_headers)
     assert forbidden_res.status_code == 403
 
+def test_invalid_login_rejection():
+    """Phase 1: Ensure unknown emails and incorrect passwords always return HTTP 401."""
+    # Unknown email
+    res1 = client.post("/api/v1/auth/login", json={"email": "nonexistent@pashuraksha.ai", "password": "password123"})
+    assert res1.status_code == 401
+    assert "Invalid credentials" in res1.json()["detail"]
+
+    # Wrong password
+    res2 = client.post("/api/v1/auth/login", json={"email": "farmer1@pashuraksha.ai", "password": "wrong_password"})
+    assert res2.status_code == 401
+    assert "Invalid credentials" in res2.json()["detail"]
+
+def test_rbac_portal_protection(farmer_headers, vet_headers, authority_headers):
+    """Phase 1: Enforce RBAC matrix across sensitive routes."""
+    # Farmer cannot access Vet, Lab, Authority, or Admin endpoints
+    assert client.get("/api/v1/vet/cases", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/lab/dashboard", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/authority/dashboard", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/admin/stats", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/field-worker/dashboard", headers=farmer_headers).status_code == 403
+
+    # Vet can access clinical desk but not admin
+    assert client.get("/api/v1/vet/cases", headers=vet_headers).status_code == 200
+    assert client.get("/api/v1/admin/users", headers=vet_headers).status_code == 403
+
+    # Authority can access surveillance dashboard but not admin users
+    assert client.get("/api/v1/authority/dashboard", headers=authority_headers).status_code == 200
+    assert client.get("/api/v1/admin/users", headers=authority_headers).status_code == 403
+
 # 3. Livestock Digital Records CRUD Tests
 def test_animal_digital_passports_crud(farmer_headers):
     anim_id = f"COW-{uuid.uuid4().hex[:4].upper()}"
@@ -173,14 +202,14 @@ def test_spatial_clustering(vet_headers):
     assert clusters[0]["radius_km"] > 0
 
 # 7. Multi-Tier Alerts & Mark as Read Tests
-def test_alerts_pipeline():
-    alerts_res = client.get("/api/v1/alerts?role=veterinarian")
+def test_alerts_pipeline(vet_headers):
+    alerts_res = client.get("/api/v1/alerts?role=veterinarian", headers=vet_headers)
     assert alerts_res.status_code == 200
     alerts = alerts_res.json()
     assert len(alerts) >= 1
 
     top_alert_id = alerts[0]["id"]
-    read_res = client.put(f"/api/v1/alerts/{top_alert_id}/read")
+    read_res = client.put(f"/api/v1/alerts/{top_alert_id}/read", headers=vet_headers)
     assert read_res.status_code == 200
     assert read_res.json()["status"] == "success"
 
