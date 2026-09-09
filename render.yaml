@@ -12,6 +12,6 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: EXTRA_CORS_ORIGINS
-        sync: false
+        value: "https://pashu-raksha-ai.vercel.app,https://pashuraksha-ai.vercel.app"
       - key: PYTHON_VERSION
         value: "3.11.9"

@@ -1,13 +1,11 @@
 # PASHURAKSHA AI (पशुरक्षा AI) 🐄🩺
 ### Livestock Health Intelligence, Early-Warning & Epidemiological Response Platform
 
-[![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026-brightgreen.svg)](https://sih.gov.in/)
-[![Problem Statement ID](https://img.shields.io/badge/PS_ID-SIH26128-blue.svg)](https://sih.gov.in/)
-[![Department](https://img.shields.io/badge/Department-Maharashtra_State_Innovation_Society_(MSInS)-orange.svg)](https://msins.in/)
-[![State](https://img.shields.io/badge/Government-Govt._of_Maharashtra-red.svg)](https://maharashtra.gov.in/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.110-009688.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/Frontend-React_18_%2B_Vite-61DAFB.svg)](https://react.dev/)
-[![Build](https://img.shields.io/badge/Production_Build-2631_Modules_Passed-brightgreen.svg)](https://vitejs.dev/)
+[![Live App](https://img.shields.io/badge/Live_Site-pashu--raksha--ai.vercel.app-success?style=for-the-badge&logo=vercel)](https://pashu-raksha-ai.vercel.app)
+[![Jury Stage](https://img.shields.io/badge/SIH_Presentation-Live_Demo-blue?style=for-the-badge)](https://pashu-raksha-ai.vercel.app/presentation)
+
+> 🌐 **Main Live Production URL**: [**https://pashu-raksha-ai.vercel.app**](https://pashu-raksha-ai.vercel.app)  
+> ⚡ **Jury Demonstration Portal**: [**https://pashu-raksha-ai.vercel.app/presentation**](https://pashu-raksha-ai.vercel.app/presentation)
 
 ---
 
