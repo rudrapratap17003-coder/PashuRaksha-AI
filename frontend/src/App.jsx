@@ -30,6 +30,8 @@ import MvuFleetTracker from './pages/authority/MvuFleetTracker'
 import MarketBiosecurityPage from './pages/authority/MarketBiosecurityPage'
 import LabDashboard from './pages/lab/LabDashboard'
 import FieldWorkerDashboard from './pages/fieldworker/FieldWorkerDashboard'
+import FieldWorkerReportPage from './pages/fieldworker/FieldWorkerReportPage'
+import FieldWorkerCensusPage from './pages/fieldworker/FieldWorkerCensusPage'
 import AnalyticsPage from './pages/analytics/AnalyticsPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import NotFoundPage from './pages/NotFoundPage'
@@ -76,6 +78,8 @@ function AppRoutes() {
 
         {/* 2. Field Worker / Pashu Sakhi Portal */}
         <Route path="/field-worker/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerDashboard /></ProtectedRoute>} />
+        <Route path="/field-worker/report-on-behalf" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerReportPage /></ProtectedRoute>} />
+        <Route path="/field-worker/households" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerCensusPage /></ProtectedRoute>} />
         <Route path="/field-worker/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerDashboard /></ProtectedRoute>} />
 
         {/* 3. Veterinarian Clinical Portal */}

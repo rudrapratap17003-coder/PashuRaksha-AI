@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        raw_secret = os.getenv("SECRET_KEY", "").strip()
+        raw_secret = (self.SECRET_KEY or os.getenv("SECRET_KEY", "")).strip()
         is_vercel = bool(os.getenv("VERCEL"))
         env = self.ENVIRONMENT.lower()
 
