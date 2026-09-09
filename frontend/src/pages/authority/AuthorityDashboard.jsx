@@ -117,7 +117,7 @@ export default function AuthorityDashboard() {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-32">
       {/* Header: District Livestock Health Command Center */}
       <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -175,7 +175,7 @@ export default function AuthorityDashboard() {
       )}
 
       {/* 6 Command Center Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         <StatCard
           title="ACTIVE ALERTS"
           value={dashboardData?.recent_alerts?.length || 3}
@@ -213,7 +213,12 @@ export default function AuthorityDashboard() {
         />
         <StatCard
           title="FIELD TEAMS"
-          value="4 Deployed"
+          value={
+            <div className="flex flex-col leading-none">
+              <span>4</span>
+              <span className="text-lg sm:text-xl font-bold text-slate-700 mt-1">Deployed</span>
+            </div>
+          }
           subtitle="Mobile veterinary units"
           icon={Truck}
           iconBg="bg-blue-500/10 text-blue-400 border border-blue-500/20"
