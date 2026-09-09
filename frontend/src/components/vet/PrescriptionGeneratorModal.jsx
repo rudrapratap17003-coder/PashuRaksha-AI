@@ -237,16 +237,18 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
                 </div>
               </div>
 
-              {/* Footer Signature & Seal */}
-              <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[11px] text-slate-500">
-                <div>
-                  <p className="font-bold text-slate-700">Digital Validation Hash: SHA256-MH-VET-SECURE</p>
-                  <p>Scan QR code on field inspection to verify legitimacy</p>
+              {/* Footer Signature & Clinical Validation */}
+              <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[11px] text-slate-600">
+                <div className="max-w-xs">
+                  <p className="font-bold text-slate-800">Clinical Reference Verification</p>
+                  <p className="text-[10px] text-slate-500">
+                    Dosage protocol generated via PashuRaksha Clinical Decision Support Engine.
+                  </p>
                 </div>
-                <div className="text-right border-t border-dashed border-slate-400 pt-2 min-w-[180px]">
+                <div className="text-right border-t border-dashed border-slate-400 pt-2 min-w-[200px]">
                   <p className="font-bold text-slate-900">{prescription.veterinarian.name}</p>
-                  <p className="text-[10px]">Veterinary Officer (Class-I)</p>
-                  <p className="text-[9px] text-slate-400">Govt. of Maharashtra</p>
+                  <p className="text-[10px] text-slate-600">Reg: {prescription.veterinarian.reg_no}</p>
+                  <p className="text-[10px] text-slate-500">{prescription.veterinarian.polyclinic}</p>
                 </div>
               </div>
             </div>

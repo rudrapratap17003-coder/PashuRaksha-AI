@@ -258,8 +258,8 @@ export default function CaseDetailsPage() {
             onClick={() => setRxModalOpen(true)}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center space-x-2 transition"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Generate Official Rx</span>
+            <Stethoscope className="w-3.5 h-3.5" />
+            <span>Clinical Decision Support</span>
           </button>
           <span className="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1.5">
             <MapPin className="w-3.5 h-3.5 text-emerald-400" />
@@ -388,7 +388,7 @@ export default function CaseDetailsPage() {
         </div>
       </div>
 
-      {/* Official AI Prescription Generator Modal */}
+      {/* Veterinary Clinical Decision Support Modal */}
       <PrescriptionGeneratorModal
         isOpen={rxModalOpen}
         onClose={() => setRxModalOpen(false)}
@@ -399,8 +399,8 @@ export default function CaseDetailsPage() {
             {
               id: `evt-${Date.now()}`,
               event_type: 'treatment',
-              title: `Official Rx Generated: ${rx.prescription_id}`,
-              description: `Prescribed ${rx.medications.length} medications for ${rx.diagnosis} (Withdrawal milk: ${rx.withdrawal_period.milk}).`,
+              title: `Clinical Reference Generated: ${rx.prescription_id}`,
+              description: `Generated dosage reference for ${rx.medications.length} medications for ${rx.diagnosis} (Withdrawal milk: ${rx.withdrawal_period.milk}).`,
               actor_name: rx.veterinarian.name,
               actor_role: 'veterinarian',
               created_at: new Date().toISOString()

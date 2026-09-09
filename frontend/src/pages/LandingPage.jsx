@@ -46,7 +46,7 @@ export default function LandingPage() {
     {
       title: 'Veterinary Desk',
       marathi: 'पशुवैद्यकीय दवाखाना',
-      description: 'AI case triage, prescriptions, and lab referrals.',
+      description: 'AI case triage, clinical decision support, and lab referrals.',
       link: '/vet/dashboard',
       icon: Stethoscope,
       color: 'bg-blue-600',

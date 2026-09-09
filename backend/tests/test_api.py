@@ -629,3 +629,60 @@ def test_phase5_outbreak_detection_14_day_filtering_and_gis(vet_headers, authori
     assert act_data["new_status"] == "contained"
     assert act_data["cluster_id"] == cluster_id
 
+
+def test_phase6_veterinary_clinical_decision_support_and_medical_safety(farmer_headers, vet_headers):
+    """
+    Phase 6: Verify Veterinary Clinical Decision Support, Role-Based Access Control,
+    Mandatory Medical Disclaimers, and Removal of Fake Certification/Hashes.
+    """
+    # 1. Role-based access check: Farmer cannot access clinical protocols
+    farmer_proto_res = client.get("/api/v1/treatments/protocols", headers=farmer_headers)
+    assert farmer_proto_res.status_code in [401, 403]
+
+    # 2. Veterinarian can access clinical treatment protocols
+    vet_proto_res = client.get("/api/v1/treatments/protocols", headers=vet_headers)
+    assert vet_proto_res.status_code == 200
+    protocols = vet_proto_res.json()
+    assert "FMD" in protocols
+    assert "LSD" in protocols
+    assert len(protocols["FMD"]["medications"]) >= 2
+
+    # 3. Farmer cannot generate clinical prescription reference
+    farmer_gen_res = client.post(
+        "/api/v1/treatments/generate-prescription",
+        params={"case_id": 1, "animal_id": 1, "disease_code": "FMD", "body_weight_kg": 400.0},
+        headers=farmer_headers
+    )
+    assert farmer_gen_res.status_code in [401, 403]
+
+    # 4. Veterinarian generates clinical decision support reference
+    vet_gen_res = client.post(
+        "/api/v1/treatments/generate-prescription",
+        params={
+            "case_id": 101,
+            "animal_id": 202,
+            "disease_code": "FMD",
+            "body_weight_kg": 420.0,
+            "vet_name": "Dr. Vivek Kulkarni, B.V.Sc",
+            "reg_number": "MSVC-98421",
+            "clinic_name": "Taluka Veterinary Polyclinic, Baramati"
+        },
+        headers=vet_headers
+    )
+    assert vet_gen_res.status_code == 200
+    rx_data = vet_gen_res.json()
+
+    # Verify medical safety disclaimer is present and mandatory
+    assert "disclaimer" in rx_data
+    assert "AI-assisted clinical reference only" in rx_data["disclaimer"]
+    assert "licensed veterinarian" in rx_data["disclaimer"]
+
+    # Verify document title & calculated dosage
+    assert "VETERINARY CLINICAL DECISION SUPPORT" in rx_data["document_title"]
+    assert len(rx_data["medications"]) >= 2
+    assert rx_data["patient"]["estimated_weight_kg"] == 420.0
+
+    # Verify NO fake SHA256 hashes or unauthorized government claims exist in payload
+    assert "SHA256-MH-VET-SECURE" not in str(rx_data)
+    assert "Class-I" not in str(rx_data)
+

@@ -192,9 +192,9 @@ class TreatmentService:
             "supportive_care": protocol["supportive_care"],
             "isolation_protocol": protocol["isolation_protocol"],
             "withdrawal_period": protocol["withdrawal_period"],
-            "document_title": "VETERINARY CLINICAL REFERENCE",
+            "document_title": "VETERINARY CLINICAL DECISION SUPPORT REFERENCE",
             "disclaimer": "AI-assisted clinical reference only. Final diagnosis, treatment and dosage decisions must be made by a licensed veterinarian.",
-            "emergency_contact": "Toll-Free Pashu Sanjeevani: 1962 / Pune Control: 020-25538300"
+            "emergency_contact": "Toll-Free Pashu Sanjeevani: 1962 / District Veterinary Dispensary"
         }
         return prescription
 

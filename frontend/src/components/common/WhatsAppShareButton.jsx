@@ -11,16 +11,16 @@ export default function WhatsAppShareButton({
   const handleShare = () => {
     let text = message
     if (prescriptionData) {
-      text = `🏛️ *महाराष्ट्र शासन • पशुसंवर्धन विभाग (GoM)*\n*PASHURAKSHA AI DIGITAL PRESCRIPTION*\n\n` +
-        `📋 *Rx ID:* ${prescriptionData.prescription_id}\n` +
+      text = `📋 *PASHURAKSHA AI — VETERINARY CLINICAL DECISION SUPPORT*\n\n` +
+        `🆔 *Reference ID:* ${prescriptionData.prescription_id}\n` +
         `🐄 *Animal ID:* #${prescriptionData.patient?.animal_id} (${prescriptionData.patient?.estimated_weight_kg} kg)\n` +
-        `🩺 *Diagnosis:* ${prescriptionData.diagnosis}\n` +
-        `👨‍⚕️ *Veterinarian:* ${prescriptionData.veterinarian?.name}\n\n` +
-        `💊 *Prescribed Medications:*\n` +
+        `🩺 *Suspected Diagnosis:* ${prescriptionData.diagnosis}\n` +
+        `👨‍⚕️ *Attending Veterinarian:* ${prescriptionData.veterinarian?.name}\n\n` +
+        `💊 *Calculated Dosage Reference:*\n` +
         prescriptionData.medications?.map((m, i) => `${i + 1}. *${m.drug_name}* - Dose: ${m.calculated_dose} (${m.route}) for ${m.frequency}`).join('\n') +
-        `\n\n⚠️ *Mandatory Milk Withholding:* ${prescriptionData.withdrawal_period?.milk || '7 days'}\n` +
-        `📞 *Toll-Free Helpline:* 1962 (24x7 Pashu Sanjeevani)\n\n` +
-        `_Digital Validation Hash: SHA256-MH-VET-SECURE_`
+        `\n\n⚠️ *Milk Withholding Guidance:* ${prescriptionData.withdrawal_period?.milk || '7 days'}\n` +
+        `📞 *Toll-Free Helpline:* 1962 (Pashu Sanjeevani)\n\n` +
+        `_Note: AI-assisted clinical reference only. Final diagnosis, treatment and dosage decisions must be made by a licensed veterinarian._`
     }
 
     const encoded = encodeURIComponent(text)

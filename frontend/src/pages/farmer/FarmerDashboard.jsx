@@ -55,11 +55,14 @@ export default function FarmerDashboard() {
     fetchFarmerData()
   }, [])
 
+  const farmerDisplayName = user?.name || 'Farmer'
+  const farmerLocation = `${user?.village || 'Baramati'}, ${user?.district || 'Pune'}`
+
   const translations = {
     mr: {
-      welcome: 'नमस्कार, रमेश पाटील',
+      welcome: `नमस्कार, ${farmerDisplayName}`,
       sub: 'आपली जनावरे AI निगराणी अंतर्गत सुरक्षित आहेत',
-      villageBadge: 'बारामती, पुणे',
+      villageBadge: farmerLocation,
       reportBtn: 'लक्षणे नोंदवा',
       voiceBtn: 'बोलून सांगा',
       addAnimal: 'नवीन जनावर जोडा',
@@ -72,9 +75,9 @@ export default function FarmerDashboard() {
       lossBtn: 'नुकसान मोजा →'
     },
     hi: {
-      welcome: 'नमस्ते, रमेश पाटिल',
+      welcome: `नमस्ते, ${farmerDisplayName}`,
       sub: 'आपके पशु AI निगरानी के तहत सुरक्षित हैं',
-      villageBadge: 'बारामती, पुणे',
+      villageBadge: farmerLocation,
       reportBtn: 'लक्षण दर्ज करें',
       voiceBtn: 'बोलकर बताएं',
       addAnimal: 'नया पशु जोड़ें',
@@ -87,9 +90,9 @@ export default function FarmerDashboard() {
       lossBtn: 'नुकसान मोजा →'
     },
     en: {
-      welcome: 'Welcome, Ramesh Patil',
+      welcome: `Welcome, ${farmerDisplayName}`,
       sub: 'Your animals are protected under AI health monitoring',
-      villageBadge: 'Baramati, Pune',
+      villageBadge: farmerLocation,
       reportBtn: 'Report Symptoms',
       voiceBtn: 'Speak to Report',
       addAnimal: 'Add Animal',
@@ -305,6 +308,8 @@ export default function FarmerDashboard() {
       <VoiceReportModal
         isOpen={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}
+        availableAnimals={animals}
+        defaultAnimalId={animals[0]?.animal_id || ''}
         onSuccess={() => fetchFarmerData()}
       />
       <EconomicLossCalculator

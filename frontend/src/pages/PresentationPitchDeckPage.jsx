@@ -65,7 +65,7 @@ const SLIDES = [
         {[
           { name: '1. Farmer Shed Portal', desc: '11-symptom syndromic intake, Marathi voice assistant, vision lesion scan, feed optimizer.' },
           { name: '2. Pashu Sakhi Hub', desc: 'Village door-to-door livestock census, offline-first reporting, sample tracking.' },
-          { name: '3. Vet Clinical Desk', desc: 'AI triage queue, digital WhatsApp prescription engine, lab referral dispatch.' },
+          { name: '3. Vet Clinical Desk', desc: 'AI triage queue, veterinary clinical decision support advisory, lab referral dispatch.' },
           { name: '4. Diagnostic Lab Desk', desc: 'Biological sample accessioning, RT-PCR validation, central registry sync.' },
           { name: '5. District Authority Command', desc: 'Spatial GIS contagion heatmap, 10km quarantine cordon, 1962 MVU GPS dispatch.' },
           { name: '6. Epidemiology Desk', desc: 'Attack rates, district incidence curves, dairy economic loss & relief calculators.' }

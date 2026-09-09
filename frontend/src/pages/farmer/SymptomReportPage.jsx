@@ -520,29 +520,29 @@ export default function SymptomReportPage() {
       <VoiceReportModal
         isOpen={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}
+        defaultAnimalId={selectedAnimalId}
+        availableAnimals={animals}
         onSymptomsDetected={(symList) => {
-          // Map recognized strings to ids
-          const mapped = symList.map(s => s.toLowerCase().replace(' ', '_'))
-          setSelectedSymptoms(mapped)
+          setSelectedSymptoms(prev => Array.from(new Set([...prev, ...symList])))
         }}
       />
 
-      {/* Visual Lesion AI Scanner Modal */}
+      {/* Visual Lesion Scanner Modal */}
       <VisualLesionScannerModal
         isOpen={lesionScannerOpen}
         onClose={() => setLesionScannerOpen(false)}
         onApplyToReport={(scan) => {
           const syms = []
-          if (scan.symptomsMatched.fever) syms.push('fever')
-          if (scan.symptomsMatched.salivation) syms.push('excessive_salivation')
-          if (scan.symptomsMatched.lesions) syms.push('mouth_lesions')
-          if (scan.symptomsMatched.reduced_appetite) syms.push('loss_of_appetite')
-          if (scan.symptomsMatched.reduced_milk) syms.push('sudden_drop_milk')
-          if (scan.symptomsMatched.swelling) syms.push('body_swelling')
-          if (scan.symptomsMatched.lethargy) syms.push('lethargy')
-          setSelectedSymptoms(syms)
-          if (scan.severity.includes('Severe')) setSeverity('severe')
-          else if (scan.severity.includes('High')) setSeverity('severe')
+          if (scan.symptomsMatched?.fever) syms.push('fever')
+          if (scan.symptomsMatched?.salivation) syms.push('salivation')
+          if (scan.symptomsMatched?.lesions) syms.push('lesions')
+          if (scan.symptomsMatched?.reduced_appetite) syms.push('reduced_appetite')
+          if (scan.symptomsMatched?.reduced_milk) syms.push('reduced_milk')
+          if (scan.symptomsMatched?.swelling) syms.push('swelling')
+          if (scan.symptomsMatched?.lethargy) syms.push('lethargy')
+          setSelectedSymptoms(prev => Array.from(new Set([...prev, ...syms])))
+          if (scan.severity?.toLowerCase().includes('severe')) setSeverity('severe')
+          else if (scan.severity?.toLowerCase().includes('high')) setSeverity('severe')
           else setSeverity('moderate')
         }}
       />
