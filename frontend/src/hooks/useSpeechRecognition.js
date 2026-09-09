@@ -10,45 +10,51 @@ export const LOCALE_MAP = {
 }
 
 /**
- * Localized Error Messages
+ * Localized Error Messages matching SIH26128 requirements
  */
 export const SPEECH_ERROR_MESSAGES = {
   'not-allowed': {
-    en: 'Microphone access was denied. Please allow microphone permission in your browser settings.',
-    hi: 'माइक्रोफ़ोन एक्सेस अस्वीकृत कर दिया गया। कृपया ब्राउज़र सेटिंग्स में माइक्रोफ़ोन की अनुमति दें।',
-    mr: 'मायक्रोफोन प्रवेश नाकारला गेला. कृपया आपल्या ब्राउझर सेटिंग्जमध्ये मायक्रोफोनची परवानगी द्या.'
+    en: 'Microphone permission is required for voice reporting. Please allow microphone access in your browser settings.',
+    hi: 'वॉइस रिपोर्टिंग के लिए माइक्रोफ़ोन की अनुमति आवश्यक है। कृपया अपनी ब्राउज़र सेटिंग्स में माइक्रोफ़ोन की अनुमति दें।',
+    mr: 'व्हॉईस रिपोर्टिंगसाठी मायक्रोफोनची परवानगी आवश्यक आहे. कृपया आपल्या ब्राउझर सेटिंग्जमध्ये मायक्रोफोनची परवानगी द्या.'
+  },
+  'service-not-allowed': {
+    en: 'Microphone permission was denied. Please enable microphone access in your browser.',
+    hi: 'माइक्रोफ़ोन एक्सेस अस्वीकृत कर दिया गया। कृपया ब्राउज़र में माइक्रोफ़ोन चालू करें।',
+    mr: 'मायक्रोफोन प्रवेश नाकारला गेला. कृपया ब्राउझरमध्ये मायक्रोफोन सुरू करा.'
   },
   'no-speech': {
-    en: 'No speech detected. Please try speaking closer to your microphone.',
-    hi: 'कोई आवाज़ नहीं सुनाई दी। कृपया माइक्रोफ़ोन के पास आकर बोलें।',
-    mr: 'कोणताही आवाज आढळला नाही. कृपया मायक्रोफोनजवळ येऊन स्पष्ट बोला.'
-  },
-  'network': {
-    en: 'Network error occurred during speech recognition. Please check your internet connection.',
-    hi: 'ध्वनि पहचान के दौरान नेटवर्क त्रुटि हुई। कृपया इंटरनेट कनेक्शन जांचें।',
-    mr: 'आवाज ओळखताना नेटवर्क त्रुटी आली. कृपया आपले इंटरनेट कनेक्शन तपासा.'
+    en: 'No speech detected. Please try speaking again closer to your microphone.',
+    hi: 'कोई आवाज़ नहीं सुनाई दी। कृपया माइक्रोफ़ोन के पास आकर पुनः बोलें।',
+    mr: 'कोणताही आवाज आढळला नाही. कृपया मायक्रोफोनजवळ येऊन पुन्हा बोला.'
   },
   'audio-capture': {
-    en: 'No microphone found or audio capture failed.',
-    hi: 'कोई माइक्रोफ़ोन नहीं मिला या ऑडियो कैप्चर विफल रहा।',
-    mr: 'मायक्रोफोन सापडला नाही किंवा ऑडिओ कॅप्चर अयशस्वी झाले.'
+    en: 'No microphone was detected. Please check your audio input device.',
+    hi: 'कोई माइक्रोफ़ोन नहीं मिला। कृपया अपना ऑडियो इनपुट उपकरण जांचें।',
+    mr: 'मायक्रोफोन सापडला नाही. कृपया आपले ऑडिओ डिव्हाइस तपासा.'
+  },
+  'network': {
+    en: 'Voice recognition could not connect. Please check your internet connection.',
+    hi: 'ध्वनि पहचान कनेक्ट नहीं हो सकी। कृपया इंटरनेट कनेक्शन जांचें।',
+    mr: 'आवाज ओळख कनेक्ट होऊ शकली नाही. कृपया आपले इंटरनेट कनेक्शन तपासा.'
   },
   'unsupported': {
-    en: 'Speech Recognition is not supported by your browser. Use Chrome, Edge, or Safari.',
-    hi: 'आपका ब्राउज़र स्पीच रिकग्निशन का समर्थन नहीं करता। कृपया Chrome या Edge का उपयोग करें।',
-    mr: 'आपला ब्राउझर स्पीच रेकग्निशनला समर्थन देत नाही. कृपया Chrome किंवा Edge वापरा.'
+    en: 'Voice input is not supported in this browser. Please use Google Chrome.',
+    hi: 'इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है। कृपया Google Chrome का उपयोग करें।',
+    mr: 'या ब्राउझरमध्ये व्हॉईस इनपुट समर्थित नाही. कृपया Google Chrome वापरा.'
   },
   'default': {
-    en: 'An error occurred during voice recognition.',
-    hi: 'ध्वनि पहचान में त्रुटि हुई।',
-    mr: 'आवाज ओळखताना त्रुटी आली.'
+    en: 'An error occurred during voice recognition. Please try again.',
+    hi: 'ध्वनि पहचान में त्रुटि हुई। कृपया पुनः प्रयास करें।',
+    mr: 'आवाज ओळखताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.'
   }
 }
 
 /**
  * useSpeechRecognition Hook
  * 
- * Provides a clean, reactive interface to the browser's Web Speech API (SpeechRecognition / webkitSpeechRecognition).
+ * Provides a production-ready reactive interface to the browser's Web Speech API
+ * (window.SpeechRecognition || window.webkitSpeechRecognition) with live logs and robust lifecycle handling.
  */
 export function useSpeechRecognition({
   defaultLang = 'mr',
@@ -67,15 +73,28 @@ export function useSpeechRecognition({
   const recognitionRef = useRef(null)
   const shouldListenRef = useRef(false)
   const langRef = useRef(defaultLang)
+  const accumulatedFinalRef = useRef('')
+  const sessionFinalRef = useRef('')
 
+  const onResultRef = useRef(onResult)
+  const onErrorRef = useRef(onError)
+  const onEndRef = useRef(onEnd)
+
+  // Keep callback refs synced to latest render props
+  useEffect(() => {
+    onResultRef.current = onResult
+    onErrorRef.current = onError
+    onEndRef.current = onEnd
+  }, [onResult, onError, onEnd])
+
+  // Check browser speech recognition support
   const isSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
 
-  // Keep langRef synced
   useEffect(() => {
     langRef.current = defaultLang
   }, [defaultLang])
 
-  // Clean up on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       shouldListenRef.current = false
@@ -98,26 +117,34 @@ export function useSpeechRecognition({
 
   const startListening = useCallback(({
     lang = langRef.current,
-    reset = false
+    reset = false,
+    existingText = ''
   } = {}) => {
+    console.log('[Voice] Button clicked')
+
     if (!isSupported) {
+      console.warn('[Voice] SpeechRecognition unsupported in this browser')
       const msg = getErrorMessage('unsupported', lang)
       setError(msg)
       setErrorCode('unsupported')
-      if (onError) onError({ error: 'unsupported', message: msg })
+      if (onErrorRef.current) onErrorRef.current({ error: 'unsupported', message: msg })
       return
     }
 
     if (reset) {
-      setTranscript('')
+      accumulatedFinalRef.current = existingText ? existingText.trim() : ''
+      sessionFinalRef.current = ''
+      setTranscript(accumulatedFinalRef.current)
       setInterimTranscript('')
+    } else if (existingText && !accumulatedFinalRef.current) {
+      accumulatedFinalRef.current = existingText.trim()
     }
 
     setError(null)
     setErrorCode(null)
     shouldListenRef.current = true
 
-    // Abort existing instance if any
+    // Clean up existing instance if any
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort()
@@ -129,6 +156,7 @@ export function useSpeechRecognition({
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
+    console.log('[Voice] Recognition initialized')
 
     const resolvedLocale = LOCALE_MAP[lang] || (lang.includes('-') ? lang : `${lang}-IN`)
     recognition.lang = resolvedLocale
@@ -137,46 +165,79 @@ export function useSpeechRecognition({
     recognition.maxAlternatives = 1
 
     recognition.onstart = () => {
+      console.log('[Voice] Recognition started')
       setIsListening(true)
       setError(null)
       setErrorCode(null)
     }
 
-    recognition.onresult = (event) => {
-      let currentInterim = ''
-      let finalAccumulated = ''
+    recognition.onaudiostart = () => {
+      console.log('[Voice] Audio capture started')
+    }
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
+    recognition.onspeechstart = () => {
+      console.log('[Voice] Speech detected')
+    }
+
+    recognition.onresult = (event) => {
+      console.log('[Voice] Result received', event)
+      let currentSessionFinal = ''
+      let currentInterim = ''
+
+      for (let i = 0; i < event.results.length; ++i) {
         const item = event.results[i]
-        const text = item[0].transcript
+        const text = item[0]?.transcript || ''
         if (item.isFinal) {
-          finalAccumulated += text + ' '
+          currentSessionFinal += text + ' '
         } else {
           currentInterim += text
         }
       }
 
-      if (finalAccumulated) {
-        setTranscript((prev) => {
-          const updated = (prev ? prev.trim() + ' ' : '') + finalAccumulated.trim()
-          if (onResult) onResult({ transcript: updated, isFinal: true })
-          return updated
-        })
+      sessionFinalRef.current = currentSessionFinal.trim()
+
+      if (currentInterim) {
+        console.log('[Voice] Interim transcript:', currentInterim)
       }
 
+      const baseAccumulated = accumulatedFinalRef.current ? accumulatedFinalRef.current.trim() : ''
+      const sessionPart = sessionFinalRef.current ? sessionFinalRef.current.trim() : ''
+      
+      let totalFinal = baseAccumulated
+      if (sessionPart) {
+        totalFinal = baseAccumulated ? `${baseAccumulated} ${sessionPart}` : sessionPart
+      }
+
+      if (sessionPart) {
+        console.log('[Voice] Final transcript:', totalFinal)
+      }
+
+      const fullLive = (totalFinal ? `${totalFinal} ${currentInterim}` : currentInterim).trim()
+
+      setTranscript(totalFinal)
       setInterimTranscript(currentInterim)
-      if (currentInterim && onResult) {
-        onResult({ interimTranscript: currentInterim, isFinal: false })
+
+      if (onResultRef.current) {
+        onResultRef.current({
+          transcript: totalFinal,
+          interimTranscript: currentInterim,
+          fullTranscript: fullLive,
+          isFinal: Boolean(sessionPart && !currentInterim)
+        })
       }
     }
 
     recognition.onerror = (event) => {
       const code = event.error
-      console.warn('SpeechRecognition error:', code, event)
-      
-      // 'no-speech' is common and usually benign if continuous
+      console.warn('[Voice] Recognition error:', code, event)
+
       if (code === 'no-speech') {
-        // Don't kill listening immediately if user is pausing
+        // Pausing while speaking is normal; do not terminate unless stopped
+        return
+      }
+
+      if (code === 'aborted') {
+        // Clean user stop
         return
       }
 
@@ -186,40 +247,52 @@ export function useSpeechRecognition({
       setIsListening(false)
       shouldListenRef.current = false
 
-      if (onError) onError({ error: code, message: msg, event })
+      if (onErrorRef.current) onErrorRef.current({ error: code, message: msg, event })
     }
 
     recognition.onend = () => {
+      console.log('[Voice] Recognition ended')
+
+      // Consolidate finalized session text into accumulated ref
+      if (sessionFinalRef.current) {
+        const base = accumulatedFinalRef.current ? accumulatedFinalRef.current.trim() : ''
+        accumulatedFinalRef.current = base ? `${base} ${sessionFinalRef.current}` : sessionFinalRef.current
+        sessionFinalRef.current = ''
+      }
       setInterimTranscript('')
-      // If user did not manually request stop and continuous is on, restart if desirable
+
+      // Auto-restart if continuous mode is expected and user has not clicked stop
       if (shouldListenRef.current && continuous) {
         try {
           recognition.start()
+          console.log('[Voice] Recognition auto-restarted for continuous listening')
           return
-        } catch {
-          // fall through
+        } catch (err) {
+          console.warn('[Voice] Failed to restart recognition:', err)
         }
       }
+
       setIsListening(false)
       shouldListenRef.current = false
-      if (onEnd) onEnd()
+      if (onEndRef.current) onEndRef.current()
     }
 
     try {
       recognition.start()
       recognitionRef.current = recognition
     } catch (err) {
-      console.error('Failed to start speech recognition:', err)
+      console.error('[Voice] Failed to start speech recognition:', err)
       setIsListening(false)
       shouldListenRef.current = false
       const msg = getErrorMessage('audio-capture', lang)
       setError(msg)
       setErrorCode('audio-capture')
-      if (onError) onError({ error: 'audio-capture', message: msg, originalError: err })
+      if (onErrorRef.current) onErrorRef.current({ error: 'audio-capture', message: msg, originalError: err })
     }
-  }, [isSupported, continuous, interimResults, getErrorMessage, onResult, onError, onEnd])
+  }, [isSupported, continuous, interimResults, getErrorMessage])
 
   const stopListening = useCallback(() => {
+    console.log('[Voice] Stop requested by user')
     shouldListenRef.current = false
     setIsListening(false)
     setInterimTranscript('')
@@ -237,14 +310,16 @@ export function useSpeechRecognition({
     }
   }, [])
 
-  const resetTranscript = useCallback(() => {
-    setTranscript('')
+  const resetTranscript = useCallback((initialValue = '') => {
+    accumulatedFinalRef.current = initialValue ? initialValue.trim() : ''
+    sessionFinalRef.current = ''
+    setTranscript(accumulatedFinalRef.current)
     setInterimTranscript('')
     setError(null)
     setErrorCode(null)
   }, [])
 
-  const fullTranscript = (transcript ? transcript + (interimTranscript ? ' ' + interimTranscript : '') : interimTranscript).trim()
+  const fullTranscript = (transcript ? (transcript + (interimTranscript ? ' ' + interimTranscript : '')) : interimTranscript).trim()
 
   return {
     isSupported,

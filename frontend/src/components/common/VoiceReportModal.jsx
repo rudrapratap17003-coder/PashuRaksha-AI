@@ -35,27 +35,27 @@ export const CLINICAL_SYMPTOM_LEXICON = [
   {
     id: 'lesions',
     label: 'Mouth / Skin Blisters (तोंडात फोड / छाले)',
-    keywords: ['lesion', 'blister', 'ulcer', 'sore', 'wound', 'फोड', 'तोंडात', 'छाले', 'घाव', 'गाठ', 'nodule', 'eruption', 'khur', 'chhale', 'phod']
+    keywords: ['lesion', 'blister', 'ulcer', 'sore', 'wound', 'फोड', 'तोंडात', 'छाले', 'घाव', 'गाठ', 'nodule', 'eruption', 'khur', 'chhale', 'phod', 'vesicle']
   },
   {
     id: 'salivation',
     label: 'Excessive Salivation (लाळ गळणे / लार टपकना)',
-    keywords: ['saliv', 'drool', 'froth', 'लाळ', 'लार', 'गळत', 'टपकना', 'foam', 'laal', 'laar']
+    keywords: ['saliv', 'drool', 'froth', 'लाळ', 'लार', 'गळत', 'टपकना', 'foam', 'laal', 'laar', 'drooling']
   },
   {
     id: 'reduced_appetite',
     label: 'Loss of Appetite (चारा न खाणे / भूख कम)',
-    keywords: ['appetite', 'feed', 'eat', 'fodder', 'चारा', 'खात नाही', 'खात', 'भूख', 'दाना', 'off-feed', 'chara', 'bhookh']
+    keywords: ['appetite', 'feed', 'eat', 'fodder', 'चारा', 'खात नाही', 'खात', 'भूख', 'दाना', 'off-feed', 'chara', 'bhookh', 'not eating', 'eating']
   },
   {
     id: 'reduced_milk',
     label: 'Reduced Milk Yield (दूध कमी)',
-    keywords: ['milk', 'yield', 'दूध', 'दूध कमी', 'drop in milk', 'less milk', 'doodh', 'dudh']
+    keywords: ['milk', 'yield', 'दूध', 'दूध कमी', 'drop in milk', 'less milk', 'doodh', 'dudh', 'ghat']
   },
   {
     id: 'cough',
     label: 'Cough (खोकला / खांसी)',
-    keywords: ['cough', 'खोकला', 'खांसी', 'कफ', 'khokla', 'khansi']
+    keywords: ['cough', 'खोकला', 'खांसी', 'कफ', 'khokla', 'khansi', 'coughing']
   },
   {
     id: 'nasal_discharge',
@@ -65,7 +65,7 @@ export const CLINICAL_SYMPTOM_LEXICON = [
   {
     id: 'difficulty_breathing',
     label: 'Difficulty Breathing (श्वास घेण्यास त्रास / सांस फूलना)',
-    keywords: ['breath', 'panting', 'श्वास', 'सांस', 'दम', 'wheez', 'shwas', 'dum']
+    keywords: ['breath', 'panting', 'श्वास', 'सांस', 'दम', 'wheez', 'shwas', 'dum', 'breathing']
   },
   {
     id: 'diarrhea',
@@ -75,29 +75,14 @@ export const CLINICAL_SYMPTOM_LEXICON = [
   {
     id: 'swelling',
     label: 'Swelling / Edema (सूज / सूजन)',
-    keywords: ['swell', 'swelling', 'सूज', 'सूजन', 'गाठ', 'sujan', 'sooj']
+    keywords: ['swell', 'swelling', 'सूज', 'सूजन', 'गाठ', 'sujan', 'sooj', 'swollen']
   },
   {
     id: 'lethargy',
     label: 'Lethargy / Dullness (सुस्ती / कमजोरी)',
-    keywords: ['letharg', 'dull', 'weak', 'सुस्ती', 'कमजोरी', 'अशक्त', 'sust', 'kamjori']
+    keywords: ['letharg', 'dull', 'weak', 'सुस्ती', 'कमजोरी', 'अशक्त', 'sust', 'kamjori', 'depressed']
   }
 ]
-
-export const SAMPLE_DIALECT_TRANSCRIPTS = {
-  mr: {
-    title: 'मराठी नमुना आवाज',
-    text: 'माझ्या गाईला दोन दिवसांपासून तीव्र ताप आहे, तोंडात फोड आले आहेत, लाळ गळत आहे आणि चारा खात नाही.'
-  },
-  hi: {
-    title: 'हिंदी नमूना आवाज',
-    text: 'मेरी गाय को दो दिन से तेज बुखार है, मुंह में छाले हैं, लार टपक रही है और चारा नहीं खा रही है।'
-  },
-  en: {
-    title: 'English Sample Voice',
-    text: 'My animal has high fever, blisters in mouth, excessive salivation and stopped eating feed.'
-  }
-}
 
 export default function VoiceReportModal({
   isOpen,
@@ -105,7 +90,8 @@ export default function VoiceReportModal({
   onSuccess,
   onSymptomsDetected,
   defaultAnimalId = '',
-  availableAnimals = []
+  availableAnimals = [],
+  initialText = ''
 }) {
   if (!isOpen) return null
 
@@ -113,7 +99,7 @@ export default function VoiceReportModal({
   const { language: appLang } = useLanguage()
   const [selectedLang, setSelectedLang] = useState(appLang || 'mr')
   const [step, setStep] = useState('idle') // 'idle' | 'listening' | 'analyzed' | 'submitted'
-  const [editableTranscript, setEditableTranscript] = useState('')
+  const [editableTranscript, setEditableTranscript] = useState(initialText || '')
   const [symptomList, setSymptomList] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [recognitionSource, setRecognitionSource] = useState('browser') // 'browser' | 'demo'
@@ -128,7 +114,7 @@ export default function VoiceReportModal({
     if (appLang) setSelectedLang(appLang)
   }, [appLang])
 
-  // Parse symptoms from given text string
+  // Parse symptoms from text
   const parseSymptomsFromText = useCallback((text) => {
     if (!text) return CLINICAL_SYMPTOM_LEXICON.map(sym => ({ ...sym, checked: false }))
     const lower = text.toLowerCase()
@@ -157,47 +143,34 @@ export default function VoiceReportModal({
     defaultLang: selectedLang,
     continuous: true,
     interimResults: true,
-    onResult: ({ transcript: finalT, interimTranscript: interimT }) => {
-      const combined = (finalT ? finalT.trim() + ' ' : '') + (interimT || '').trim()
-      setEditableTranscript(combined.trim())
-      const detected = parseSymptomsFromText(combined)
+    onResult: ({ fullTranscript: liveFull, transcript: finalT, interimTranscript: interimT }) => {
+      const currentText = (liveFull || finalT || interimT || '').trim()
+      setEditableTranscript(currentText)
+      const detected = parseSymptomsFromText(currentText)
       setSymptomList(detected)
     },
     onError: (err) => {
-      console.warn('SpeechRecognition encountered error:', err)
+      console.warn('[Voice] Modal error handler:', err)
     }
   })
 
-  // Start live microphone listening
+  // Start live microphone recording
   const handleStartRecording = () => {
+    console.log('[Voice] Modal start recording triggered')
     setRecognitionSource('browser')
-    resetTranscript()
-    setEditableTranscript('')
-    setSymptomList(CLINICAL_SYMPTOM_LEXICON.map(s => ({ ...s, checked: false })))
     setStep('listening')
-    startListening({ lang: selectedLang, reset: true })
+    startListening({
+      lang: selectedLang,
+      reset: !editableTranscript,
+      existingText: editableTranscript
+    })
   }
 
-  // Stop recording and move to review & analyze
+  // Stop recording and move to review
   const handleStopRecording = () => {
+    console.log('[Voice] Modal stop recording triggered')
     stopListening()
     setStep('analyzed')
-  }
-
-  // Demo dialect simulation
-  const handleDemoDialectSimulation = () => {
-    stopListening()
-    setRecognitionSource('demo')
-    setStep('listening')
-    setEditableTranscript('')
-
-    setTimeout(() => {
-      const sample = SAMPLE_DIALECT_TRANSCRIPTS[selectedLang]?.text || SAMPLE_DIALECT_TRANSCRIPTS.mr.text
-      setEditableTranscript(sample)
-      const extracted = parseSymptomsFromText(sample)
-      setSymptomList(extracted)
-      setStep('analyzed')
-    }, 1200)
   }
 
   const handleToggleSymptom = (id) => {
@@ -222,18 +195,18 @@ export default function VoiceReportModal({
 
   const handleClose = () => {
     stopListening()
-    resetTranscript()
     onClose()
   }
 
   const handleLodgeVoiceReport = async () => {
     const selectedSymptoms = symptomList.filter((s) => s.checked).map((s) => s.id)
-    if (selectedSymptoms.length === 0) {
-      alert('Please check at least one confirmed symptom before submitting.')
+    if (selectedSymptoms.length === 0 && !editableTranscript.trim()) {
+      alert('Please check at least one confirmed symptom or enter spoken observations.')
       return
     }
 
     setSubmitting(true)
+    const finalSpokenNotes = editableTranscript || fullTranscript || transcript
     const payload = {
       animal_id: animalId || 'COW-101',
       species: 'Cattle (Cow)',
@@ -252,10 +225,11 @@ export default function VoiceReportModal({
       diarrhea: selectedSymptoms.includes('diarrhea'),
       swelling: selectedSymptoms.includes('swelling'),
       lethargy: selectedSymptoms.includes('lethargy'),
+      other_symptoms: finalSpokenNotes,
       severity: selectedSymptoms.length >= 3 ? 'severe' : 'moderate',
       duration_days: 2,
       number_of_animals_affected: 2,
-      notes: `Voice intake (${recognitionSource === 'browser' ? 'Live Microphone' : 'Sample Dialect'} - ${selectedLang.toUpperCase()}): "${editableTranscript || transcript}"`
+      notes: `Voice intake (${selectedLang.toUpperCase()}): "${finalSpokenNotes}"`
     }
 
     try {
@@ -264,7 +238,7 @@ export default function VoiceReportModal({
       }
       await apiClient.post('/health-reports', payload)
       setStep('submitted')
-      if (onSymptomsDetected) onSymptomsDetected(selectedSymptoms)
+      if (onSymptomsDetected) onSymptomsDetected(selectedSymptoms, finalSpokenNotes)
       setTimeout(() => {
         if (onSuccess) onSuccess()
         handleClose()
@@ -273,7 +247,7 @@ export default function VoiceReportModal({
       console.warn('Network submission failed, queueing offline:', err)
       await saveOfflineReport(payload)
       setStep('submitted')
-      if (onSymptomsDetected) onSymptomsDetected(selectedSymptoms)
+      if (onSymptomsDetected) onSymptomsDetected(selectedSymptoms, finalSpokenNotes)
       setTimeout(() => {
         if (onSuccess) onSuccess()
         handleClose()
@@ -304,7 +278,7 @@ export default function VoiceReportModal({
                 Multilingual Voice Symptom Intake
               </h3>
               <p className="text-xs text-slate-400">
-                मराठी / हिंदी / English Speech Recognition
+                मराठी (mr-IN) / हिंदी (hi-IN) / English (en-IN)
               </p>
             </div>
           </div>
@@ -320,7 +294,7 @@ export default function VoiceReportModal({
 
         {/* Language Selector */}
         <div className="flex items-center justify-between bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
-          <span className="text-[11px] text-slate-400 font-bold px-2">Language:</span>
+          <span className="text-[11px] text-slate-400 font-bold px-2">Voice Language:</span>
           <div className="flex items-center space-x-1">
             {langButtons.map((l) => (
               <button
@@ -328,7 +302,7 @@ export default function VoiceReportModal({
                 onClick={() => {
                   setSelectedLang(l.id)
                   if (step === 'listening') {
-                    startListening({ lang: l.id, reset: false })
+                    startListening({ lang: l.id, reset: false, existingText: editableTranscript })
                   }
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
@@ -343,7 +317,7 @@ export default function VoiceReportModal({
           </div>
         </div>
 
-        {/* Animal Selector / Verification */}
+        {/* Animal Selector / Location */}
         <div className="flex items-center justify-between text-xs bg-slate-950 px-3.5 py-2.5 rounded-2xl border border-slate-800">
           <div className="flex items-center space-x-2">
             <span className="text-slate-400 text-[10px]">Animal:</span>
@@ -371,13 +345,13 @@ export default function VoiceReportModal({
 
         {/* Speech Error Banner if any */}
         {speechError && (
-          <div className="p-3 rounded-2xl bg-rose-950/80 border border-rose-500 text-rose-200 text-xs flex items-start space-x-2">
+          <div className="p-3.5 rounded-2xl bg-rose-950/80 border border-rose-500 text-rose-200 text-xs flex items-start space-x-2.5">
             <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <span className="font-bold block">{speechError}</span>
-              {errorCode === 'not-allowed' && (
-                <p className="text-[11px] text-rose-300">
-                  Tip: Click the lock icon in your browser address bar and enable Microphone permissions.
+              {(errorCode === 'not-allowed' || errorCode === 'service-not-allowed') && (
+                <p className="text-[11px] text-rose-300 leading-relaxed">
+                  Microphone permission is required for voice reporting. Please allow microphone access in your browser settings.
                 </p>
               )}
             </div>
@@ -402,42 +376,22 @@ export default function VoiceReportModal({
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {selectedLang === 'mr'
-                      ? 'उदा. "माझ्या गाईला ताप आहे आणि तोंडात फोड आले आहेत"'
+                      ? 'उदा. "माझ्या गाईला ताप आहे, तोंडात फोड आले आहेत आणि लाळ गळत आहे"'
                       : selectedLang === 'hi'
-                      ? 'उदा. "गाय को तेज बुखार है और मुंह में छाले हैं"'
-                      : 'e.g. "Cow has fever, mouth blisters and salivation"'}
+                      ? 'उदा. "मेरी गाय को तेज बुखार है, मुंह में छाले हैं और लार टपक रही है"'
+                      : 'e.g. "My cow has fever, mouth blisters and salivation"'}
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-2 text-left">
-                <div className="flex items-center space-x-2 text-amber-300 text-xs font-bold">
+              <div className="p-4 rounded-2xl bg-slate-950 border border-rose-500/40 space-y-2 text-left">
+                <div className="flex items-center space-x-2 text-rose-300 text-xs font-bold">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>Voice recognition is not supported in this browser.</span>
+                  <span>Voice input is not supported in this browser. Please use Google Chrome.</span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  You can still test the clinical intake workflow using the sample dialect simulation below:
+                  Web Speech API is available on desktop &amp; mobile Chrome, Microsoft Edge, and Safari.
                 </p>
-                <button
-                  type="button"
-                  onClick={handleDemoDialectSimulation}
-                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2"
-                >
-                  <Volume2 className="w-4 h-4" /> Run Sample Dialect Simulation
-                </button>
-              </div>
-            )}
-
-            {isSupported && (
-              <div className="pt-2 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={handleDemoDialectSimulation}
-                  className="text-[11px] text-slate-400 hover:text-amber-300 font-bold underline transition flex items-center justify-center gap-1.5 mx-auto"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                  Or test with Sample Dialect Simulation
-                </button>
               </div>
             )}
           </div>
@@ -459,15 +413,15 @@ export default function VoiceReportModal({
 
             <div className="space-y-1">
               <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
-                {recognitionSource === 'browser' ? '🔴 Recording Microphone Live...' : '⚡ Processing Sample Speech...'}
+                🔴 Listening to microphone ({LOCALE_MAP[selectedLang] || selectedLang})...
               </span>
               <p className="text-xs text-slate-400">
-                {recognitionSource === 'browser' ? 'Speak clearly. Tap stop when done.' : 'Simulating dialect phrase...'}
+                Speak clearly into your microphone. Tap stop when finished.
               </p>
             </div>
 
             {/* Live Audio Waves / Transcript Box */}
-            <div className="p-3.5 rounded-2xl bg-slate-950 border border-rose-500/30 min-h-[60px] text-left space-y-1">
+            <div className="p-3.5 rounded-2xl bg-slate-950 border border-rose-500/40 min-h-[70px] text-left space-y-1">
               <span className="text-[10px] font-mono text-rose-400 font-bold uppercase block">
                 Live Speech Stream:
               </span>
@@ -483,9 +437,9 @@ export default function VoiceReportModal({
                 variant="primary"
                 onClick={handleStopRecording}
                 icon={StopCircle}
-                className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2 px-5"
+                className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2.5 px-6"
               >
-                Stop &amp; Review Symptoms
+                Stop &amp; Review Transcript
               </Button>
             </div>
           </div>
@@ -494,23 +448,13 @@ export default function VoiceReportModal({
         {/* STAGE 3: ANALYZED & CONFIRMATION */}
         {step === 'analyzed' && (
           <div className="space-y-4 animate-in fade-in">
-            {recognitionSource === 'browser' ? (
-              <div className="p-2.5 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between">
-                <span className="flex items-center gap-1.5 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Live Speech Captured
-                </span>
-                <span className="text-[10px] text-emerald-400 font-mono">Web Speech API</span>
-              </div>
-            ) : (
-              <div className="p-2.5 rounded-xl bg-amber-950/70 border border-amber-500/40 text-amber-300 text-xs flex items-center justify-between">
-                <span className="flex items-center gap-1.5 font-bold">
-                  <Volume2 className="w-4 h-4 text-amber-400" />
-                  Sample Dialect Simulation
-                </span>
-                <span className="text-[10px] text-amber-400 font-mono">Pre-recorded Phrase</span>
-              </div>
-            )}
+            <div className="p-2.5 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between">
+              <span className="flex items-center gap-1.5 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                Speech Captured Successfully
+              </span>
+              <span className="text-[10px] text-emerald-400 font-mono">{LOCALE_MAP[selectedLang]}</span>
+            </div>
 
             {/* Editable Transcript */}
             <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
@@ -520,17 +464,17 @@ export default function VoiceReportModal({
                 </span>
                 <button
                   type="button"
-                  onClick={handleReset}
-                  className="text-[10px] text-emerald-400 hover:underline font-bold"
+                  onClick={handleStartRecording}
+                  className="text-[10px] text-emerald-400 hover:underline font-bold flex items-center gap-1"
                 >
-                  Record Again
+                  <Mic className="w-3 h-3" /> Speak More
                 </button>
               </div>
               <textarea
-                rows={2}
+                rows={3}
                 value={editableTranscript}
                 onChange={(e) => handleTranscriptChange(e.target.value)}
-                placeholder="Spoken symptoms will appear here..."
+                placeholder="Spoken symptoms appear here..."
                 className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
               />
             </div>
