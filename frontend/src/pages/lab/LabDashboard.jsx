@@ -15,7 +15,8 @@ import {
   RefreshCw,
   MapPin,
   Calendar,
-  ShieldAlert
+  ShieldAlert,
+  Radio
 } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
@@ -39,6 +40,7 @@ export default function LabDashboard() {
     result_notes: ''
   })
   const [submitting, setSubmitting] = useState(false)
+  const [notice, setNotice] = useState('')
 
   const fetchLabData = async () => {
     setLoading(true)
@@ -66,14 +68,16 @@ export default function LabDashboard() {
     e.preventDefault()
     if (!selectedReferral) return
     setSubmitting(true)
+    setError(null)
     try {
       await apiClient.put(`/lab/referrals/${selectedReferral.id}`, resultForm)
       await fetchLabData()
       setResultModalOpen(false)
-    } catch {
-      // Local optimistic update
-      setReferrals(prev => prev.map(r => r.id === selectedReferral.id ? { ...r, ...resultForm } : r))
-      setResultModalOpen(false)
+      setNotice(`✅ Sample #${selectedReferral.id} updated successfully.`)
+      setTimeout(() => setNotice(''), 5000)
+    } catch (err) {
+      console.error('Failed to update result:', err)
+      alert('Failed to update findings. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -82,6 +86,8 @@ export default function LabDashboard() {
   const filteredReferrals = referrals.filter(r => {
     const matchesStatus = statusFilter === 'all' || r.status === statusFilter
     const matchesSearch = 
+      r.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.case_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.animal_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.sample_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.test_requested?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,7 +96,7 @@ export default function LabDashboard() {
   })
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-32">
       {/* Page Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -107,16 +113,35 @@ export default function LabDashboard() {
               Real-time biological sample accessioning, RT-PCR validation, and laboratory confirmation linked directly to the district outbreak containment registry.
             </p>
           </div>
-          <Button 
-            onClick={fetchLabData} 
-            variant="outline" 
-            icon={RefreshCw}
-            className="self-start md:self-auto bg-slate-900/80 text-white border-slate-700 hover:bg-slate-800"
-          >
-            Refresh Queue
-          </Button>
+          
+          {/* Right Side System Status instead of blank space */}
+          <div className="flex flex-col shrink-0 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 backdrop-blur-sm w-full md:w-72 space-y-3">
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center border-b border-slate-800 pb-2">Laboratory System Status</span>
+             <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-300 flex items-center space-x-1.5"><Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> <span>LIMS Sync Network</span></span>
+                <span className="text-[10px] font-black text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-500/30">ONLINE</span>
+             </div>
+             <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-300 flex items-center space-x-1.5"><FlaskConical className="w-3.5 h-3.5 text-sky-400" /> <span>PCR Thermal Cycler</span></span>
+                <span className="text-[10px] font-black text-sky-400 bg-sky-950 px-2 py-0.5 rounded-full border border-sky-500/30">ACTIVE</span>
+             </div>
+             <Button 
+                onClick={fetchLabData} 
+                icon={RefreshCw}
+                className="w-full mt-1 bg-slate-800/80 text-slate-200 hover:text-white border border-slate-700 hover:bg-slate-700 text-xs py-1.5 shadow-none"
+             >
+                Sync & Refresh Queue
+             </Button>
+          </div>
         </div>
       </div>
+
+      {notice && (
+        <div className="p-3.5 rounded-2xl bg-emerald-950/90 border border-emerald-400 text-white text-xs font-bold flex items-center space-x-2 animate-in fade-in shadow-xl">
+          <CheckCircle2 className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+          <span>{notice}</span>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -217,22 +242,22 @@ export default function LabDashboard() {
                 {filteredReferrals.map((ref) => (
                   <tr key={ref.id} className="hover:bg-slate-800/40 transition">
                     <td className="py-3.5 px-4">
-                      <span className="font-mono font-bold text-emerald-400">{ref.id}</span>
-                      <span className="block text-[10px] text-slate-500">Case: {ref.case_id || 'Direct'}</span>
+                      <span className="font-mono font-bold text-emerald-300">{ref.id}</span>
+                      <span className="block text-[11px] text-slate-400 font-medium">Case: {ref.case_id || 'Direct'}</span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-white block">{ref.animal_id}</span>
-                      <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
-                        <MapPin className="w-3 h-3 text-slate-500" />
+                      <span className="font-bold text-white block text-[13px]">{ref.animal_id}</span>
+                      <span className="text-[11px] text-slate-300 flex items-center space-x-1 mt-0.5">
+                        <MapPin className="w-3 h-3 text-slate-400" />
                         <span>{ref.village}, {ref.district}</span>
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-slate-200 block">{ref.sample_type}</span>
-                      <span className="text-[11px] text-teal-400 block">{ref.test_requested}</span>
+                      <span className="font-bold text-slate-100 block text-[13px]">{ref.sample_type}</span>
+                      <span className="text-[11px] text-teal-300 font-medium block">{ref.test_requested}</span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="text-slate-300">{ref.veterinarian_name || 'Taluka Vet'}</span>
+                      <span className="text-slate-200 font-medium">{ref.veterinarian_name || 'Taluka Vet'}</span>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
