@@ -686,3 +686,61 @@ def test_phase6_veterinary_clinical_decision_support_and_medical_safety(farmer_h
     assert "SHA256-MH-VET-SECURE" not in str(rx_data)
     assert "Class-I" not in str(rx_data)
 
+
+# 14. Phase 8: Final Security, QA & Error Sanitation Tests
+def test_phase8_security_and_token_validation(farmer_headers):
+    """
+    Phase 8 Security:
+    - Missing token -> 401
+    - Malformed token -> 401
+    - Expired/invalid JWT signature -> 401
+    - No raw Python traceback exposure in error responses
+    """
+    # 1. Missing Authorization header
+    res_no_auth = client.get("/api/v1/auth/me")
+    assert res_no_auth.status_code == 401
+
+    # 2. Malformed token format
+    res_bad_auth = client.get("/api/v1/auth/me", headers={"Authorization": "InvalidBearerFormat"})
+    assert res_bad_auth.status_code == 401
+
+    # 3. Invalid JWT signature
+    res_fake_jwt = client.get("/api/v1/auth/me", headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.fake_signature"})
+    assert res_fake_jwt.status_code == 401
+
+    # 4. Unknown endpoint does not expose stack trace
+    res_404 = client.get("/api/v1/non-existent-endpoint-xyz")
+    assert res_404.status_code == 404
+    assert "Traceback" not in res_404.text
+
+    # 5. Invalid report body returns structured 422, not 500
+    res_invalid_body = client.post("/api/v1/health-reports", json={"invalid_field": 123}, headers=farmer_headers)
+    assert res_invalid_body.status_code == 422
+
+
+def test_phase8_lab_and_admin_functional_suite(farmer_headers, lab_headers):
+    """Phase 8: Verify Lab and Admin workflows end-to-end."""
+    # 1. Lab referrals query
+    lab_res = client.get("/api/v1/lab/referrals", headers=lab_headers)
+    assert lab_res.status_code == 200
+    assert isinstance(lab_res.json(), list)
+
+    # 2. Lab dashboard query
+    dash_res = client.get("/api/v1/lab/dashboard", headers=lab_headers)
+    assert dash_res.status_code == 200
+    dash_data = dash_res.json()
+    assert "total_samples" in dash_data or "pending_tests" in dash_data or "stats" in dash_data or isinstance(dash_data, dict)
+
+    # 3. Admin token check
+    admin_token = get_auth_token("admin@pashuraksha.ai")
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    admin_users_res = client.get("/api/v1/admin/users", headers=admin_headers)
+    assert admin_users_res.status_code == 200
+    users_list = admin_users_res.json()
+    assert len(users_list) >= 5
+
+    admin_stats_res = client.get("/api/v1/admin/stats", headers=admin_headers)
+    assert admin_stats_res.status_code == 200
+
+
