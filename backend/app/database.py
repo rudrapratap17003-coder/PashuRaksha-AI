@@ -83,6 +83,21 @@ def init_db():
             if cols and "status" not in cols:
                 conn.exec_driver_sql("ALTER TABLE health_reports ADD COLUMN status VARCHAR DEFAULT 'RISK_ASSESSED'")
                 conn.commit()
+
+            c_result = conn.exec_driver_sql("PRAGMA table_info(outbreak_clusters)")
+            c_cols = [row[1] for row in c_result.fetchall()]
+            if c_cols:
+                if "explanation" not in c_cols:
+                    conn.exec_driver_sql("ALTER TABLE outbreak_clusters ADD COLUMN explanation TEXT")
+                if "case_ids" not in c_cols:
+                    conn.exec_driver_sql("ALTER TABLE outbreak_clusters ADD COLUMN case_ids JSON")
+                if "temporal_window_days" not in c_cols:
+                    conn.exec_driver_sql("ALTER TABLE outbreak_clusters ADD COLUMN temporal_window_days INTEGER DEFAULT 14")
+                if "vaccination_coverage" not in c_cols:
+                    conn.exec_driver_sql("ALTER TABLE outbreak_clusters ADD COLUMN vaccination_coverage FLOAT DEFAULT 78.5")
+                if "contributing_factors" not in c_cols:
+                    conn.exec_driver_sql("ALTER TABLE outbreak_clusters ADD COLUMN contributing_factors JSON")
+                conn.commit()
     except Exception as e:
         logger.debug(f"SQLite schema migration notice: {e}")
 

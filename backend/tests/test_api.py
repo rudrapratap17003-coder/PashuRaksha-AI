@@ -516,3 +516,116 @@ def test_invalid_case_state_transitions():
     finally:
         db.close()
 
+
+# 13. Phase 5: Outbreak Intelligence, 14-Day Rolling Window & Explainable GIS
+def test_phase5_outbreak_detection_14_day_filtering_and_gis(vet_headers, authority_headers):
+    """
+    Phase 5: Test strict temporal filtering (14 days), spatial proximity,
+    symptom similarity, and human-interpretable explainability reasons.
+    """
+    from datetime import datetime, timedelta
+    from app.database import SessionLocal
+    from app.models.health_report import HealthReport
+    from app.ai.clustering import OutbreakClusterEngine
+
+    # 1. Test 14-Day Temporal Filtering: Historical reports (>14 days) must be excluded
+    now = datetime.utcnow()
+    old_reports = [
+        {
+            "id": "old-rep-1",
+            "animal_id": "COW-991",
+            "latitude": 18.1515,
+            "longitude": 74.5772,
+            "village": "Baramati",
+            "fever": True,
+            "lesions": True,
+            "salivation": True,
+            "number_of_animals_affected": 2,
+            "risk_score": 85.0,
+            "reported_at": (now - timedelta(days=25)).isoformat()  # 25 days old -> MUST be excluded
+        },
+        {
+            "id": "old-rep-2",
+            "animal_id": "COW-992",
+            "latitude": 18.1520,
+            "longitude": 74.5780,
+            "village": "Baramati",
+            "fever": True,
+            "lesions": True,
+            "salivation": True,
+            "number_of_animals_affected": 3,
+            "risk_score": 90.0,
+            "reported_at": (now - timedelta(days=20)).isoformat()  # 20 days old -> MUST be excluded
+        }
+    ]
+    # Running cluster engine on ONLY old reports with window_days=14 must return empty list
+    old_clusters = OutbreakClusterEngine.detect_clusters(old_reports, time_window_days=14, min_cases=2)
+    assert len(old_clusters) == 0, "Historical cases outside 14-day window incorrectly created clusters"
+
+    # 2. Test Recent Reports (<14 days): Must form cluster with explainable detection reason
+    recent_reports = [
+        {
+            "id": "rec-rep-1",
+            "animal_id": "COW-101",
+            "latitude": 18.1515,
+            "longitude": 74.5772,
+            "village": "Baramati",
+            "fever": True,
+            "lesions": True,
+            "salivation": True,
+            "number_of_animals_affected": 2,
+            "risk_score": 88.0,
+            "reported_at": (now - timedelta(days=2)).isoformat()  # 2 days old
+        },
+        {
+            "id": "rec-rep-2",
+            "animal_id": "BUF-204",
+            "latitude": 18.1610,
+            "longitude": 74.5880,
+            "village": "Malegaon Bk",
+            "fever": True,
+            "lesions": True,
+            "salivation": True,
+            "number_of_animals_affected": 3,
+            "risk_score": 92.0,
+            "reported_at": (now - timedelta(days=1)).isoformat()  # 1 day old
+        }
+    ]
+    recent_clusters = OutbreakClusterEngine.detect_clusters(recent_reports, time_window_days=14, min_cases=2)
+    assert len(recent_clusters) == 1
+    c = recent_clusters[0]
+    assert c["case_count"] == 2
+    assert c["affected_animals_count"] == 5
+    assert c["radius_km"] > 0
+    assert "explanation" in c
+    assert "Cluster detected because" in c["explanation"]
+    assert "14 days" in c["explanation"]
+    assert len(c["contributing_factors"]) >= 3
+    assert len(c["case_ids"]) == 2
+
+    # 3. Test API cluster detection endpoint
+    detect_res = client.post("/api/v1/clusters/run-detection?window_days=14", headers=authority_headers)
+    assert detect_res.status_code == 200
+    clusters_api = detect_res.json()
+    assert len(clusters_api) >= 1
+    top_cluster = clusters_api[0]
+    assert top_cluster["id"].startswith("clust-")
+    assert top_cluster["explanation"] is not None
+    assert top_cluster["temporal_window_days"] == 14
+    assert top_cluster["vaccination_coverage"] > 0
+    assert len(top_cluster["dominant_symptoms"]) >= 1
+
+    # 4. Test Cluster Action Dispatch
+    cluster_id = top_cluster["id"]
+    action_payload = "Deploy 250 Ring Vaccination Doses & Impose Livestock Transit Checkpoint"
+    act_res = client.post(
+        f"/api/v1/clusters/{cluster_id}/action",
+        params={"action": action_payload},
+        headers=authority_headers
+    )
+    assert act_res.status_code == 200
+    act_data = act_res.json()
+    assert act_data["status"] == "success"
+    assert act_data["new_status"] == "contained"
+    assert act_data["cluster_id"] == cluster_id
+

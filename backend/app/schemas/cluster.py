@@ -22,6 +22,11 @@ class ClusterResponse(BaseModel):
     risk_level: str = Field(..., example="CRITICAL")
     dominant_symptoms: List[str] = Field(default_factory=lambda: ["Fever", "Cough", "Reduced Appetite"])
     affected_villages: List[str] = Field(default_factory=lambda: ["Rampur"])
+    case_ids: List[str] = Field(default_factory=list)
+    explanation: Optional[str] = Field(None, example="Cluster detected because 5 similar cases were reported within 8 km during the last 14 days.")
+    temporal_window_days: int = Field(default=14, example=14)
+    vaccination_coverage: float = Field(default=78.5, example=78.5)
+    contributing_factors: List[dict] = Field(default_factory=list)
     status: ClusterStatusEnum = Field(default=ClusterStatusEnum.ACTIVE)
     detected_at: datetime = Field(default_factory=datetime.utcnow)
     recommended_action: str = Field(

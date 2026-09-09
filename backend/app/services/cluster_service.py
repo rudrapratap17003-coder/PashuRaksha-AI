@@ -31,6 +31,11 @@ class ClusterService:
                 risk_level=c.risk_level,
                 dominant_symptoms=c.dominant_symptoms or [],
                 affected_villages=c.affected_villages or [],
+                case_ids=c.case_ids or [],
+                explanation=c.explanation or f"Cluster detected because {c.case_count} cases were reported within {c.radius_km} km during the last 14 days.",
+                temporal_window_days=getattr(c, "temporal_window_days", 14) or 14,
+                vaccination_coverage=getattr(c, "vaccination_coverage", 78.5) or 78.5,
+                contributing_factors=c.contributing_factors or [],
                 status=c.status,
                 detected_at=c.detected_at,
                 recommended_action=c.recommended_action
@@ -56,13 +61,18 @@ class ClusterService:
             risk_level=c.risk_level,
             dominant_symptoms=c.dominant_symptoms or [],
             affected_villages=c.affected_villages or [],
+            case_ids=c.case_ids or [],
+            explanation=c.explanation or f"Cluster detected because {c.case_count} cases were reported within {c.radius_km} km during the last 14 days.",
+            temporal_window_days=getattr(c, "temporal_window_days", 14) or 14,
+            vaccination_coverage=getattr(c, "vaccination_coverage", 78.5) or 78.5,
+            contributing_factors=c.contributing_factors or [],
             status=c.status,
             detected_at=c.detected_at,
             recommended_action=c.recommended_action
         )
 
     @staticmethod
-    def run_detection(db: Session) -> List[ClusterResponse]:
+    def run_detection(db: Session, window_days: int = 14) -> List[ClusterResponse]:
         """
         Executes AI spatial-temporal clustering over all stored health reports,
         persists detected clusters into the database, and emits alerts.
@@ -96,7 +106,7 @@ class ClusterService:
             for r in reports
         ]
 
-        detected = OutbreakClusterEngine.detect_clusters(report_dicts, eps_km=12.0, min_cases=2)
+        detected = OutbreakClusterEngine.detect_clusters(report_dicts, eps_km=12.0, time_window_days=window_days, min_cases=2)
         persisted_clusters = []
 
         for d in detected:
@@ -111,10 +121,15 @@ class ClusterService:
                     radius_km=d["radius_km"],
                     case_count=d["case_count"],
                     affected_animals_count=d["affected_animals_count"],
+                    case_ids=d.get("case_ids", []),
                     cluster_score=d["cluster_score"],
                     risk_level=d["risk_level"],
                     dominant_symptoms=d["dominant_symptoms"],
                     affected_villages=d["affected_villages"],
+                    explanation=d.get("explanation"),
+                    temporal_window_days=d.get("temporal_window_days", 14),
+                    vaccination_coverage=d.get("vaccination_coverage", 78.5),
+                    contributing_factors=d.get("contributing_factors", []),
                     status="active",
                     recommended_action=d["recommended_action"],
                     detected_at=datetime.utcnow()
@@ -159,10 +174,13 @@ class ClusterService:
             else:
                 existing.case_count = d["case_count"]
                 existing.affected_animals_count = d["affected_animals_count"]
+                existing.case_ids = d.get("case_ids", [])
                 existing.cluster_score = d["cluster_score"]
                 existing.risk_level = d["risk_level"]
                 existing.dominant_symptoms = d["dominant_symptoms"]
                 existing.affected_villages = d["affected_villages"]
+                existing.explanation = d.get("explanation")
+                existing.contributing_factors = d.get("contributing_factors", [])
                 existing.recommended_action = d["recommended_action"]
                 existing.disease_concern = d["disease_concern"]
 
