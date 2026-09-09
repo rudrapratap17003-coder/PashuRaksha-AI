@@ -51,33 +51,16 @@ export default function CaseDetailsPage() {
       })
       setLabOrdered(true)
       setNotice('🔬 Urgent RT-PCR diagnostic referral created for Pune District Diagnostic Lab!')
-      setTimeline(prev => [
-        ...prev,
-        {
-          id: `evt-lab-${Date.now()}`,
-          event_type: 'sample_collected',
-          title: 'Urgent RT-PCR Lab Referral Dispatched',
-          description: 'Attending veterinarian Dr. Priya Sharma ordered diagnostic RT-PCR viral typing (Oral Epithelial Swab) at Pune Diagnostic Laboratory.',
-          actor_name: 'Dr. Priya Sharma',
-          actor_role: 'veterinarian',
-          created_at: new Date().toISOString()
-        }
-      ])
+      
+      const evtRes = await apiClient.post(`/cases/${effectiveId}/timeline`, {
+        event_type: 'sample_collected',
+        title: 'Urgent RT-PCR Lab Referral Dispatched',
+        description: 'Attending veterinarian ordered diagnostic RT-PCR viral typing (Oral Epithelial Swab) at Pune Diagnostic Laboratory.',
+        actor_role: 'veterinarian'
+      })
+      setTimeline(prev => [...prev, evtRes.data])
     } catch (err) {
-      setLabOrdered(true)
-      setNotice('🔬 RT-PCR referral registered in demonstration laboratory queue.')
-      setTimeline(prev => [
-        ...prev,
-        {
-          id: `evt-lab-${Date.now()}`,
-          event_type: 'sample_collected',
-          title: 'Urgent RT-PCR Lab Referral Dispatched',
-          description: 'Attending veterinarian Dr. Priya Sharma ordered diagnostic RT-PCR viral typing (Oral Epithelial Swab) at Pune Diagnostic Laboratory.',
-          actor_name: 'Dr. Priya Sharma',
-          actor_role: 'veterinarian',
-          created_at: new Date().toISOString()
-        }
-      ])
+      setNotice('🔬 Failed to order lab test or update timeline.')
     } finally {
       setOrderingLab(false)
       setTimeout(() => setNotice(''), 6000)
@@ -180,40 +163,17 @@ export default function CaseDetailsPage() {
     setSubmitting(true)
     const effectiveId = caseId || 'rep-101'
     try {
-      await apiClient.post(`/cases/${effectiveId}/timeline`, {
+      const response = await apiClient.post(`/cases/${effectiveId}/timeline`, {
         event_type: 'treatment',
         title: 'Clinical Treatment Note',
         description: note,
-        actor_name: 'Attending Veterinarian',
         actor_role: 'veterinarian'
       })
-      setTimeline(prev => [
-        ...prev,
-        {
-          id: `evt-${Date.now()}`,
-          event_type: 'treatment',
-          title: 'Clinical Treatment Note',
-          description: note,
-          actor_name: 'Attending Veterinarian',
-          actor_role: 'veterinarian',
-          created_at: new Date().toISOString()
-        }
-      ])
+      setTimeline(prev => [...prev, response.data])
       setNote('')
-    } catch {
-      setTimeline(prev => [
-        ...prev,
-        {
-          id: `evt-${Date.now()}`,
-          event_type: 'treatment',
-          title: 'Clinical Treatment Note',
-          description: note,
-          actor_name: 'Attending Veterinarian',
-          actor_role: 'veterinarian',
-          created_at: new Date().toISOString()
-        }
-      ])
-      setNote('')
+    } catch (error) {
+      console.error('Failed to append to timeline', error)
+      alert('Failed to save timeline note. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -356,34 +316,40 @@ export default function CaseDetailsPage() {
               </span>
             </div>
 
-            <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
-              {timeline.map((evt, idx) => (
-                <div key={idx} className="relative group">
-                  {/* Dot */}
-                  <div className={`absolute -left-6 top-1 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${
-                    evt.event_type === 'lab_result' 
-                      ? 'bg-rose-500 animate-pulse'
-                      : evt.event_type === 'treatment'
-                      ? 'bg-emerald-500'
-                      : evt.event_type === 'sample_collected'
-                      ? 'bg-sky-500'
-                      : 'bg-teal-500'
-                  }`} />
+            {timeline.length === 0 ? (
+              <div className="text-slate-400 text-sm text-center py-8 border border-dashed border-slate-700 rounded-xl bg-slate-900/50">
+                No timeline events yet.
+              </div>
+            ) : (
+              <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
+                {timeline.map((evt, idx) => (
+                  <div key={idx} className="relative group">
+                    {/* Dot */}
+                    <div className={`absolute -left-6 top-1 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${
+                      evt.event_type === 'lab_result' 
+                        ? 'bg-rose-500 animate-pulse'
+                        : evt.event_type === 'treatment'
+                        ? 'bg-emerald-500'
+                        : evt.event_type === 'sample_collected'
+                        ? 'bg-sky-500'
+                        : 'bg-teal-500'
+                    }`} />
 
-                  <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-3.5 space-y-1 hover:border-slate-700 transition">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white text-xs">{evt.title}</span>
-                      <span className="text-[9px] text-slate-500 uppercase font-bold">{evt.actor_role}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">{evt.description}</p>
-                    <div className="flex items-center justify-between pt-1 text-[9px] text-slate-500">
-                      <span>By {evt.actor_name || 'System'}</span>
-                      <span>{new Date(evt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-3.5 space-y-1 hover:border-slate-700 transition">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white text-xs">{evt.title}</span>
+                        <span className="text-[9px] text-slate-500 uppercase font-bold">{evt.actor_role}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">{evt.description}</p>
+                      <div className="flex items-center justify-between pt-1 text-[9px] text-slate-500">
+                        <span>By {evt.actor_name || 'System'}</span>
+                        <span>{new Date(evt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
       </div>
@@ -393,19 +359,20 @@ export default function CaseDetailsPage() {
         isOpen={rxModalOpen}
         onClose={() => setRxModalOpen(false)}
         caseData={caseData}
-        onPrescriptionCreated={(rx) => {
-          setTimeline(prev => [
-            ...prev,
-            {
-              id: `evt-${Date.now()}`,
+        onPrescriptionCreated={async (rx) => {
+          try {
+            const effectiveId = caseId || 'rep-101'
+            const response = await apiClient.post(`/cases/${effectiveId}/timeline`, {
               event_type: 'treatment',
               title: `Clinical Reference Generated: ${rx.prescription_id}`,
               description: `Generated dosage reference for ${rx.medications.length} medications for ${rx.diagnosis} (Withdrawal milk: ${rx.withdrawal_period.milk}).`,
-              actor_name: rx.veterinarian.name,
-              actor_role: 'veterinarian',
-              created_at: new Date().toISOString()
-            }
-          ])
+              actor_name: rx.veterinarian?.name || 'Veterinarian',
+              actor_role: 'veterinarian'
+            })
+            setTimeline(prev => [...prev, response.data])
+          } catch (err) {
+            console.error('Failed to append prescription to timeline', err)
+          }
         }}
       />
     </div>
