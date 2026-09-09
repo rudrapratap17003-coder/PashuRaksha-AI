@@ -110,90 +110,113 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative z-10 pt-8 sm:pt-14 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-
-          {/* Left Hero Content */}
-          <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-sm font-semibold">
-              <span className="w-2 h-2 rounded-full bg-sky-500" />
-              <span>Smart India Hackathon 2026 • SIH26128</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight">
-              Livestock Health &amp;<br className="hidden sm:inline" />
-              <span className="text-sky-600">Disease Protection</span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              <strong>PASHURAKSHA AI</strong> — <strong>Prototype developed for SIH Problem Statement SIH26128</strong>. 
-              Early detection of animal diseases using explainable risk scoring, visual screening overlay, voice intake in Marathi, 
-              and coordinated veterinary triage across Maharashtra talukas.
-            </p>
-
-            {/* CTAs — Large, Easy to Tap */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-              <Link to="/farmer/dashboard" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  icon={ArrowRight}
-                  className="w-full sm:w-auto font-bold bg-sky-600 hover:bg-sky-700 text-white text-base py-4 px-8 border-0 rounded-xl transition-colors duration-200"
-                >
-                  Open Demo
-                </Button>
-              </Link>
-
-              <Link to="/presentation" className="w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  icon={Presentation}
-                  className="w-full sm:w-auto font-bold bg-white border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-400 text-base py-4 px-8 rounded-xl transition-colors duration-200"
-                >
-                  Jury Presentation
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-3 text-sm text-slate-600 border-t border-slate-200">
-              <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
-                <Shield className="w-4 h-4 text-sky-600" />
-                <span className="font-semibold">Maharashtra State Innovation Society</span>
+        <div className="space-y-8">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Hero Content */}
+            <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Smart India Hackathon 2026 • Problem Statement SIH26128</span>
               </div>
-              <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
-                <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                <span className="font-semibold">Dept. of Animal Husbandry</span>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight">
+                PASHURAKSHA <span className="text-emerald-600">AI</span>
+              </h1>
+
+              <p className="text-lg sm:text-xl font-bold text-slate-700 leading-snug">
+                "From the first symptom to the first outbreak warning."
+              </p>
+
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                A spatial-temporal livestock disease surveillance platform connecting rural farmers, Pashu Sakhis, veterinarians, diagnostic laboratories, and district health authorities into a real-time early warning network.
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+                <Link to="/farmer/dashboard" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    icon={ArrowRight}
+                    className="w-full sm:w-auto font-black bg-emerald-600 hover:bg-emerald-500 text-white text-base py-4 px-8 border-0 rounded-2xl shadow-lg shadow-emerald-950/20 transition"
+                  >
+                    EXPLORE LIVE DEMO
+                  </Button>
+                </Link>
+
+                <Link to="/presentation" className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    icon={Presentation}
+                    className="w-full sm:w-auto font-bold bg-white border-slate-300 text-slate-700 hover:bg-emerald-50 hover:border-emerald-400 text-base py-4 px-8 rounded-2xl transition"
+                  >
+                    SIH PRESENTATION
+                  </Button>
+                </Link>
               </div>
             </div>
-          </div>
 
-          {/* Right Hero: Live Telemetry Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-md">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                  <span className="text-sm font-bold text-slate-700">Live Surveillance</span>
+            {/* Right Hero: Live Telemetry Card */}
+            <div className="lg:col-span-5">
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-lg space-y-3">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="text-sm font-bold text-slate-800">Baramati Surveillance Grid</span>
+                  </div>
+                  <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-bold">
+                    Active Radar
+                  </span>
                 </div>
-                <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-3 py-1 rounded-full font-semibold">
-                  Pune Division
-                </span>
-              </div>
 
-              <WeatherWidget district="Pune" village="Baramati" />
+                <WeatherWidget district="Pune" village="Baramati" />
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <span className="text-xs text-slate-500 block font-medium">Active Containment</span>
-                  <span className="text-sm font-bold text-rose-600">#RC-2026-014 (Baramati)</span>
-                </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <span className="text-xs text-slate-500 block font-medium">Vaccination Coverage</span>
-                  <span className="text-sm font-bold text-emerald-600">78.5% (278/355)</span>
+                <div className="grid grid-cols-2 gap-2.5 pt-1 text-xs">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3">
+                    <span className="text-[11px] text-slate-500 block font-medium">Surveillance Window</span>
+                    <strong className="text-slate-800 text-xs">14-Day Rolling Geometry</strong>
+                  </div>
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
+                    <span className="text-[11px] text-emerald-700 block font-medium">Containment Ring</span>
+                    <strong className="text-emerald-900 text-xs">5km Movement Barrier</strong>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* 8-Step Closed-Loop Pipeline Visual */}
+          <div className="p-4 sm:p-6 bg-slate-900 text-white rounded-3xl shadow-xl border border-emerald-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                END-TO-END OPERATIONAL INTELLIGENCE PIPELINE
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+                8 Integrated Surveillance Nodes
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-xs">
+              {[
+                { step: '1', title: 'FARMER', desc: 'Voice/Text Intake', bg: 'bg-emerald-950 border-emerald-500/40 text-emerald-300' },
+                { step: '2', title: 'REPORT', desc: 'Symptom Entry', bg: 'bg-teal-950 border-teal-500/40 text-teal-300' },
+                { step: '3', title: 'RISK ENGINE', desc: 'Multi-Factor Score', bg: 'bg-amber-950 border-amber-500/40 text-amber-300' },
+                { step: '4', title: 'FIELD VISIT', desc: 'Pashu Sakhi Census', bg: 'bg-sky-950 border-sky-500/40 text-sky-300' },
+                { step: '5', title: 'VET', desc: 'Clinical Triage', bg: 'bg-blue-950 border-blue-500/40 text-blue-300' },
+                { step: '6', title: 'LAB', desc: 'RT-PCR Confirm', bg: 'bg-purple-950 border-purple-500/40 text-purple-300' },
+                { step: '7', title: 'GIS', desc: 'Spatial Haversine', bg: 'bg-rose-950 border-rose-500/40 text-rose-300' },
+                { step: '8', title: 'AUTHORITY', desc: 'Ring Containment', bg: 'bg-red-950 border-red-500/40 text-red-300' }
+              ].map((n, idx) => (
+                <div key={idx} className={`p-2.5 rounded-2xl border ${n.bg} flex flex-col justify-between`}>
+                  <span className="font-mono font-black text-[10px] opacity-70">NODE 0{n.step}</span>
+                  <strong className="font-black text-xs block my-0.5">{n.title}</strong>
+                  <span className="text-[10px] opacity-80 leading-tight">{n.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 

@@ -9,7 +9,13 @@ import {
   Plus,
   ChevronRight,
   Phone,
-  Calculator
+  Calculator,
+  ShieldCheck,
+  Activity,
+  Radio,
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
@@ -17,6 +23,7 @@ import RiskBadge from '../../components/common/RiskBadge'
 import VoiceReportModal from '../../components/common/VoiceReportModal'
 import WeatherWidget from '../../components/common/WeatherWidget'
 import EconomicLossCalculator from '../../components/farmer/EconomicLossCalculator'
+import EmergencyPanicModal from '../../components/common/EmergencyPanicModal'
 import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
@@ -27,22 +34,26 @@ export default function FarmerDashboard() {
   const { scenarioData, currentScenario } = useScenario()
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
+  const [recentReports, setRecentReports] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
   const [lossCalcOpen, setLossCalcOpen] = useState(false)
-  const [language, setLanguage] = useState('mr')
+  const [panicModalOpen, setPanicModalOpen] = useState(false)
+  const [language, setLanguage] = useState('mr') // 'mr' | 'hi' | 'en'
 
   const fetchFarmerData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const [animRes, alertRes] = await Promise.all([
+      const [animRes, alertRes, repRes] = await Promise.all([
         apiClient.get('/animals'),
         apiClient.get('/alerts?role=farmer'),
+        apiClient.get('/health-reports?limit=5')
       ])
       setAnimals(animRes.data || [])
       setAlerts(alertRes.data || [])
+      setRecentReports(repRes.data || [])
     } catch (err) {
       console.error('Farmer data fetch failed:', err)
       setError(err.response?.data?.detail || err.message || 'Unable to connect to live livestock registry.')
@@ -60,76 +71,107 @@ export default function FarmerDashboard() {
 
   const translations = {
     mr: {
-      welcome: `नमस्कार, ${farmerDisplayName}`,
-      sub: 'आपली जनावरे AI निगराणी अंतर्गत सुरक्षित आहेत',
+      heroTitle: 'आज आपले जनावर कसे आहे?',
+      heroSub: 'पशुरक्षा AI — जनावरांचे आरोग्य रक्षक',
       villageBadge: farmerLocation,
-      reportBtn: 'लक्षणे नोंदवा',
-      voiceBtn: 'बोलून सांगा',
-      addAnimal: 'नवीन जनावर जोडा',
-      livestockHeader: 'माझी जनावरे',
-      alertsHeader: 'इशारे',
-      vaccineDue: 'लसीकरण बाकी',
-      statusNormal: 'आरोग्य उत्तम',
-      lossTitle: 'दूध नुकसान मोजा',
-      lossSub: 'आजारी जनावरांमुळे होणारे नुकसान मोजा व शासकीय भरपाईसाठी अर्ज करा.',
-      lossBtn: 'नुकसान मोजा →'
+      actions: {
+        report: 'आजारी जनावर नोंदवा',
+        reportSub: 'ताप, लाळ, फोड, दूध घट',
+        myAnimals: 'माझी जनावरे',
+        myAnimalsSub: 'नोंदणीकृत जनावरे पहा',
+        vaccine: 'लसीकरण स्थिती',
+        vaccineSub: 'बाकी व पूर्ण लसी',
+        speak: 'बोलून सांगा',
+        speakSub: 'व्हॉईस रिपोर्टिंग',
+        emergency: 'आपत्कालीन SOS (1962)',
+        emergencySub: 'तातडीची रुग्णवाहिका'
+      },
+      sections: {
+        herdHealth: 'माझ्या गोठ्यातील आरोग्य स्थिती',
+        vaccinesDue: 'लसीकरण बाकी असणारी जनावरे',
+        recentReports: 'मागील आरोग्य तक्रारी',
+        alerts: 'महत्त्वाचे गावपातळीवरील इशारे'
+      }
     },
     hi: {
-      welcome: `नमस्ते, ${farmerDisplayName}`,
-      sub: 'आपके पशु AI निगरानी के तहत सुरक्षित हैं',
+      heroTitle: 'आज आपका पशु कैसा है?',
+      heroSub: 'पशुरक्षा AI — पशु स्वास्थ्य सुरक्षा',
       villageBadge: farmerLocation,
-      reportBtn: 'लक्षण दर्ज करें',
-      voiceBtn: 'बोलकर बताएं',
-      addAnimal: 'नया पशु जोड़ें',
-      livestockHeader: 'मेरे पशु',
-      alertsHeader: 'चेतावनी',
-      vaccineDue: 'टीकाकरण बाकी',
-      statusNormal: 'स्वास्थ्य सामान्य',
-      lossTitle: 'दूध नुकसान गणना',
-      lossSub: 'बीमार पशुओं से होने वाले नुकसान की गणना करें और सरकारी भरपाई के लिए आवेदन करें।',
-      lossBtn: 'नुकसान मोजा →'
+      actions: {
+        report: 'बीमार पशु दर्ज करें',
+        reportSub: 'बुखार, लार, छाले, दूध कम',
+        myAnimals: 'मेरे पशु',
+        myAnimalsSub: 'पंजीकृत पशु देखें',
+        vaccine: 'टीकाकरण स्थिति',
+        vaccineSub: 'लंबित व पूर्ण टीके',
+        speak: 'बोलकर बताएं',
+        speakSub: 'वॉइस रिपोर्टिंग',
+        emergency: 'आपातकालीन SOS (1962)',
+        emergencySub: 'तत्काल एम्बुलेंस'
+      },
+      sections: {
+        herdHealth: 'मेरे पशुओं की स्वास्थ्य स्थिति',
+        vaccinesDue: 'टीकाकरण बाकी पशु',
+        recentReports: 'हालिया स्वास्थ्य रिपोर्ट',
+        alerts: 'महत्वपूर्ण चेतावनी'
+      }
     },
     en: {
-      welcome: `Welcome, ${farmerDisplayName}`,
-      sub: 'Your animals are protected under AI health monitoring',
+      heroTitle: 'How is your animal today?',
+      heroSub: 'PashuRaksha AI — Livestock Health Guard',
       villageBadge: farmerLocation,
-      reportBtn: 'Report Symptoms',
-      voiceBtn: 'Speak to Report',
-      addAnimal: 'Add Animal',
-      livestockHeader: 'My Animals',
-      alertsHeader: 'Alerts',
-      vaccineDue: 'Vaccine Due',
-      statusNormal: 'Healthy',
-      lossTitle: 'Calculate Milk Loss',
-      lossSub: 'Calculate loss from sick animals and apply for government compensation.',
-      lossBtn: 'Calculate Loss →'
+      actions: {
+        report: 'Report Sick Animal',
+        reportSub: 'Fever, salivation, blisters, milk drop',
+        myAnimals: 'My Animals',
+        myAnimalsSub: 'View registered livestock',
+        vaccine: 'Vaccination',
+        vaccineSub: 'Due & administered boosters',
+        speak: 'Speak Report',
+        speakSub: 'Multilingual voice intake',
+        emergency: 'Emergency SOS (1962)',
+        emergencySub: 'Mobile Veterinary Unit'
+      },
+      sections: {
+        herdHealth: 'My Herd Health',
+        vaccinesDue: 'Vaccinations Due',
+        recentReports: 'Recent Reports',
+        alerts: 'Important Alerts'
+      }
     }
   }
 
   const t = translations[language] || translations.mr
 
-  return (
-    <div className="space-y-5 pb-12 text-slate-800 font-sans">
+  // Computed Herd Health stats
+  const totalAnimals = animals.length
+  const highRiskAnimals = animals.filter(a => a.current_risk_level === 'HIGH' || a.current_risk_level === 'CRITICAL').length
+  const dueVaccineAnimals = animals.filter(a => a.vaccination_status?.toLowerCase().includes('due') || a.vaccination_status?.toLowerCase().includes('overdue'))
 
-      {/* Welcome Bar */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-semibold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-              Farmer Portal • शेतकरी कक्ष
+  return (
+    <div className="space-y-6 pb-12 text-slate-800 font-sans">
+      
+      {/* Top Mobile-First Hero Greeting */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white border border-emerald-500/30 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1.5 z-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30">
+              {farmerDisplayName}
             </span>
-            <span className="bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">
-              {t.villageBadge}
+            <span className="bg-slate-900 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">
+              📍 {t.villageBadge}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            {t.welcome}
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
+            {t.heroTitle}
           </h1>
-          <p className="text-sm text-slate-500">{t.sub}</p>
+          <p className="text-xs sm:text-sm text-emerald-300/90 font-medium">
+            {t.heroSub}
+          </p>
         </div>
 
-        {/* Language Selector — Big Buttons for Farmers */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        {/* Language Switcher — Touch Friendly */}
+        <div className="flex items-center bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800 z-10 self-stretch sm:self-auto justify-center">
           {[
             { code: 'mr', label: 'मराठी' },
             { code: 'hi', label: 'हिंदी' },
@@ -138,10 +180,10 @@ export default function FarmerDashboard() {
             <button
               key={lang.code}
               onClick={() => setLanguage(lang.code)}
-              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors duration-200 ${
+              className={`px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition ${
                 language === lang.code
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               {lang.label}
@@ -150,158 +192,305 @@ export default function FarmerDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions — BIG Buttons for Less Educated Users */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-        {/* Report Symptoms */}
+      {/* 5 PRIMARY ACTIONS (Prominent, High-Contrast & Mobile-First) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        
+        {/* 1. REPORT SICK ANIMAL */}
         <Link
           to="/farmer/report"
-          className="group p-5 rounded-2xl bg-sky-600 text-white shadow-md card-hover flex items-start space-x-4"
+          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg shadow-emerald-950 flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
-          <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-            <FilePlus2 className="w-7 h-7" />
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+            <FilePlus2 className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold">{t.reportBtn}</h3>
-            <p className="text-sm text-sky-100 mt-1">
-              Fever, cough, blisters, milk drop
-            </p>
+            <h3 className="font-black text-base sm:text-lg leading-tight">{t.actions.report}</h3>
+            <p className="text-[11px] text-emerald-100 mt-1 leading-snug">{t.actions.reportSub}</p>
           </div>
         </Link>
 
-        {/* Voice Report */}
-        <button
-          onClick={() => setVoiceModalOpen(true)}
-          className="group p-5 rounded-2xl bg-white border-2 border-amber-300 text-slate-800 shadow-sm card-hover flex items-start space-x-4 text-left"
+        {/* 2. MY ANIMALS */}
+        <Link
+          to="/farmer/animals"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
-          <div className="w-14 h-14 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
-            <Mic className="w-7 h-7" />
+          <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center">
+            <PawPrint className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold">{t.voiceBtn}</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              Marathi / Hindi / English
-            </p>
+            <h3 className="font-bold text-base leading-tight">{t.actions.myAnimals}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.myAnimalsSub}</p>
           </div>
-        </button>
+        </Link>
 
-        {/* Weather */}
-        <div className="sm:col-span-2 lg:col-span-1">
-          <WeatherWidget district="Pune" village="Baramati" />
-        </div>
-      </div>
-
-      {/* Economic Loss Banner — Simple */}
-      <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-base font-bold text-slate-900">{t.lossTitle}</h3>
-          <p className="text-sm text-slate-600 mt-0.5">{t.lossSub}</p>
-        </div>
-        <button
-          onClick={() => setLossCalcOpen(true)}
-          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm flex items-center space-x-2 flex-shrink-0 transition-colors duration-200"
+        {/* 3. VACCINATION */}
+        <Link
+          to="/farmer/animals"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
-          <Calculator className="w-4 h-4" />
-          <span>{t.lossBtn}</span>
+          <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
+            <Syringe className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base leading-tight">{t.actions.vaccine}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.vaccineSub}</p>
+          </div>
+        </Link>
+
+        {/* 4. SPEAK REPORT */}
+        <button
+          type="button"
+          onClick={() => setVoiceModalOpen(true)}
+          className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-amber-300 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 text-left transition transform hover:-translate-y-0.5"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+            <Mic className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base leading-tight">{t.actions.speak}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.speakSub}</p>
+          </div>
         </button>
+
+        {/* 5. EMERGENCY SOS */}
+        <button
+          type="button"
+          onClick={() => setPanicModalOpen(true)}
+          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white shadow-lg shadow-rose-950 flex flex-col justify-between space-y-3 text-left transition transform hover:-translate-y-0.5"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center animate-pulse">
+            <Radio className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-black text-base leading-tight">{t.actions.emergency}</h3>
+            <p className="text-[11px] text-rose-100 mt-1 leading-snug">{t.actions.emergencySub}</p>
+          </div>
+        </button>
+
       </div>
 
-      {/* Animals & Alerts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* Main Grid: Left Column (Herd Health & Recent Reports), Right Column (Vaccines Due & Alerts) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left 7 Columns */}
+        <div className="lg:col-span-7 space-y-6">
+          
+          {/* SECTION: My Herd Health */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-5 h-5 text-emerald-600" />
+                <h2 className="text-base font-extrabold text-slate-900">{t.sections.herdHealth}</h2>
+              </div>
+              <Link to="/farmer/animals/add">
+                <Button size="sm" icon={Plus} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs">
+                  Add Cattle
+                </Button>
+              </Link>
+            </div>
 
-        {/* My Animals */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-extrabold text-slate-900">{t.livestockHeader}</h2>
-            <Link to="/farmer/animals/add">
-              <Button size="sm" icon={Plus} className="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-colors duration-200">
-                {t.addAnimal}
-              </Button>
-            </Link>
-          </div>
+            {/* Quick KPI Counters */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Total Herd</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 block mt-0.5">{totalAnimals}</span>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center">
+                <span className="text-[11px] font-bold text-emerald-700 uppercase">Healthy</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-700 block mt-0.5">{Math.max(0, totalAnimals - highRiskAnimals)}</span>
+              </div>
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3 text-center">
+                <span className="text-[11px] font-bold text-rose-700 uppercase">Risk / Sick</span>
+                <span className="text-xl sm:text-2xl font-black text-rose-700 block mt-0.5">{highRiskAnimals}</span>
+              </div>
+            </div>
 
-          {loading ? (
-            <LoadingState message="Loading your registered livestock..." />
-          ) : error ? (
-            <ErrorState error={error} onRetry={fetchFarmerData} />
-          ) : animals.length === 0 ? (
-            <EmptyState
-              title="No Livestock Registered"
-              message="No animals are registered under your farmer account yet. Register your cattle to initiate AI health monitoring."
-              actionText={t.addAnimal}
-              onAction={() => window.location.href = '/farmer/animals/add'}
-            />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {animals.map((animal) => (
-                <Link
-                  key={animal.id}
-                  to={`/farmer/animals/${animal.animal_id}`}
-                  className="group bg-white border border-slate-200 hover:border-sky-400 rounded-2xl p-4 shadow-sm card-hover block space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
-                        <PawPrint className="w-5 h-5" />
-                      </div>
+            {/* Animal Cards List */}
+            {loading ? (
+              <LoadingState message="Loading your registered livestock..." />
+            ) : error ? (
+              <ErrorState error={error} onRetry={fetchFarmerData} />
+            ) : animals.length === 0 ? (
+              <EmptyState
+                title="No Livestock Registered"
+                message="No animals are registered under your farmer account yet."
+                actionText="Add Cattle"
+                onAction={() => window.location.href = '/farmer/animals/add'}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {animals.map((animal) => (
+                  <Link
+                    key={animal.id}
+                    to={`/farmer/animals/${animal.animal_id}`}
+                    className="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-emerald-400 rounded-2xl p-3.5 shadow-xs transition block space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
                       <div>
                         <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id}</span>
-                        <span className="text-xs text-slate-500">{animal.breed} • {animal.species}</span>
+                        <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {animal.species}</span>
                       </div>
+                      <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
                     </div>
-                    <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
-                  </div>
+                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                      <span className="flex items-center space-x-1">
+                        <Syringe className="w-3.5 h-3.5 text-purple-600" />
+                        <span>{animal.vaccination_status || 'Up to date'}</span>
+                      </span>
+                      <span className="text-emerald-700 font-bold flex items-center">
+                        Details <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-                    <span className="flex items-center space-x-1.5">
-                      <Syringe className="w-4 h-4 text-sky-600" />
-                      <span>{animal.vaccination_status || 'Up to date'}</span>
-                    </span>
-                    <span className="text-sky-600 font-semibold flex items-center space-x-1">
-                      <span>View</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </span>
+          {/* SECTION: Recent Reports */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-5 h-5 text-sky-600" />
+                <h2 className="text-base font-extrabold text-slate-900">{t.sections.recentReports}</h2>
+              </div>
+              <Link to="/farmer/report" className="text-xs font-bold text-sky-600 hover:text-sky-700">
+                New Report →
+              </Link>
+            </div>
+
+            {recentReports.length === 0 ? (
+              <p className="text-xs text-slate-500 py-3 text-center">No recent symptom reports lodged.</p>
+            ) : (
+              <div className="divide-y divide-slate-100 text-xs">
+                {recentReports.slice(0, 4).map((rep) => (
+                  <div key={rep.id} className="py-2.5 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <strong className="text-slate-900">{rep.animal_id}</strong>
+                        <span className="text-slate-500">• {rep.possible_disease_concern || 'Under Review'}</span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        {rep.village || 'Baramati'} • {new Date(rep.reported_at).toLocaleDateString('en-IN')}
+                      </span>
+                    </div>
+                    <RiskBadge level={rep.risk_level} score={rep.risk_score} />
                   </div>
-                </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Right 5 Columns */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          {/* Weather & Field Telemetry */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+            <WeatherWidget district={user?.district || 'Pune'} village={user?.village || 'Baramati'} />
+          </div>
+
+          {/* SECTION: Vaccinations Due */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <Syringe className="w-5 h-5 text-purple-600" />
+                <h2 className="text-base font-extrabold text-slate-900">{t.sections.vaccinesDue}</h2>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-bold">
+                {dueVaccineAnimals.length} Due
+              </span>
+            </div>
+
+            {dueVaccineAnimals.length === 0 ? (
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>All registered herd cattle have completed scheduled vaccinations.</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {dueVaccineAnimals.map((anim) => (
+                  <div key={anim.id} className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between text-xs">
+                    <div>
+                      <strong className="text-purple-950 block">{anim.animal_id} ({anim.species})</strong>
+                      <span className="text-[11px] text-purple-700">{anim.vaccination_status}</span>
+                    </div>
+                    <Link
+                      to="/farmer/report"
+                      className="px-2.5 py-1 rounded-xl bg-purple-600 text-white font-bold text-[11px] hover:bg-purple-700 transition"
+                    >
+                      Book Camp
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION: Important Alerts */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <h2 className="text-base font-extrabold text-slate-900">{t.sections.alerts}</h2>
+              </div>
+              <span className="text-[11px] text-slate-400">Baramati Block</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {[
+                {
+                  title: 'Baramati FMD Surveillance Hotspot',
+                  msg: 'Oral vesicles reported in nearby village. Isolate any cattle showing drooling or foot sores immediately.',
+                  level: 'HIGH',
+                  icon: '🔴',
+                  date: 'Today'
+                },
+                {
+                  title: 'Taluka Free Vaccination Camp',
+                  msg: 'FMD + HS booster drive starts this Monday at Baramati Polyclinic.',
+                  level: 'INFO',
+                  icon: '🟢',
+                  date: 'Yesterday'
+                }
+              ].map((al, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3.5 rounded-2xl border space-y-1 ${
+                    al.level === 'HIGH' ? 'bg-rose-50/80 border-rose-200' : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                      <span>{al.icon}</span>
+                      <span>{al.title}</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">{al.date}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">{al.msg}</p>
+                </div>
               ))}
             </div>
-          )}
+          </div>
+
+          {/* Economic Loss Calculator Trigger */}
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-black text-slate-900">Milk Loss Compensation</h3>
+              <p className="text-[11px] text-slate-600">Calculate economic loss for compensation relief.</p>
+            </div>
+            <button
+              onClick={() => setLossCalcOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center space-x-1"
+            >
+              <Calculator className="w-3.5 h-3.5" />
+              <span>Calculate</span>
+            </button>
+          </div>
+
         </div>
 
-        {/* Alerts */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-extrabold text-slate-900">{t.alertsHeader}</h2>
-          {[
-            {
-              title: 'Baramati Respiratory Watch',
-              msg: 'Multiple cases reported. Isolate cattle showing nasal discharge.',
-              level: 'CRITICAL',
-              date: 'Today, 10:15 AM'
-            },
-            {
-              title: 'Vaccination Drive',
-              msg: 'HS + BQ booster drive starts next week at Taluka Veterinary Center.',
-              level: 'MODERATE',
-              date: 'Yesterday'
-            }
-          ].map((al, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 text-sm">{al.title}</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  al.level === 'CRITICAL' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
-                }`}>
-                  {al.level}
-                </span>
-              </div>
-              <p className="text-sm text-slate-600">{al.msg}</p>
-              <span className="text-xs text-slate-400 block">{al.date}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Modals */}
@@ -316,6 +505,11 @@ export default function FarmerDashboard() {
         isOpen={lossCalcOpen}
         onClose={() => setLossCalcOpen(false)}
       />
+      <EmergencyPanicModal
+        isOpen={panicModalOpen}
+        onClose={() => setPanicModalOpen(false)}
+      />
     </div>
   )
 }
+

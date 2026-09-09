@@ -235,7 +235,7 @@ export default function FieldWorkerDashboard() {
               {loading ? (
                 <LoadingState message="Loading assigned farm visits..." />
               ) : error ? (
-                <ErrorState message={error} onRetry={fetchDashboardData} />
+                <ErrorState message={error} onRetry={fetchFieldData} />
               ) : cases.length === 0 ? (
                 <EmptyState
                   title="No Pending Farm Visits"
