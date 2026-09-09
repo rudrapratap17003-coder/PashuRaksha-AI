@@ -168,23 +168,28 @@ export default function HerdManagement() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30">
-              <Layers className="w-6 h-6 text-emerald-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 flex items-center gap-3 tracking-tight" style={{ color: '#111827' }}>
+            <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-xs flex items-center justify-center">
+              <Layers className="w-6 h-6 text-emerald-600" />
             </div>
-            Herd Management — Digital Passport Registry
+            <span>Herd Management — Digital Passport Registry</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1 ml-14">
+          <p className="text-xs sm:text-sm font-medium mt-1 ml-0 sm:ml-14 text-slate-600" style={{ color: '#475569' }}>
             Farm-level livestock inventory with species, vaccination status, lactation yield & age breakdown
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={fetchData} className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition">
+          <button 
+            onClick={fetchData} 
+            title="Refresh Herd Data"
+            aria-label="Refresh Herd Data"
+            className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 shadow-xs transition cursor-pointer"
+          >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <Link
             to="/farmer/animals/add"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-900/30 transition"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-900/30 transition shadow-xs"
           >
             <PawPrint className="w-4 h-4" /> Register Animal
           </Link>

@@ -9,10 +9,13 @@ let oscSub = null
 let gainNode = null
 let isPlaying = false
 let sirenInterval = null
+let autoStopTimeout = null
 
-export const playEmergencySiren = (durationSeconds = 8) => {
+export const playEmergencySiren = (durationSeconds = 15, onStop = null) => {
   try {
-    if (isPlaying) return
+    if (isPlaying) {
+      stopEmergencySiren()
+    }
 
     const AudioContext = window.AudioContext || window.webkitAudioContext
     if (!AudioContext) return
@@ -72,8 +75,11 @@ export const playEmergencySiren = (durationSeconds = 8) => {
 
     // Auto-stop after duration
     if (durationSeconds > 0) {
-      setTimeout(() => {
+      autoStopTimeout = setTimeout(() => {
         stopEmergencySiren()
+        if (typeof onStop === 'function') {
+          onStop()
+        }
       }, durationSeconds * 1000)
     }
   } catch (err) {
@@ -83,26 +89,30 @@ export const playEmergencySiren = (durationSeconds = 8) => {
 
 export const stopEmergencySiren = () => {
   try {
+    if (autoStopTimeout) {
+      clearTimeout(autoStopTimeout)
+      autoStopTimeout = null
+    }
     if (sirenInterval) {
       clearInterval(sirenInterval)
       sirenInterval = null
     }
     if (oscMain) {
-      oscMain.stop()
-      oscMain.disconnect()
+      try { oscMain.stop() } catch {}
+      try { oscMain.disconnect() } catch {}
       oscMain = null
     }
     if (oscSub) {
-      oscSub.stop()
-      oscSub.disconnect()
+      try { oscSub.stop() } catch {}
+      try { oscSub.disconnect() } catch {}
       oscSub = null
     }
     if (gainNode) {
-      gainNode.disconnect()
+      try { gainNode.disconnect() } catch {}
       gainNode = null
     }
     if (audioCtx && audioCtx.state !== 'closed') {
-      audioCtx.close()
+      try { audioCtx.close() } catch {}
       audioCtx = null
     }
     isPlaying = false
