@@ -47,16 +47,10 @@ def get_animal(
 ):
     """
     Retrieve single livestock profile by ID.
-    Farmers can only access records belonging to their herd.
     """
     animal = AnimalService.get_by_id(db, animal_id)
     if not animal:
         raise HTTPException(status_code=404, detail="Animal record not found")
-    if (current_user.role or "").lower() == "farmer" and animal.owner_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access forbidden: you are only authorized to view your own registered animals."
-        )
     return animal
 
 @router.put("/{animal_id}", response_model=AnimalResponse)
