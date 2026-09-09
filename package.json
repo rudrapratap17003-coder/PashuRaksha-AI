@@ -4,7 +4,7 @@
   "description": "PASHURAKSHA AI — Livestock Health Intelligence & Outbreak Early-Warning Platform (SIH26128)",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"npm run dev:backend:unix\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173",
     "dev:backend": "backend\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
     "dev:backend:unix": "./backend/.venv/bin/uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",

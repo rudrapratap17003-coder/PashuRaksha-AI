@@ -13,6 +13,17 @@ class FarmCreate(FarmBase):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+class FarmUpdate(BaseModel):
+    name: Optional[str] = None
+    owner_name: Optional[str] = None
+    village: Optional[str] = None
+    total_animals: Optional[int] = None
+    cattle_count: Optional[int] = None
+    buffalo_count: Optional[int] = None
+    goat_count: Optional[int] = None
+    sheep_count: Optional[int] = None
+    poultry_count: Optional[int] = None
+
 class FarmResponse(FarmBase):
     id: str
     owner_id: str

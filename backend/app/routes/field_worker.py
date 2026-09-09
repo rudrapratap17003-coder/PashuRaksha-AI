@@ -13,6 +13,8 @@ from app.services.timeline_service import TimelineService
 from app.services.case_service import CaseService, CaseStatus
 from app.schemas.case_timeline import CaseTimelineEventCreate
 from app.schemas.health_report import HealthReportCreate
+from app.schemas.farm import FarmCreate, FarmUpdate, FarmResponse
+import uuid
 
 router = APIRouter(prefix="/field-worker", tags=["Field Worker"])
 
@@ -225,3 +227,57 @@ def _get_symptom_list(report: HealthReport) -> list:
         if getattr(report, attr, False):
             symptoms.append(label)
     return symptoms
+
+@router.get("/households", response_model=list[FarmResponse])
+def get_households(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_field_worker)
+):
+    """Get all households (farms) assigned to the field worker."""
+    user_district = current_user.district or "Pune"
+    farms = db.query(Farm).filter(Farm.district == user_district).all()
+    return farms
+
+@router.post("/households", response_model=FarmResponse)
+def create_household(
+    data: FarmCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_field_worker)
+):
+    """Register a new household (farm)."""
+    farm = Farm(
+        id=f"farm-{str(uuid.uuid4())[:8]}",
+        name=data.name,
+        owner_id=current_user.id,
+        owner_name=data.owner_name or data.name,
+        village=data.village,
+        taluka=data.taluka,
+        district=data.district or current_user.district,
+        latitude=data.latitude,
+        longitude=data.longitude
+    )
+    db.add(farm)
+    db.commit()
+    db.refresh(farm)
+    return farm
+
+@router.put("/households/{farm_id}", response_model=FarmResponse)
+def update_household(
+    farm_id: str,
+    data: FarmUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_field_worker)
+):
+    """Update census data for a household."""
+    farm = db.query(Farm).filter(Farm.id == farm_id).first()
+    if not farm:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Household not found")
+    
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(farm, key, value)
+    
+    db.commit()
+    db.refresh(farm)
+    return farm
