@@ -28,10 +28,12 @@ import { LoadingState, ErrorState, EmptyState } from '../../components/common/St
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function FarmerDashboard() {
   const { user } = useAuth()
   const { scenarioData, currentScenario } = useScenario()
+  const { language, setLanguage } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
   const [recentReports, setRecentReports] = useState([])
@@ -40,7 +42,6 @@ export default function FarmerDashboard() {
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
   const [lossCalcOpen, setLossCalcOpen] = useState(false)
   const [panicModalOpen, setPanicModalOpen] = useState(false)
-  const [language, setLanguage] = useState('mr') // 'mr' | 'hi' | 'en'
 
   const fetchFarmerData = async () => {
     setLoading(true)

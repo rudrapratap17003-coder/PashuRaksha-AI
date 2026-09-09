@@ -23,7 +23,8 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
-import VoiceReportModal from '../../components/common/VoiceReportModal'
+import VoiceReportModal, { CLINICAL_SYMPTOM_LEXICON } from '../../components/common/VoiceReportModal'
+import VoiceReportButton from '../../components/common/VoiceReportButton'
 import VisualLesionScannerModal from '../../components/common/VisualLesionScannerModal'
 import apiClient from '../../services/api'
 import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
@@ -83,6 +84,20 @@ export default function SymptomReportPage() {
     setAffectedCount(3)
     setVillage('Baramati')
     setDistrict('Pune')
+  }
+
+  const handleInlineVoiceInput = (finalTranscript, fullLiveTranscript) => {
+    const text = (fullLiveTranscript || finalTranscript || '').toLowerCase()
+    if (!text) return
+    const matched = []
+    CLINICAL_SYMPTOM_LEXICON.forEach((lex) => {
+      if (lex.keywords.some((kw) => text.includes(kw.toLowerCase()))) {
+        matched.push(lex.id)
+      }
+    })
+    if (matched.length > 0) {
+      setSelectedSymptoms((prev) => Array.from(new Set([...prev, ...matched])))
+    }
   }
 
   const handleAnalyzeHealthRisk = async (e) => {
@@ -245,11 +260,20 @@ export default function SymptomReportPage() {
 
         {/* Step 2: 11 Core Symptoms Checklist */}
         <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span className="text-xs font-mono font-black uppercase text-emerald-400">
-              STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
-            </span>
-            <span className="text-[11px] text-slate-400">Tap all symptoms currently present</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
+            <div>
+              <span className="text-xs font-mono font-black uppercase text-emerald-400 block">
+                STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
+              </span>
+              <span className="text-[11px] text-slate-400">Tap to select or speak your symptoms below</span>
+            </div>
+            <VoiceReportButton
+              size="sm"
+              onTranscript={handleInlineVoiceInput}
+              label="Speak Symptoms"
+              activeLabel="Listening..."
+              className="self-start sm:self-auto"
+            />
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
