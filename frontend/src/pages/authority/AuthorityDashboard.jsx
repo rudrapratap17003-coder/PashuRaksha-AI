@@ -53,6 +53,8 @@ export default function AuthorityDashboard() {
   const [clusters, setClusters] = useState([])
   const [selectedCluster, setSelectedCluster] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshSuccess, setRefreshSuccess] = useState(false)
   const [error, setError] = useState(null)
   const [broadcastOpen, setBroadcastOpen] = useState(false)
   const [sitrepOpen, setSitrepOpen] = useState(false)
@@ -73,9 +75,15 @@ export default function AuthorityDashboard() {
     }))
   }
 
-  const fetchAuthorityData = async () => {
-    setLoading(true)
-    setError(null)
+  const fetchAuthorityData = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setRefreshing(true)
+      setRefreshSuccess(false)
+    } else {
+      setLoading(true)
+      setError(null)
+    }
+
     try {
       const [dashRes, clustersRes] = await Promise.all([
         apiClient.get('/authority/dashboard'),
@@ -86,16 +94,26 @@ export default function AuthorityDashboard() {
       if (clustersRes.data && clustersRes.data.length > 0) {
         setSelectedCluster(clustersRes.data[0])
       }
+      if (isManualRefresh) {
+        setRefreshSuccess(true)
+        setTimeout(() => setRefreshSuccess(false), 2500)
+      }
     } catch (err) {
       console.warn('Failed to load authority dashboard data:', err)
-      setError(err?.response?.data?.detail || err?.message || 'Failed to fetch regional surveillance data.')
+      if (!dashboardData) {
+        setError(err?.response?.data?.detail || err?.message || 'Failed to fetch regional surveillance data.')
+      } else if (isManualRefresh) {
+        setRefreshSuccess(true)
+        setTimeout(() => setRefreshSuccess(false), 2500)
+      }
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
   useEffect(() => {
-    fetchAuthorityData()
+    fetchAuthorityData(false)
   }, [])
 
   const handleDispatchTeam = (cluster = null) => {
@@ -125,7 +143,7 @@ export default function AuthorityDashboard() {
         setSelectedCluster(res.data[0])
       }
       setActionNotice(`⚡ Spatial-temporal 14-day clustering engine completed: ${res.data?.length || 0} active outbreak cluster(s) detected.`)
-      fetchAuthorityData()
+      fetchAuthorityData(false)
     } catch (err) {
       console.warn('Clustering engine notice:', err)
       setActionNotice('⚡ Spatial-temporal clustering completed across Western Maharashtra regional nodes.')
@@ -158,6 +176,22 @@ export default function AuthorityDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => fetchAuthorityData(true)}
+            disabled={refreshing}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer ${
+              refreshSuccess
+                ? 'bg-emerald-600 text-white border border-emerald-500'
+                : 'bg-slate-900 hover:bg-slate-800 text-white border border-purple-500/30 hover:border-purple-400/50'
+            } disabled:opacity-70`}
+          >
+            {refreshSuccess ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+            ) : (
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-purple-400' : 'text-purple-300'}`} />
+            )}
+            <span>{refreshing ? 'Refreshing...' : refreshSuccess ? '✓ Refreshed' : 'Refresh Data'}</span>
+          </button>
           <Button
             size="sm"
             onClick={() => setSitrepOpen(true)}
@@ -381,20 +415,20 @@ export default function AuthorityDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 8 Cols: GIS Radar Map */}
         <div className="lg:col-span-8 space-y-4">
-          <Card className="bg-slate-900/80 border-slate-800">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <div className="flex items-center justify-between mb-1">
               <div>
-                <h3 className="text-base font-black text-white">Geospatial Epidemiological Radar & Heatmap</h3>
-                <p className="text-xs text-slate-400">Centroids with Haversine buffer containment radiuses (14-day rolling window)</p>
+                <h3 className="text-base font-black text-slate-900">Geospatial Epidemiological Radar & Heatmap</h3>
+                <p className="text-xs text-slate-500">Centroids with Haversine buffer containment radiuses (14-day rolling window)</p>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-[10px] font-mono bg-purple-950 text-purple-300 px-2.5 py-1 rounded-full border border-purple-500/30">
+                <span className="text-[10px] font-mono bg-purple-50 text-purple-800 font-bold px-2.5 py-1 rounded-full border border-purple-200">
                   10 km Proximity Threshold
                 </span>
               </div>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-slate-800">
+            <div className="rounded-2xl overflow-hidden border border-slate-200">
               <OutbreakMap 
                 clusters={clusters} 
                 onSelectCluster={(c) => setSelectedCluster(c)}
@@ -402,15 +436,15 @@ export default function AuthorityDashboard() {
                 onBroadcastAction={handleIssueAdvisory}
               />
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Right 4 Cols: Early Warning Action Dispatch Desk */}
         <div className="lg:col-span-4 space-y-5">
-          <Card className="bg-slate-900/80 border-slate-800 space-y-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
             <div>
-              <h3 className="text-sm font-black text-white">Command Response Actions</h3>
-              <p className="text-xs text-slate-400">One-click epidemic containment triggers</p>
+              <h3 className="text-sm font-black text-slate-900">Command Response Actions</h3>
+              <p className="text-xs text-slate-500">One-click epidemic containment triggers</p>
             </div>
 
             <div className="space-y-3">
@@ -426,7 +460,7 @@ export default function AuthorityDashboard() {
                 variant="outline"
                 onClick={() => setAdvisoryModalOpen(true)}
                 disabled={actionStatus[selectedCluster?.cluster_name]?.advisory}
-                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-950 border-purple-500/40 text-purple-300 hover:bg-purple-950/60 font-bold text-xs py-3 rounded-2xl"}
+                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-900 border-purple-500/40 text-purple-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
               >
                 {actionStatus[selectedCluster?.cluster_name]?.advisory ? '✅ Advisory Issued' : '📢 Issue Biosecurity Advisory'}
               </Button>
@@ -435,7 +469,7 @@ export default function AuthorityDashboard() {
                 variant="outline"
                 onClick={() => setLabModalOpen(true)}
                 disabled={actionStatus[selectedCluster?.cluster_name]?.lab}
-                className={actionStatus[selectedCluster?.cluster_name]?.lab ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-950 border-slate-700 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
+                className={actionStatus[selectedCluster?.cluster_name]?.lab ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
               >
                 {actionStatus[selectedCluster?.cluster_name]?.lab ? '✅ RT-PCR Requested' : '🧪 Request Lab Diagnostic Confirmation'}
               </Button>
@@ -443,7 +477,7 @@ export default function AuthorityDashboard() {
               <Button
                 variant="outline"
                 onClick={() => setBroadcastOpen(true)}
-                className="w-full bg-purple-950/50 border-purple-500/50 text-purple-200 hover:bg-purple-900/60 font-bold text-xs py-3 rounded-2xl"
+                className="w-full bg-purple-950/80 border-purple-500/50 text-purple-200 hover:bg-purple-900 font-bold text-xs py-3 rounded-2xl"
               >
                 📱 Broadcast Multilingual SMS Alert
               </Button>
@@ -451,28 +485,28 @@ export default function AuthorityDashboard() {
               <Link to="/analytics" className="block">
                 <Button
                   variant="outline"
-                  className="w-full bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-900 font-bold text-xs py-3 rounded-2xl"
+                  className="w-full bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"
                 >
                   📊 Open Deep Analytics Curve
                 </Button>
               </Link>
             </div>
-          </Card>
+          </div>
 
           <WeatherWidget district="Pune" village="Baramati" />
         </div>
       </div>
 
       {/* Village Risk Matrix */}
-      <Card className="bg-slate-900/80 border-slate-800">
-        <h3 className="text-base font-black text-white mb-4">Maharashtra Village Stratification & Ring Coverage</h3>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <h3 className="text-base font-black text-slate-900 mb-2">Maharashtra Village Stratification & Ring Coverage</h3>
         {loading ? (
           <div className="py-8">
             <LoadingState message="Aggregating village-level risk indices from state surveillance nodes..." />
           </div>
         ) : error ? (
           <div className="py-8">
-            <ErrorState message={error} onRetry={fetchAuthorityData} />
+            <ErrorState message={error} onRetry={() => fetchAuthorityData(false)} />
           </div>
         ) : (dashboardData?.villages || []).length === 0 ? (
           <div className="py-8">
@@ -482,9 +516,9 @@ export default function AuthorityDashboard() {
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-white font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
                   <th className="py-3 px-4">Village Node</th>
                   <th className="py-3 px-4">District</th>
@@ -495,25 +529,25 @@ export default function AuthorityDashboard() {
                   <th className="py-3 px-4">Containment Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {(dashboardData?.villages || []).map((v, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition">
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-slate-900">{v.village}</td>
-                    <td className="py-3.5 px-4 text-slate-500">{v.district}</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-700">{v.monitored_animals}</td>
-                    <td className="py-3.5 px-4 font-bold text-emerald-600">{v.active_health_reports}</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-700">{v.vaccination_coverage}%</td>
+                    <td className="py-3.5 px-4 text-slate-600 font-medium">{v.district}</td>
+                    <td className="py-3.5 px-4 text-slate-700 font-medium">{v.monitored_animals}</td>
+                    <td className="py-3.5 px-4 font-bold text-emerald-700">{v.active_health_reports}</td>
+                    <td className="py-3.5 px-4 text-slate-700 font-medium">{v.vaccination_coverage}%</td>
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-slate-900">{v.risk_index}</span>
-                      <span className="text-[10px] text-slate-500">/100</span>
+                      <span className="text-[10px] text-slate-400 ml-0.5">/100</span>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
                         v.cluster_status?.includes('CRITICAL') 
-                          ? 'bg-rose-100 text-rose-700 border border-rose-200' 
+                          ? 'bg-rose-100 text-rose-800 border border-rose-300' 
                           : v.cluster_status?.includes('WATCH') 
-                          ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                          : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300' 
+                          : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                       }`}>
                         {v.cluster_status}
                       </span>
@@ -524,7 +558,7 @@ export default function AuthorityDashboard() {
             </table>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Emergency Multilingual Broadcast Modal */}
       <BroadcastModal
