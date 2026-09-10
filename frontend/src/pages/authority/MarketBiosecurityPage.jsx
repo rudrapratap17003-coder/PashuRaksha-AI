@@ -98,7 +98,7 @@ export default function MarketBiosecurityPage() {
   }
 
   return (
-    <div className="space-y-6 pb-12 text-slate-100 max-w-6xl mx-auto">
+    <div className="space-y-6 pb-12 text-slate-800 max-w-6xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -116,10 +116,10 @@ export default function MarketBiosecurityPage() {
       </div>
 
       {/* Transit Permit QR Scanner Verification Bar */}
-      <Card className="p-5 rounded-3xl bg-slate-900/90 border border-emerald-500/30 space-y-4">
-        <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
-          <QrCode className="w-5 h-5 text-emerald-400" />
-          <h3 className="text-sm font-black text-white">Live Transit Permit &amp; Cattle Truck Gatekeeper Scanner</h3>
+      <Card className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-200 space-y-4">
+        <div className="flex items-center space-x-2 border-b border-emerald-200 pb-2">
+          <QrCode className="w-5 h-5 text-emerald-600" />
+          <h3 className="text-sm font-black text-emerald-900">Live Transit Permit &amp; Cattle Truck Gatekeeper Scanner</h3>
         </div>
 
         <form onSubmit={handleVerifyPermit} className="flex flex-col sm:flex-row gap-3">
@@ -128,7 +128,7 @@ export default function MarketBiosecurityPage() {
             value={scanCode}
             onChange={(e) => setScanCode(e.target.value)}
             placeholder="Scan Permit QR or Enter Permit ID (e.g. MH-TRANSIT-2026-9401 or 8812)..."
-            className="flex-1 bg-slate-950 border border-slate-800 focus:border-emerald-500 px-4 py-3 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-white border border-emerald-200 focus:border-emerald-500 px-4 py-3 rounded-2xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
           />
           <button
             type="submit"
@@ -151,42 +151,42 @@ export default function MarketBiosecurityPage() {
 
       {/* Major Maharashtra Markets Biosecurity Status */}
       <div className="space-y-4">
-        <h3 className="text-sm font-black text-white flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-emerald-400" />
+        <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-emerald-600" />
           <span>Major Maharashtra Livestock Bazaars Status</span>
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {markets.map((m, i) => (
-            <Card key={i} className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <Card key={i} className="p-5 rounded-3xl bg-white border border-slate-200 space-y-3 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold">{m.day}</span>
+                  <span className="text-[10px] font-mono text-emerald-600 font-bold">{m.day}</span>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                    m.statusType === 'danger' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
-                    m.statusType === 'warning' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                    'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    m.statusType === 'danger' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                    m.statusType === 'warning' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                    'bg-emerald-100 text-emerald-700 border border-emerald-200'
                   }`}>
                     {m.statusType === 'danger' ? 'Embargoed' : m.statusType === 'warning' ? 'Screening' : 'Normal'}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-bold text-white leading-snug">{m.marketName}</h4>
-                <p className="text-[11px] text-slate-400 mt-1">{m.taluka}</p>
+                <h4 className="text-sm font-bold text-slate-900 leading-snug">{m.marketName}</h4>
+                <p className="text-[11px] text-slate-500 mt-1">{m.taluka}</p>
 
-                <div className="mt-3 p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] space-y-1">
+                <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Weekly Footfall:</span>
-                    <strong className="text-white">{m.weeklyCattleFootfall}</strong>
+                    <strong className="text-slate-900">{m.weeklyCattleFootfall}</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Spray Station:</span>
-                    <strong className="text-emerald-400">Active</strong>
+                    <strong className="text-emerald-600">Active</strong>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400">
+              <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500">
                 <p>{m.activeRestrictions}</p>
               </div>
             </Card>

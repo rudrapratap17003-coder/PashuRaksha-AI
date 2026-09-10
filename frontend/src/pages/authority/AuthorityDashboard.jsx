@@ -36,6 +36,9 @@ import OutbreakMap from '../../components/map/OutbreakMap'
 import WeatherWidget from '../../components/common/WeatherWidget'
 import BroadcastModal from '../../components/authority/BroadcastModal'
 import SitrepGeneratorModal from '../../components/authority/SitrepGeneratorModal'
+import DeployTeamModal from '../../components/authority/DeployTeamModal'
+import IssueAdvisoryModal from '../../components/authority/IssueAdvisoryModal'
+import RequestLabModal from '../../components/authority/RequestLabModal'
 import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
@@ -53,6 +56,22 @@ export default function AuthorityDashboard() {
   const [error, setError] = useState(null)
   const [broadcastOpen, setBroadcastOpen] = useState(false)
   const [sitrepOpen, setSitrepOpen] = useState(false)
+  const [deployModalOpen, setDeployModalOpen] = useState(false)
+  const [advisoryModalOpen, setAdvisoryModalOpen] = useState(false)
+  const [labModalOpen, setLabModalOpen] = useState(false)
+  const [actionStatus, setActionStatus] = useState({})
+
+  const handleActionSuccess = (actionName) => {
+    if (!selectedCluster) return
+    const id = selectedCluster.cluster_name || 'default'
+    setActionStatus(prev => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        [actionName]: true
+      }
+    }))
+  }
 
   const fetchAuthorityData = async () => {
     setLoading(true)
@@ -321,33 +340,37 @@ export default function AuthorityDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 size="sm"
-                onClick={() => handleDispatchTeam(selectedCluster)}
-                className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md"
+                onClick={() => setDeployModalOpen(true)}
+                disabled={actionStatus[selectedCluster?.cluster_name]?.deployed}
+                className={actionStatus[selectedCluster?.cluster_name]?.deployed ? "bg-emerald-600/50 text-emerald-100 font-bold text-xs shadow-md border-0" : "bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md border-0"}
               >
-                🚨 Deploy Team (250 Doses)
+                {actionStatus[selectedCluster?.cluster_name]?.deployed ? '✅ Team Deployed' : '🚨 Deploy Team (250 Doses)'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleIssueAdvisory(selectedCluster)}
-                className="bg-slate-900 border-purple-400/50 text-purple-300 hover:bg-purple-950 text-xs font-bold"
+                onClick={() => setAdvisoryModalOpen(true)}
+                disabled={actionStatus[selectedCluster?.cluster_name]?.advisory}
+                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "bg-emerald-900 border-emerald-500/50 text-emerald-300 text-xs font-bold" : "bg-slate-900 border-purple-400/50 text-purple-300 hover:bg-purple-950 text-xs font-bold"}
               >
-                📢 Issue Advisory
+                {actionStatus[selectedCluster?.cluster_name]?.advisory ? '✅ Advisory Issued' : '📢 Issue Advisory'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleRequestLabConfirmation(selectedCluster)}
-                className="bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-bold"
+                onClick={() => setLabModalOpen(true)}
+                disabled={actionStatus[selectedCluster?.cluster_name]?.lab}
+                className={actionStatus[selectedCluster?.cluster_name]?.lab ? "bg-emerald-900 border-emerald-500/50 text-emerald-300 text-xs font-bold" : "bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-bold"}
               >
-                🧪 Request Lab RT-PCR
+                {actionStatus[selectedCluster?.cluster_name]?.lab ? '✅ RT-PCR Requested' : '🧪 Request Lab RT-PCR'}
               </Button>
               <Button
                 size="sm"
                 onClick={() => setBroadcastOpen(true)}
-                className="bg-purple-900 hover:bg-purple-800 text-purple-200 border border-purple-400/50 text-xs font-bold"
+                disabled={actionStatus[selectedCluster?.cluster_name]?.broadcast}
+                className={actionStatus[selectedCluster?.cluster_name]?.broadcast ? "bg-emerald-600/50 text-emerald-100 font-bold text-xs shadow-md border-0" : "bg-purple-900 hover:bg-purple-800 text-purple-200 border border-purple-400/50 text-xs font-bold"}
               >
-                📱 Broadcast Alert
+                {actionStatus[selectedCluster?.cluster_name]?.broadcast ? '✅ Alert Broadcasted' : '📱 Broadcast Alert'}
               </Button>
             </div>
           </div>
@@ -401,18 +424,20 @@ export default function AuthorityDashboard() {
 
               <Button
                 variant="outline"
-                onClick={() => handleIssueAdvisory()}
-                className="w-full bg-slate-950 border-purple-500/40 text-purple-300 hover:bg-purple-950/60 font-bold text-xs py-3 rounded-2xl"
+                onClick={() => setAdvisoryModalOpen(true)}
+                disabled={actionStatus[selectedCluster?.cluster_name]?.advisory}
+                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-950 border-purple-500/40 text-purple-300 hover:bg-purple-950/60 font-bold text-xs py-3 rounded-2xl"}
               >
-                📢 Issue Biosecurity Advisory
+                {actionStatus[selectedCluster?.cluster_name]?.advisory ? '✅ Advisory Issued' : '📢 Issue Biosecurity Advisory'}
               </Button>
 
               <Button
                 variant="outline"
-                onClick={() => handleRequestLabConfirmation()}
-                className="w-full bg-slate-950 border-slate-700 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"
+                onClick={() => setLabModalOpen(true)}
+                disabled={actionStatus[selectedCluster?.cluster_name]?.lab}
+                className={actionStatus[selectedCluster?.cluster_name]?.lab ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-950 border-slate-700 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
               >
-                🧪 Request Lab Diagnostic Confirmation
+                {actionStatus[selectedCluster?.cluster_name]?.lab ? '✅ RT-PCR Requested' : '🧪 Request Lab Diagnostic Confirmation'}
               </Button>
 
               <Button
@@ -458,8 +483,8 @@ export default function AuthorityDashboard() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <table className="w-full text-left text-xs text-slate-600">
+              <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="py-3 px-4">Village Node</th>
                   <th className="py-3 px-4">District</th>
@@ -470,25 +495,25 @@ export default function AuthorityDashboard() {
                   <th className="py-3 px-4">Containment Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100">
                 {(dashboardData?.villages || []).map((v, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/40 transition">
-                    <td className="py-3.5 px-4 font-bold text-white">{v.village}</td>
-                    <td className="py-3.5 px-4 text-slate-400">{v.district}</td>
-                    <td className="py-3.5 px-4">{v.monitored_animals}</td>
-                    <td className="py-3.5 px-4 font-bold text-emerald-400">{v.active_health_reports}</td>
-                    <td className="py-3.5 px-4">{v.vaccination_coverage}%</td>
+                  <tr key={idx} className="hover:bg-slate-50 transition">
+                    <td className="py-3.5 px-4 font-bold text-slate-900">{v.village}</td>
+                    <td className="py-3.5 px-4 text-slate-500">{v.district}</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-700">{v.monitored_animals}</td>
+                    <td className="py-3.5 px-4 font-bold text-emerald-600">{v.active_health_reports}</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-700">{v.vaccination_coverage}%</td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-white">{v.risk_index}</span>
+                      <span className="font-bold text-slate-900">{v.risk_index}</span>
                       <span className="text-[10px] text-slate-500">/100</span>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
                         v.cluster_status?.includes('CRITICAL') 
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' 
+                          ? 'bg-rose-100 text-rose-700 border border-rose-200' 
                           : v.cluster_status?.includes('WATCH') 
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                          : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                       }`}>
                         {v.cluster_status}
                       </span>
@@ -505,6 +530,42 @@ export default function AuthorityDashboard() {
       <BroadcastModal
         isOpen={broadcastOpen}
         onClose={() => setBroadcastOpen(false)}
+        onSuccess={() => {
+          handleActionSuccess('broadcast')
+          setActionNotice(`📡 Emergency alert broadcast successfully for ${selectedCluster?.affected_villages?.[0] || 'Karad'}.`)
+          setTimeout(() => setActionNotice(null), 7000)
+        }}
+      />
+
+      {/* New Action Modals */}
+      <DeployTeamModal
+        isOpen={deployModalOpen}
+        onClose={() => setDeployModalOpen(false)}
+        cluster={selectedCluster}
+        onSuccess={() => {
+          handleDispatchTeam(selectedCluster)
+          handleActionSuccess('deployed')
+        }}
+      />
+
+      <IssueAdvisoryModal
+        isOpen={advisoryModalOpen}
+        onClose={() => setAdvisoryModalOpen(false)}
+        cluster={selectedCluster}
+        onSuccess={() => {
+          handleIssueAdvisory(selectedCluster)
+          handleActionSuccess('advisory')
+        }}
+      />
+
+      <RequestLabModal
+        isOpen={labModalOpen}
+        onClose={() => setLabModalOpen(false)}
+        cluster={selectedCluster}
+        onSuccess={() => {
+          handleRequestLabConfirmation(selectedCluster)
+          handleActionSuccess('lab')
+        }}
       />
 
       {/* Official State Epidemiological SITREP Modal */}
