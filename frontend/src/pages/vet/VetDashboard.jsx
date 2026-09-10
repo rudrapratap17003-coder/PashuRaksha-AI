@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link } from 'react-router-dom'
 import { 
   Stethoscope, 
@@ -33,6 +34,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
 
 export default function VetDashboard() {
+  const { t } = useLanguage()
   const { user } = useAuth()
   const { scenarioData, currentScenario } = useScenario()
   const [cases, setCases] = useState([])
@@ -78,17 +80,17 @@ export default function VetDashboard() {
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xs font-mono font-bold text-sky-400 uppercase">
-              Veterinary Clinical Triage Desk
+              {t("vetModule.dashboardTitle")}
             </span>
             <span className="px-2.5 py-0.5 rounded-full bg-sky-950 border border-sky-500/40 text-sky-300 text-[10px] font-bold">
-              AI Priority Queue Active
+              {t("vetModule.priorityActive")}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Veterinarian Emergency & Triage Console
+            {t("vetModule.triageConsole")}
           </h1>
           <p className="text-xs text-slate-300 mt-0.5">
-            Jurisdiction: <strong>Baramati Block Center • Pune Division, Maharashtra</strong>
+            {t("vetModule.jurisdiction")}
           </p>
         </div>
 
@@ -108,30 +110,30 @@ export default function VetDashboard() {
       {/* KPI Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Critical Cases (Score ≥80)"
+          title={t("vetModule.stats.criticalCases")}
           value={cases.filter((c) => c.risk_level === 'CRITICAL').length || 1}
-          subtitle="Immediate triage priority"
+          subtitle={t("vetModule.stats.criticalSub")}
           icon={AlertTriangle}
           iconBg="bg-rose-500/10 text-rose-400 border border-rose-500/20"
         />
         <StatCard
-          title="High-Priority Cases"
+          title={t("vetModule.stats.highPriority")}
           value={cases.filter((c) => c.risk_level === 'HIGH').length || 2}
-          subtitle="Inspection within 24 hrs"
+          subtitle={t("vetModule.stats.highSub")}
           icon={ShieldAlert}
           iconBg="bg-orange-500/10 text-orange-400 border border-orange-500/20"
         />
         <StatCard
-          title="Lab Tests Requisitioned"
+          title={t("vetModule.stats.labTests")}
           value={cases.filter((c) => c.lab_referral).length || 3}
-          subtitle="PCR & Bacterial typing"
+          subtitle={t("vetModule.stats.labSub")}
           icon={TestTube2}
           iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
         />
         <StatCard
-          title="Resolved This Week"
+          title={t("vetModule.stats.resolvedWeek")}
           value={14}
-          subtitle="Treatment plan recorded"
+          subtitle={t("vetModule.stats.resolvedSub")}
           icon={CheckCircle2}
           iconBg="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
         />
@@ -144,21 +146,21 @@ export default function VetDashboard() {
           <Card className="bg-slate-900/80 border-slate-800">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
-                <h3 className="text-base font-black text-white">AI Prioritized Clinical Queue</h3>
-                <p className="text-xs text-slate-400">Ranked by explainable multi-factor severity</p>
+                <h3 className="text-base font-black text-white">{t("vetModule.queue.title")}</h3>
+                <p className="text-xs text-slate-400">{t("vetModule.queue.subtitle")}</p>
               </div>
 
               {/* Status Filter */}
               <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
                 {['all', 'pending', 'investigating', 'investigated'].map((st) => (
                   <button
-                    key={st}
+                    key={t(`vetModule.queue.filters.${st}`)}
                     onClick={() => setStatusFilter(st)}
                     className={`px-2.5 py-1 rounded-lg capitalize font-bold text-[11px] transition ${
                       statusFilter === st ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {st}
+                    {t(`vetModule.queue.filters.${st}`)}
                   </button>
                 ))}
               </div>
@@ -172,8 +174,8 @@ export default function VetDashboard() {
                 <ErrorState message={error} onRetry={fetchVetCases} />
               ) : filteredCases.length === 0 ? (
                 <EmptyState
-                  title="No Cases in Clinical Queue"
-                  description={statusFilter !== 'all' || searchTerm ? "No clinical cases match the active filter criteria." : "All registered animal triage cases have been attended to."}
+                  title={t("vetModule.queue.emptyTitle")}
+                  description={statusFilter !== 'all' || searchTerm ? t("vetModule.queue.emptyFilter") : t("vetModule.queue.emptyAll")}
                 />
               ) : (
                 filteredCases.map((c) => (
@@ -188,7 +190,7 @@ export default function VetDashboard() {
                           <RiskBadge level={c.risk_level} score={c.risk_score} />
                         </div>
                         <p className="text-xs text-slate-300 font-semibold mt-0.5">
-                          {c.breed} {c.species} • Owner: <strong className="text-white">{c.farmer_name}</strong>
+                          {t(`data.breed.${c.breed}`) || c.breed} {t(`data.species.${c.species}`) || c.species} • {t("vetModule.queue.owner")}: <strong className="text-white">{c.farmer_name}</strong>
                         </p>
                         <span className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
                           <MapPin className="w-3 h-3 text-slate-500" />
@@ -197,11 +199,11 @@ export default function VetDashboard() {
                       </div>
 
                       <div className="text-right">
-                        <span className="text-[10px] font-mono text-slate-500 block">Case #{c.id}</span>
+                        <span className="text-[10px] font-mono text-slate-500 block">{t("vetModule.queue.caseId")} #{c.id}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize mt-1 inline-block ${
                           c.status === 'pending' ? 'bg-rose-950 text-rose-300 border border-rose-500/30' : 'bg-slate-800 text-slate-300'
                         }`}>
-                          {c.status}
+                          {t(`data.status.${c.status}`) || c.status}
                         </span>
                       </div>
                     </div>
@@ -210,14 +212,14 @@ export default function VetDashboard() {
                     <div className="flex flex-wrap gap-1">
                       {c.symptoms?.map((s, idx) => (
                         <span key={idx} className="bg-slate-900 text-sky-300 text-[10px] px-2 py-0.5 rounded border border-sky-500/20 font-medium">
-                          {s}
+                          {t(`data.symptom.${s}`) || s}
                         </span>
                       ))}
                     </div>
 
                     <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
                       <span className="text-xs text-amber-300 font-bold truncate max-w-[240px]">
-                        {c.possible_disease_concern}
+                        {t(`data.disease.${c.possible_disease_concern}`) || c.possible_disease_concern}
                       </span>
 
                       <div className="flex items-center space-x-2">
@@ -247,9 +249,9 @@ export default function VetDashboard() {
         <div className="lg:col-span-5 space-y-4">
           <Card className="bg-slate-900/80 border-slate-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-black text-white">Outbreak Centroids Radar</h3>
+              <h3 className="text-sm font-black text-white">{t("vetModule.map.radar")}</h3>
               <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">
-                Baramati & Shirur
+                {t("vetModule.map.location")}
               </span>
             </div>
             <div className="rounded-2xl overflow-hidden border border-slate-800 h-80">

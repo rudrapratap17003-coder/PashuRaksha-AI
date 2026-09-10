@@ -6,8 +6,10 @@ import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
 import AnimalDetailModal from '../../components/farmer/AnimalDetailModal'
 import apiClient from '../../services/api'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function FarmerAnimalsPage() {
+  const { t } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -92,7 +94,7 @@ export default function FarmerAnimalsPage() {
                     {animal.animal_id}
                   </span>
                   <h3 className="text-lg font-black text-slate-900">
-                    {animal.species}
+                    {t('data.species.' + animal.species) || animal.species}
                   </h3>
                   <p className="text-xs text-slate-500">
                     {animal.breed} • {animal.age} yrs
@@ -107,7 +109,7 @@ export default function FarmerAnimalsPage() {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-medium">Vaccination:</span>
-                  <span className="font-semibold text-slate-700">{animal.vaccination_status || 'Up to date'}</span>
+                  <span className="font-semibold text-slate-700">{t('data.status.' + (animal.vaccination_status || 'Up to date')) || (animal.vaccination_status || 'Up to date')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-medium">Weight:</span>

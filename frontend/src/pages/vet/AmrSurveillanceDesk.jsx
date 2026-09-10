@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import {
   ShieldAlert,
   AlertTriangle,
@@ -50,6 +51,7 @@ const AMR_FARMS = [
 ]
 
 export default function AmrSurveillanceDesk() {
+  const { t } = useLanguage()
   const [farms, setFarms] = useState(AMR_FARMS)
   const [search, setSearch] = useState('')
 
@@ -65,13 +67,13 @@ export default function AmrSurveillanceDesk() {
         <div>
           <div className="flex items-center space-x-2 text-rose-400 text-xs font-bold uppercase tracking-wider mb-1">
             <ShieldAlert className="w-4 h-4" />
-            <span>WHO &amp; FSSAI National Action Plan • प्रतिजैविक प्रतिकार (AMR) नियंत्रण</span>
+            <span>{t("vetModule.amr.actionPlan")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Antimicrobial Resistance (AMR) &amp; Milk Residue Surveillance
+            {t("vetModule.amr.title")}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-            Real-time tracking of Veterinary Critically Important Antimicrobials (VCIA), mandatory withdrawal compliance, and Maximum Residue Limits (MRL) in dairy milk.
+            {t("vetModule.amr.subtitle")}
           </p>
         </div>
       </div>
@@ -79,10 +81,10 @@ export default function AmrSurveillanceDesk() {
       {/* KPI Overview Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Monitored Farms', value: '42 Sheds', sub: 'Western Maharashtra', color: 'emerald' },
-          { label: 'Withdrawals Active', value: '7 Farms', sub: 'Milk Withholding Enforced', color: 'amber' },
-          { label: 'HPCI Antibiotic Use', value: '18.4%', sub: 'Fluoroquinolones / 3rd Gen', color: 'rose' },
-          { label: 'MRL Strip Compliance', value: '98.2%', sub: 'FSSAI Standards Met', color: 'sky' },
+          { label: t("vetModule.amr.stats.monitored"), value: '42 Sheds', sub: t("vetModule.amr.stats.monitoredSub"), color: 'emerald' },
+          { label: t("vetModule.amr.stats.withdrawals"), value: '7 Farms', sub: t("vetModule.amr.stats.withdrawalsSub"), color: 'amber' },
+          { label: t("vetModule.amr.stats.hpci"), value: '18.4%', sub: t("vetModule.amr.stats.hpciSub"), color: 'rose' },
+          { label: t("vetModule.amr.stats.mrl"), value: '98.2%', sub: t("vetModule.amr.stats.mrlSub"), color: 'sky' },
         ].map((k, i) => (
           <div key={i} className={`p-4 rounded-2xl bg-slate-900/80 border border-${k.color}-500/20 text-center space-y-1`}>
             <span className="text-[10px] text-slate-400 font-bold uppercase block">{k.label}</span>
@@ -99,7 +101,7 @@ export default function AmrSurveillanceDesk() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by dairy farm name or antibiotic compound (e.g. Enrofloxacin, Ceftiofur, Oxytetracycline)..."
+          placeholder={t("vetModule.amr.searchPlaceholder")}
           className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 pl-10 pr-4 py-3 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
         />
       </div>
@@ -110,9 +112,9 @@ export default function AmrSurveillanceDesk() {
           <Card key={idx} className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 hover:border-rose-500/30 transition">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
               <div>
-                <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">Dairy Audit #{idx + 101}</span>
+                <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">{t("vetModule.amr.auditPrefix")} #{idx + 101}</span>
                 <h3 className="text-base font-bold text-white">{farm.farmName}</h3>
-                <p className="text-xs text-slate-400">Owner: {farm.owner} • {farm.cattleCount} Registered Head</p>
+                <p className="text-xs text-slate-400">{t("vetModule.amr.owner")}: {farm.owner} • {farm.cattleCount} {t("vetModule.amr.regHead")}</p>
               </div>
 
               <span className={`px-3 py-1 rounded-full text-xs font-bold self-start sm:self-auto ${
@@ -126,22 +128,22 @@ export default function AmrSurveillanceDesk() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
               <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Prescribed Antimicrobial</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold block">{t("vetModule.amr.prescribed")}</span>
                 <strong className="text-white text-xs block">{farm.primaryAntibioticUsed}</strong>
                 <span className="text-[10px] text-rose-400 block">{farm.ciaCategory}</span>
               </div>
 
               <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Lab Antibiogram (AST)</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold block">{t("vetModule.amr.labAst")}</span>
                 <p className="text-[11px] text-slate-300 leading-snug">{farm.astSensitivity}</p>
               </div>
 
               <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Dairy Safety Action</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold block">{t("vetModule.amr.dairySafety")}</span>
                 <p className="text-[11px] text-emerald-300">
                   {farm.withdrawalDaysRemaining > 0
-                    ? `⚠️ Prohibit milk supply to chilling centers for ${farm.withdrawalDaysRemaining} more days.`
-                    : '✓ Verified zero residue; milk approved for cooperative supply.'}
+                    ? `⚠️ {t("vetModule.amr.prohibitMilk")} ${farm.withdrawalDaysRemaining} {t("vetModule.amr.moreDays")}`
+                    : '{t("vetModule.amr.milkApproved")}'}
                 </p>
               </div>
             </div>

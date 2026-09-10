@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import {
   FileText,
   Printer,
@@ -16,6 +17,7 @@ import WhatsAppShareButton from '../common/WhatsAppShareButton'
 import apiClient from '../../services/api'
 
 export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, onPrescriptionCreated }) {
+  const { t } = useLanguage()
   const [loading, setLoading] = useState(false)
   const [diseaseCode, setDiseaseCode] = useState('FMD')
   const [bodyWeight, setBodyWeight] = useState(350)
@@ -95,19 +97,19 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
         {/* Configuration Bar */}
         <div className="px-6 py-3 bg-slate-950/50 border-b border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 mb-1">Diagnosed Condition</label>
+            <label className="block text-[11px] font-bold text-slate-400 mb-1">{t("vetModule.rxModal.diagnosedCond")}</label>
             <select
               value={diseaseCode}
               onChange={(e) => setDiseaseCode(e.target.value)}
               className="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="FMD">Foot and Mouth Disease (लाळ-खुरकूत)</option>
-              <option value="LSD">Lumpy Skin Disease (गाठींचा चर्मरोग)</option>
-              <option value="DEFAULT">General Febrile Infection</option>
+              <option value="FMD">{t("vetModule.rxModal.fmd")}</option>
+              <option value="LSD">{t("vetModule.rxModal.lsd")}</option>
+              <option value="DEFAULT">{t("vetModule.rxModal.general")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 mb-1">Body Weight (kg)</label>
+            <label className="block text-[11px] font-bold text-slate-400 mb-1">{t("vetModule.rxModal.bodyWeight")}</label>
             <input
               type="number"
               value={bodyWeight}
@@ -138,7 +140,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
                   <div className="text-[11px] font-black uppercase text-emerald-800 tracking-wider">
                     Prototype developed for SIH Problem Statement SIH26128 • Clinical Decision Support
                   </div>
-                  <h3 className="text-lg font-black text-slate-900">VETERINARY CLINICAL REFERENCE & DOSAGE ADVISORY</h3>
+                  <h3 className="text-lg font-black text-slate-900">{t("vetModule.rxModal.advisoryHeader")}</h3>
                   <p className="text-xs text-slate-600 font-medium">{prescription.veterinarian.polyclinic}</p>
                 </div>
                 <div className="text-right">
@@ -146,7 +148,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
                     {prescription.prescription_id}
                   </span>
                   <span className="text-[10px] text-slate-500 mt-1 block">
-                    Date: {new Date(prescription.issued_at).toLocaleDateString('en-IN')}
+                    {t("vetModule.rxModal.date")}: {new Date(prescription.issued_at).toLocaleDateString('en-IN')}
                   </span>
                 </div>
               </div>
@@ -155,7 +157,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs flex items-start gap-2 print:border-slate-400">
                 <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold">CLINICAL DECISION SUPPORT REFERENCE</p>
+                  <p className="font-bold">{t("vetModule.rxModal.disclaimerTitle")}</p>
                   <p className="text-[11px] leading-relaxed">
                     AI-assisted clinical reference only. Final diagnosis, treatment, and dosage decisions must be made by a licensed veterinarian following clinical examination.
                   </p>
@@ -165,31 +167,31 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               {/* Patient & Vet Details */}
               <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div>
-                  <p><strong>Patient:</strong> Animal #{prescription.patient.animal_id} (Case #{prescription.patient.case_id})</p>
-                  <p><strong>Estimated Body Weight:</strong> {prescription.patient.estimated_weight_kg} kg</p>
-                  <p><strong>Suspected Diagnosis:</strong> <span className="text-rose-700 font-bold">{prescription.diagnosis}</span> ({prescription.pathogen_type})</p>
+                  <p><strong>{t("vetModule.rxModal.patient")}:</strong> Animal #{prescription.patient.animal_id} (Case #{prescription.patient.case_id})</p>
+                  <p><strong>{t("vetModule.rxModal.estWeight")}:</strong> {prescription.patient.estimated_weight_kg} kg</p>
+                  <p><strong>{t("vetModule.rxModal.suspectedDiag")}:</strong> <span className="text-rose-700 font-bold">{prescription.diagnosis}</span> ({prescription.pathogen_type})</p>
                 </div>
                 <div className="text-right">
-                  <p><strong>Treating Veterinarian:</strong> {prescription.veterinarian.name}</p>
-                  <p><strong>Registration No:</strong> {prescription.veterinarian.reg_no}</p>
-                  <p><strong>Emergency Helplines:</strong> 1962 (Toll-Free)</p>
+                  <p><strong>{t("vetModule.rxModal.treatingVet")}:</strong> {prescription.veterinarian.name}</p>
+                  <p><strong>{t("vetModule.rxModal.regNo")}:</strong> {prescription.veterinarian.reg_no}</p>
+                  <p><strong>{t("vetModule.rxModal.helpline")}:</strong> 1962 (Toll-Free)</p>
                 </div>
               </div>
 
               {/* Rx Medications */}
               <div className="space-y-2">
                 <h4 className="text-xs font-black uppercase tracking-wider text-emerald-900 border-b border-emerald-200 pb-1 flex items-center gap-1.5">
-                  <span className="text-base font-serif italic font-bold">℞</span> Prescribed Medications & Dosages
+                  <span className="text-base font-serif italic font-bold">℞</span> {t("vetModule.rxModal.medsAndDosage")}
                 </h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="bg-emerald-50/80 text-emerald-950 font-bold text-left border-b border-emerald-200">
-                        <th className="p-2">#</th>
-                        <th className="p-2">Drug Name & Formulation</th>
-                        <th className="p-2">Calculated Dosage</th>
-                        <th className="p-2">Route</th>
-                        <th className="p-2">Frequency & Duration</th>
+                        <th className="p-2">{t("vetModule.rxModal.tableNum")}</th>
+                        <th className="p-2">{t("vetModule.rxModal.tableDrug")}</th>
+                        <th className="p-2">{t("vetModule.rxModal.tableDose")}</th>
+                        <th className="p-2">{t("vetModule.rxModal.tableRoute")}</th>
+                        <th className="p-2">{t("vetModule.rxModal.tableFreq")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -214,7 +216,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1">
                   <h5 className="font-bold text-amber-900 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" /> Supportive Care & Wound Dressing
+                    <ShieldCheck className="w-3.5 h-3.5" /> {t("vetModule.rxModal.supportiveCare")}
                   </h5>
                   <ul className="list-disc list-inside space-y-0.5 text-[11px] text-amber-950">
                     {prescription.supportive_care.map((item, i) => (
@@ -225,13 +227,13 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
 
                 <div className="p-3 bg-rose-50/70 border border-rose-200 rounded-xl space-y-1">
                   <h5 className="font-bold text-rose-900 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Mandatory Withdrawal Period
+                    <AlertTriangle className="w-3.5 h-3.5" /> {t("vetModule.rxModal.withdrawalPeriod")}
                   </h5>
                   <p className="text-[11px] text-rose-950">
-                    <strong>Milk Withholding:</strong> {prescription.withdrawal_period.milk} (Do not supply to dairy collection centers).
+                    <strong>{t("vetModule.rxModal.milkWithhold")}:</strong> {prescription.withdrawal_period.milk} ({t("vetModule.rxModal.doNotSupply")}).
                   </p>
                   <p className="text-[11px] text-rose-950">
-                    <strong>Meat Withholding:</strong> {prescription.withdrawal_period.meat}.
+                    <strong>{t("vetModule.rxModal.meatWithhold")}:</strong> {prescription.withdrawal_period.meat}.
                   </p>
                   <p className="text-[10px] text-rose-800 italic mt-1">{prescription.isolation_protocol}</p>
                 </div>
@@ -240,7 +242,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               {/* Footer Signature & Clinical Validation */}
               <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[11px] text-slate-600">
                 <div className="max-w-xs">
-                  <p className="font-bold text-slate-800">Clinical Reference Verification</p>
+                  <p className="font-bold text-slate-800">{t("vetModule.rxModal.clinicalVerif")}</p>
                   <p className="text-[10px] text-slate-500">
                     Dosage protocol generated via PashuRaksha Clinical Decision Support Engine.
                   </p>
@@ -265,7 +267,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               className="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
             />
             <span>
-              I, licensed veterinarian, confirm this clinical dosage reference for Case #{caseData?.id || '101'}.
+              {t("vetModule.rxModal.confirmText")} #{caseData?.id || '101'}.
             </span>
           </label>
           <div className="flex items-center space-x-3">
@@ -279,7 +281,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               onClick={handlePrint}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-2 border border-slate-700"
             >
-              <Printer className="w-4 h-4" /> Print / Save PDF
+              <Printer className="w-4 h-4" /> {t("vetModule.rxModal.printPdf")}
             </button>
             <button
               disabled={!vetConfirmed}
@@ -293,7 +295,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
                   : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60'
               }`}
             >
-              <CheckCircle2 className="w-4 h-4" /> Attach to Case File
+              <CheckCircle2 className="w-4 h-4" /> {t("vetModule.rxModal.attachCase")}
             </button>
           </div>
         </div>

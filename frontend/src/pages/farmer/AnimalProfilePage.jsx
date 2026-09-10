@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { 
@@ -25,6 +26,8 @@ import VaccinationBookingModal from '../../components/farmer/VaccinationBookingM
 import apiClient from '../../services/api'
 
 export default function AnimalProfilePage() {
+  const { t } = useLanguage()
+
   const { animalId } = useParams()
   const [animal, setAnimal] = useState(null)
   const [reports, setReports] = useState([])

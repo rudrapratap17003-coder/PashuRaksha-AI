@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState } from 'react'
 import {
   Award,
@@ -87,6 +88,8 @@ const MAHARASHTRA_INDIGENOUS_BREEDS = [
 ]
 
 export default function BreedRegistryPage() {
+  const { t } = useLanguage()
+
   const [search, setSearch] = useState('')
   const [selectedBreed, setSelectedBreed] = useState(MAHARASHTRA_INDIGENOUS_BREEDS[0])
 
@@ -105,10 +108,10 @@ export default function BreedRegistryPage() {
             <span>NBAGR &amp; Maharashtra DAH Genetic Mission • देशी गोवंश संवर्धन</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Maharashtra Indigenous Cattle &amp; Buffalo Breed Registry
+            {t("breeds.title")}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-            Genetic lineage preservation, disease-resistance profiling, and artificial insemination (AI) semen bank locator for native Maharashtra livestock.
+            {t("breeds.subtitle")}
           </p>
         </div>
       </div>
@@ -120,7 +123,7 @@ export default function BreedRegistryPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search indigenous breed (e.g. Khillar, Dangi, Deoni, Pandharpuri)..."
+          placeholder={t("breeds.searchPlaceholder")}
           className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 pl-10 pr-4 py-3 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
         />
       </div>
@@ -160,23 +163,23 @@ export default function BreedRegistryPage() {
                 </span>
                 <h3 className="text-xl font-black text-white mt-0.5">{selectedBreed.name}</h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  <strong>Native Breeding Tract:</strong> {selectedBreed.nativeTract}
+                  <strong>{t("breeds.nativeTract")}</strong> {selectedBreed.nativeTract}
                 </p>
               </div>
 
-              {/* Disease Resistance Radar */}
+              {/* {t("breeds.diseaseResistance")} Radar */}
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 grid grid-cols-3 gap-2 text-center">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Disease Resistance</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">{t("breeds.diseaseResistance")}</span>
                   <strong className="text-xl font-black text-emerald-400">{selectedBreed.diseaseResistanceIndex}</strong>
-                  <span className="text-[9px] text-slate-500 block">/ 100 Index</span>
+                  <span className="text-[9px] text-slate-500 block">{t("breeds.outOf100")}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Heat Tolerance</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">{t("breeds.heatTolerance")}</span>
                   <strong className="text-xs font-bold text-amber-300 block mt-1">{selectedBreed.heatTolerance}</strong>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">FMD Vulnerability</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">{t("breeds.fmdVulnerability")}</span>
                   <strong className="text-xs font-bold text-sky-300 block mt-1">{selectedBreed.fmdVulnerability}</strong>
                 </div>
               </div>
@@ -184,7 +187,7 @@ export default function BreedRegistryPage() {
               {/* Phenotypic Characteristics */}
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Breed Characteristics &amp; Adaptability Traits
+                  {t("breeds.characteristics")}
                 </h4>
                 <ul className="space-y-1.5 bg-slate-950 p-3.5 rounded-2xl border border-slate-800/80 text-xs">
                   {selectedBreed.characteristics.map((char, idx) => (
@@ -199,7 +202,7 @@ export default function BreedRegistryPage() {
               {/* Semen Station Linkages */}
               <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl text-xs space-y-1">
                 <strong className="text-emerald-300 block text-[11px] flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5" /> Certified Semen Stations &amp; AI Straw Availability:
+                  <Award className="w-3.5 h-3.5" /> {t("breeds.semenStations")}
                 </strong>
                 <p className="text-slate-300 text-[11px]">{selectedBreed.semenCenters}</p>
               </div>
