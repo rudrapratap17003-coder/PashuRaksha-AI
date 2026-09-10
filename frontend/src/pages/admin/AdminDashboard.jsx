@@ -9,13 +9,11 @@ import {
   CheckCircle2, 
   Lock, 
   Server, 
-  RefreshCw,
-  Cpu,
-  Search,
+  Cpu, 
+  Search, 
   Sparkles
 } from 'lucide-react'
 import Card from '../../components/common/Card'
-import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
 import apiClient from '../../services/api'
 
@@ -103,22 +101,17 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-zinc-900 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Shield className="w-4 h-4" />
-            <span>State Platform Operations & Identity Governance</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            System Administration & Policy Console
-          </h1>
-          <p className="text-slate-400 text-sm mt-1 max-w-2xl">
-            Configure explainable AI risk scoring parameters, manage RBAC identities across 5 stakeholder tiers, and audit Maharashtra cluster detection jobs.
-          </p>
+      <div className="bg-gradient-to-r from-slate-900 via-zinc-900 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl">
+        <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <Shield className="w-4 h-4" />
+          <span>State Platform Operations & Identity Governance</span>
         </div>
-        <Button onClick={fetchAdminData} variant="outline" icon={RefreshCw} className="bg-slate-900 border-slate-700 text-white">
-          Reload Config
-        </Button>
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          System Administration & Policy Console
+        </h1>
+        <p className="text-slate-400 text-sm mt-1 max-w-3xl leading-relaxed">
+          Configure explainable AI risk scoring parameters, manage RBAC identities across 5 stakeholder tiers, and audit Maharashtra cluster detection jobs.
+        </p>
       </div>
 
       {/* KPI Stats */}
