@@ -120,9 +120,13 @@ export default function AnalyticsPage() {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <Button onClick={fetchAnalytics} variant="outline" icon={RefreshCw} className="bg-slate-900 border-slate-700 text-white">
-            Refresh Data
-          </Button>
+          <button 
+            onClick={fetchAnalytics} 
+            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white text-sm font-semibold transition-colors shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh Data</span>
+          </button>
         </div>
       </div>
 

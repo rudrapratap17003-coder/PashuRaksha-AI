@@ -7,13 +7,23 @@ export default function Card({
   padding = 'p-5',
   ...props
 }) {
+  const hasBg = className.includes('bg-')
+  const hasBorderClass = className.includes('border-')
+  const hasShadow = className.includes('shadow-')
+  const hasRounded = className.includes('rounded-')
+
+  const baseClasses = `
+    ${hasBg ? '' : 'bg-white'} 
+    ${hasRounded ? '' : 'rounded-2xl'} 
+    ${hasBorderClass ? 'border' : 'border border-slate-200'} 
+    ${hasShadow ? '' : 'shadow-sm'} 
+    ${hover ? 'card-hover' : ''} 
+    ${padding} 
+    ${className}
+  `.replace(/\s+/g, ' ').trim()
+
   return (
-    <div
-      className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${
-        hover ? 'card-hover' : ''
-      } ${padding} ${className}`}
-      {...props}
-    >
+    <div className={baseClasses} {...props}>
       {children}
     </div>
   )
