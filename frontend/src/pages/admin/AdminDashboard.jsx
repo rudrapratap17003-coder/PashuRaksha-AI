@@ -13,7 +13,6 @@ import {
   Search, 
   Sparkles
 } from 'lucide-react'
-import Card from '../../components/common/Card'
 import StatCard from '../../components/common/StatCard'
 import apiClient from '../../services/api'
 
@@ -147,24 +146,25 @@ export default function AdminDashboard() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
+      <div className="flex items-center space-x-2 border-b border-slate-200 pb-3">
         {[
           { id: 'users', label: 'User Registry', icon: Users },
           { id: 'rules', label: 'AI Risk Engine Parameters', icon: Sliders },
           { id: 'nodes', label: 'Village Sensor Nodes', icon: MapPin }
         ].map((tab) => {
           const Icon = tab.icon
+          const isActive = activeTab === tab.id
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition ${
-                activeTab === tab.id
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-950/40'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-amber-800' : 'text-slate-500'}`} />
               <span>{tab.label}</span>
             </button>
           )
@@ -173,24 +173,24 @@ export default function AdminDashboard() {
 
       {/* Tab 1: Users */}
       {activeTab === 'users' && (
-        <Card className="bg-slate-900/80 border-slate-800">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search users by name, role or village..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
               />
             </div>
-            <span className="text-xs text-slate-400 font-bold">{filteredUsers.length} Users Listed</span>
+            <span className="text-xs text-slate-500 font-bold">{filteredUsers.length} Users Listed</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-white font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
                   <th className="py-3 px-4">User ID</th>
                   <th className="py-3 px-4">Full Name</th>
@@ -200,21 +200,23 @@ export default function AdminDashboard() {
                   <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-800/40 transition">
-                    <td className="py-3.5 px-4 font-mono font-bold text-amber-400">{u.id}</td>
-                    <td className="py-3.5 px-4 font-bold text-white">{u.name}</td>
+                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-amber-600">{u.id}</td>
+                    <td className="py-3.5 px-4 font-bold text-slate-900">{u.name || 'Unnamed User'}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 border border-slate-700 text-slate-200">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-900 border border-slate-800 text-white inline-block">
                         {u.role}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-300">{u.village}, {u.district}</td>
-                    <td className="py-3.5 px-4 font-mono text-slate-400">{u.phone}</td>
+                    <td className="py-3.5 px-4 text-slate-600 font-medium">
+                      {u.village ? `${u.village}${u.district ? `, ${u.district}` : ''}` : u.district || 'Maharashtra'}
+                    </td>
+                    <td className="py-3.5 px-4 font-mono text-slate-600">{u.phone || '—'}</td>
                     <td className="py-3.5 px-4">
-                      <span className="text-emerald-400 font-bold flex items-center space-x-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                         <span>Active</span>
                       </span>
                     </td>
@@ -223,64 +225,64 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Tab 2: Risk Rules */}
       {activeTab === 'rules' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-slate-900/80 border-slate-800">
-            <h3 className="text-sm font-black text-white mb-3">Core Clinical Symptom Weights (0-100 Base)</h3>
-            <p className="text-xs text-slate-400 mb-4">Multi-factor severity points injected into explainable risk matrix</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <h3 className="text-sm font-black text-slate-900 mb-1">Core Clinical Symptom Weights (0-100 Base)</h3>
+            <p className="text-xs text-slate-500 mb-4">Multi-factor severity points injected into explainable risk matrix</p>
             <div className="space-y-2.5">
               {riskRules?.symptom_weights && Object.entries(riskRules.symptom_weights).map(([sym, wt]) => (
-                <div key={sym} className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                  <span className="font-bold text-slate-200 capitalize">{sym.replace('_', ' ')}</span>
-                  <span className="bg-amber-500/20 text-amber-300 font-black px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                <div key={sym} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                  <span className="font-bold text-slate-800 capitalize">{sym.replace('_', ' ')}</span>
+                  <span className="bg-amber-100 text-amber-900 font-black px-2.5 py-0.5 rounded-full border border-amber-300">
                     +{wt} pts
                   </span>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
 
-          <Card className="bg-slate-900/80 border-slate-800">
-            <h3 className="text-sm font-black text-white mb-3">Multi-Factor Weight Attribution</h3>
-            <p className="text-xs text-slate-400 mb-4">Hierarchical weight distribution across 7 risk dimensions</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <h3 className="text-sm font-black text-slate-900 mb-1">Multi-Factor Weight Attribution</h3>
+            <p className="text-xs text-slate-500 mb-4">Hierarchical weight distribution across 7 risk dimensions</p>
             <div className="space-y-2.5">
               {riskRules?.factor_weights && Object.entries(riskRules.factor_weights).map(([fact, pct]) => (
-                <div key={fact} className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                  <span className="font-bold text-slate-200 capitalize">{fact.replace('_', ' ')}</span>
-                  <span className="text-emerald-400 font-black">{pct}</span>
+                <div key={fact} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                  <span className="font-bold text-slate-800 capitalize">{fact.replace('_', ' ')}</span>
+                  <span className="text-emerald-700 font-black">{pct}</span>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* Tab 3: Village Nodes */}
       {activeTab === 'nodes' && (
-        <Card className="bg-slate-900/80 border-slate-800">
-          <h3 className="text-sm font-black text-white mb-3">Maharashtra Village Telemetry Mesh</h3>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-sm font-black text-slate-900 mb-3">Maharashtra Village Telemetry Mesh</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {villages.map((v, idx) => (
-              <div key={idx} className="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-1.5 text-xs">
+              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 text-xs hover:border-emerald-300 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{v.name}</span>
-                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold border border-emerald-500/20">
+                  <span className="font-bold text-slate-900 text-sm">{v.name}</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold border border-emerald-300">
                     Active Node
                   </span>
                 </div>
-                <p className="text-slate-400">{v.taluka} Taluka • {v.district} District</p>
-                <div className="flex justify-between pt-2 border-t border-slate-800/60 text-[11px] text-slate-300">
+                <p className="text-slate-500">{v.taluka} Taluka • {v.district} District</p>
+                <div className="flex justify-between pt-2 border-t border-slate-200 text-[11px] text-slate-600">
                   <span>{v.farms || 3} Registered Farms</span>
-                  <span className="font-bold text-teal-400">{v.animals || 100} Animals Monitored</span>
+                  <span className="font-bold text-teal-700">{v.animals || 100} Animals Monitored</span>
                 </div>
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
     </div>
   )
