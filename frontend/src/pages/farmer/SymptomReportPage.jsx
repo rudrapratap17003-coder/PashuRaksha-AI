@@ -23,7 +23,8 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
 import Badge from '../../components/common/Badge'
-import VoiceReportModal from '../../components/common/VoiceReportModal'
+import VoiceReportModal, { CLINICAL_SYMPTOM_LEXICON } from '../../components/common/VoiceReportModal'
+import VoiceReportButton from '../../components/common/VoiceReportButton'
 import VisualLesionScannerModal from '../../components/common/VisualLesionScannerModal'
 import apiClient from '../../services/api'
 import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
@@ -36,6 +37,7 @@ export default function SymptomReportPage() {
   const [animals, setAnimals] = useState([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [selectedSymptoms, setSelectedSymptoms] = useState([])
+  const [otherSymptoms, setOtherSymptoms] = useState('')
   const [severity, setSeverity] = useState('moderate')
   const [durationDays, setDurationDays] = useState(2)
   const [affectedCount, setAffectedCount] = useState(1)
@@ -78,6 +80,7 @@ export default function SymptomReportPage() {
       setSelectedAnimalId(targetCow.animal_id)
     }
     setSelectedSymptoms(['fever', 'lesions', 'salivation', 'reduced_appetite', 'reduced_milk'])
+    setOtherSymptoms('High temperature observed with severe drooling, mouth ulcers and milk yield dropped sharply.')
     setSeverity('severe')
     setDurationDays(2)
     setAffectedCount(3)
@@ -85,10 +88,30 @@ export default function SymptomReportPage() {
     setDistrict('Pune')
   }
 
+  const handleInlineVoiceInput = (finalTranscript, fullLiveTranscript) => {
+    const text = (fullLiveTranscript || finalTranscript || '').trim()
+    if (!text) return
+
+    // Update otherSymptoms field directly in real-time
+    setOtherSymptoms(text)
+
+    // Detect and match symptoms into checklist
+    const lower = text.toLowerCase()
+    const matched = []
+    CLINICAL_SYMPTOM_LEXICON.forEach((lex) => {
+      if (lex.keywords.some((kw) => lower.includes(kw.toLowerCase()))) {
+        matched.push(lex.id)
+      }
+    })
+    if (matched.length > 0) {
+      setSelectedSymptoms((prev) => Array.from(new Set([...prev, ...matched])))
+    }
+  }
+
   const handleAnalyzeHealthRisk = async (e) => {
     e.preventDefault()
-    if (selectedSymptoms.length === 0) {
-      setError('Please select at least one clinical symptom to analyze.')
+    if (selectedSymptoms.length === 0 && !otherSymptoms.trim()) {
+      setError('Please select at least one clinical symptom or describe symptoms to analyze.')
       return
     }
 
@@ -110,6 +133,7 @@ export default function SymptomReportPage() {
       swelling: selectedSymptoms.includes('swelling'),
       lethargy: selectedSymptoms.includes('lethargy'),
       reduced_appetite: selectedSymptoms.includes('reduced_appetite'),
+      other_symptoms: otherSymptoms,
       severity,
       duration_days: parseInt(durationDays) || 2,
       number_of_animals_affected: parseInt(affectedCount) || 1,
@@ -245,11 +269,20 @@ export default function SymptomReportPage() {
 
         {/* Step 2: 11 Core Symptoms Checklist */}
         <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span className="text-xs font-mono font-black uppercase text-emerald-400">
-              STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
-            </span>
-            <span className="text-[11px] text-slate-400">Tap all symptoms currently present</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
+            <div>
+              <span className="text-xs font-mono font-black uppercase text-emerald-400 block">
+                STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
+              </span>
+              <span className="text-[11px] text-slate-400">Tap to select or speak your symptoms below</span>
+            </div>
+            <VoiceReportButton
+              size="sm"
+              onTranscript={handleInlineVoiceInput}
+              label="Speak Symptoms"
+              activeLabel="Listening..."
+              className="self-start sm:self-auto"
+            />
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
@@ -334,6 +367,35 @@ export default function SymptomReportPage() {
               />
             </div>
           </div>
+        </Card>
+
+        {/* Step 4: Spoken / Typed Clinical Observations */}
+        <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
+            <div>
+              <span className="text-xs font-mono font-black uppercase text-emerald-400 block">
+                STEP 4 • SPOKEN / TYPED CLINICAL OBSERVATIONS
+              </span>
+              <span className="text-[11px] text-slate-400">
+                Speak or type additional symptoms (automatically parsed &amp; sent to AI analysis)
+              </span>
+            </div>
+            <VoiceReportButton
+              size="sm"
+              onTranscript={handleInlineVoiceInput}
+              label="Speak Report"
+              activeLabel="Listening..."
+              className="self-start sm:self-auto"
+            />
+          </div>
+
+          <textarea
+            rows={3}
+            value={otherSymptoms}
+            onChange={(e) => setOtherSymptoms(e.target.value)}
+            placeholder="Spoken or typed observations (e.g., 'My cow has high fever, blisters in mouth, excessive salivation and stopped eating')..."
+            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm text-slate-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none font-medium"
+          />
         </Card>
 
         {/* Big Submit Button */}
@@ -522,8 +584,12 @@ export default function SymptomReportPage() {
         onClose={() => setVoiceModalOpen(false)}
         defaultAnimalId={selectedAnimalId}
         availableAnimals={animals}
-        onSymptomsDetected={(symList) => {
+        initialText={otherSymptoms}
+        onSymptomsDetected={(symList, spokenText) => {
           setSelectedSymptoms(prev => Array.from(new Set([...prev, ...symList])))
+          if (spokenText) {
+            setOtherSymptoms(prev => prev ? (prev.trim() + ' ' + spokenText.trim()) : spokenText.trim())
+          }
         }}
       />
 

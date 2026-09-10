@@ -23,15 +23,18 @@ import RiskBadge from '../../components/common/RiskBadge'
 import VoiceReportModal from '../../components/common/VoiceReportModal'
 import WeatherWidget from '../../components/common/WeatherWidget'
 import EconomicLossCalculator from '../../components/farmer/EconomicLossCalculator'
+import VaccinationBookingModal from '../../components/farmer/VaccinationBookingModal'
 import EmergencyPanicModal from '../../components/common/EmergencyPanicModal'
 import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function FarmerDashboard() {
   const { user } = useAuth()
   const { scenarioData, currentScenario } = useScenario()
+  const { language, setLanguage } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
   const [recentReports, setRecentReports] = useState([])
@@ -40,7 +43,7 @@ export default function FarmerDashboard() {
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
   const [lossCalcOpen, setLossCalcOpen] = useState(false)
   const [panicModalOpen, setPanicModalOpen] = useState(false)
-  const [language, setLanguage] = useState('mr') // 'mr' | 'hi' | 'en'
+  const [campBookingAnimal, setCampBookingAnimal] = useState(null)
 
   const fetchFarmerData = async () => {
     setLoading(true)
@@ -198,6 +201,7 @@ export default function FarmerDashboard() {
         {/* 1. REPORT SICK ANIMAL */}
         <Link
           to="/farmer/report"
+          onClick={() => console.log('[ReportSymptoms] Opened')}
           className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg shadow-emerald-950 flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -319,30 +323,34 @@ export default function FarmerDashboard() {
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {animals.map((animal) => (
-                  <Link
-                    key={animal.id}
-                    to={`/farmer/animals/${animal.animal_id}`}
-                    className="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-emerald-400 rounded-2xl p-3.5 shadow-xs transition block space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id}</span>
-                        <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {animal.species}</span>
+                {animals.map((animal) => {
+                  const targetId = animal.animal_id || animal.id
+                  return (
+                    <Link
+                      key={animal.id}
+                      to={`/farmer/animals/${targetId}`}
+                      onClick={() => console.log('[AnimalDetails] Clicked animal:', targetId, animal)}
+                      className="group bg-slate-50 hover:bg-white border border-slate-200 hover:border-emerald-400 rounded-2xl p-3.5 shadow-xs transition block space-y-2 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id || animal.id}</span>
+                          <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {animal.species}</span>
+                        </div>
+                        <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
                       </div>
-                      <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
-                    </div>
-                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                      <span className="flex items-center space-x-1">
-                        <Syringe className="w-3.5 h-3.5 text-purple-600" />
-                        <span>{animal.vaccination_status || 'Up to date'}</span>
-                      </span>
-                      <span className="text-emerald-700 font-bold flex items-center">
-                        Details <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                        <span className="flex items-center space-x-1">
+                          <Syringe className="w-3.5 h-3.5 text-purple-600" />
+                          <span>{animal.vaccination_status || 'Up to date'}</span>
+                        </span>
+                        <span className="text-emerald-700 font-bold flex items-center group-hover:translate-x-0.5 transition-transform">
+                          Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                        </span>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -413,15 +421,21 @@ export default function FarmerDashboard() {
                 {dueVaccineAnimals.map((anim) => (
                   <div key={anim.id} className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between text-xs">
                     <div>
-                      <strong className="text-purple-950 block">{anim.animal_id} ({anim.species})</strong>
+                      <strong className="text-purple-950 block">{anim.animal_id || anim.id} ({anim.species})</strong>
                       <span className="text-[11px] text-purple-700">{anim.vaccination_status}</span>
                     </div>
-                    <Link
-                      to="/farmer/report"
-                      className="px-2.5 py-1 rounded-xl bg-purple-600 text-white font-bold text-[11px] hover:bg-purple-700 transition"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('[VaccinationCamp] Clicked animal:', anim.animal_id || anim.id, anim)
+                        setCampBookingAnimal(anim)
+                      }}
+                      className="px-2.5 py-1 rounded-xl bg-purple-600 text-white font-bold text-[11px] hover:bg-purple-700 active:scale-95 transition shadow-xs cursor-pointer"
                     >
                       Book Camp
-                    </Link>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -494,6 +508,12 @@ export default function FarmerDashboard() {
       </div>
 
       {/* Modals */}
+      <VaccinationBookingModal
+        isOpen={Boolean(campBookingAnimal)}
+        onClose={() => setCampBookingAnimal(null)}
+        animal={campBookingAnimal}
+        onBookingSuccess={() => fetchFarmerData()}
+      />
       <VoiceReportModal
         isOpen={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}

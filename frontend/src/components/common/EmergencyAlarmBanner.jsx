@@ -4,47 +4,46 @@ import {
   BellRing, 
   Volume2, 
   VolumeX, 
-  AlertOctagon, 
-  Radio, 
-  ShieldAlert, 
-  X, 
   ChevronRight,
   Truck,
-  MessageSquare
+  X
 } from 'lucide-react'
 import { useScenario } from '../../context/ScenarioContext'
-import { playEmergencySiren, stopEmergencySiren, isSirenPlaying } from '../../utils/audioAlarm'
+import { playEmergencySiren, stopEmergencySiren } from '../../utils/audioAlarm'
 
 export default function EmergencyAlarmBanner() {
   const { currentScenario, scenarios } = useScenario()
-  const [muted, setMuted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
   const [sirenActive, setSirenActive] = useState(false)
 
   const isOutbreak = currentScenario === scenarios.RAMPUR_OUTBREAK
 
+  // Strictly enforce: Siren audio is OFF by default.
+  // NO audio should EVER play automatically on load, mount, navigation, or scenario change.
+  // Clean up any playing siren on unmount.
   useEffect(() => {
-    if (isOutbreak && !muted && !dismissed) {
-      playEmergencySiren(8) // Play siren for 8s
-      setSirenActive(true)
-    } else {
-      stopEmergencySiren()
-      setSirenActive(false)
-    }
-
     return () => {
       stopEmergencySiren()
     }
-  }, [isOutbreak, muted, dismissed])
+  }, [])
 
-  const toggleMute = () => {
+  // If scenario is no longer outbreak or banner is dismissed, ensure siren is stopped
+  useEffect(() => {
+    if (!isOutbreak || dismissed) {
+      stopEmergencySiren()
+      setSirenActive(false)
+    }
+  }, [isOutbreak, dismissed])
+
+  const toggleSiren = () => {
     if (sirenActive) {
       stopEmergencySiren()
       setSirenActive(false)
-      setMuted(true)
     } else {
-      setMuted(false)
-      playEmergencySiren(10)
+      // User explicitly clicked to activate siren
+      playEmergencySiren(20, () => {
+        setSirenActive(false)
+      })
       setSirenActive(true)
     }
   }
@@ -82,15 +81,26 @@ export default function EmergencyAlarmBanner() {
         {/* Right Action & Siren Audio Controls */}
         <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
           <button
-            onClick={toggleMute}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 text-xs ${
+            type="button"
+            onClick={toggleSiren}
+            aria-label={sirenActive ? 'Mute emergency siren' : 'Activate emergency siren'}
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-400 cursor-pointer ${
               sirenActive
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/50 animate-pulse'
-                : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'
+                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/50 animate-pulse border border-rose-400'
+                : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500'
             }`}
           >
-            {sirenActive ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5 text-rose-400" />}
-            <span>{sirenActive ? '🚨 Siren Sound Active (Mute)' : '🚨 Siren Sound'}</span>
+            {sirenActive ? (
+              <>
+                <VolumeX className="w-3.5 h-3.5 text-white" />
+                <span>🔇 Mute Siren</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-rose-400" />
+                <span>🔊 Activate Siren</span>
+              </>
+            )}
           </button>
 
           <Link
@@ -110,12 +120,15 @@ export default function EmergencyAlarmBanner() {
           </Link>
 
           <button
+            type="button"
             onClick={() => {
               stopEmergencySiren()
+              setSirenActive(false)
               setDismissed(true)
             }}
+            aria-label="Dismiss alarm banner"
             title="Dismiss alarm banner"
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition ml-1"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition ml-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-500"
           >
             <X className="w-4 h-4" />
           </button>

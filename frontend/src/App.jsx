@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ScenarioProvider } from './context/ScenarioContext'
+import { LanguageProvider } from './context/LanguageContext'
 import MainLayout from './layouts/MainLayout'
 import DashboardLayout from './layouts/DashboardLayout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -115,12 +116,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ScenarioProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ScenarioProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <ScenarioProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ScenarioProvider>
+      </AuthProvider>
+    </LanguageProvider>
   )
 }
