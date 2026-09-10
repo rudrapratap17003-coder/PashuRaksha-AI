@@ -95,6 +95,7 @@ function AppRoutes() {
         <Route path="/lab/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.LABORATORY, USER_ROLES.ADMIN]}><LabDashboard /></ProtectedRoute>} />
 
         {/* 5. Public Health Authority Portal */}
+        <Route path="/authority" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><AuthorityDashboard user={user} /></ProtectedRoute>} />
         <Route path="/authority/dashboard" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><AuthorityDashboard user={user} /></ProtectedRoute>} />
         <Route path="/authority/cold-chain" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><ColdChainLogisticsPage /></ProtectedRoute>} />
         <Route path="/authority/mvu-fleet" element={<ProtectedRoute allowedRoles={[USER_ROLES.AUTHORITY, USER_ROLES.ADMIN]}><MvuFleetTracker /></ProtectedRoute>} />
