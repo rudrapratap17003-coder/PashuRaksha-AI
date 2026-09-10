@@ -29,6 +29,7 @@ VALID_TRANSITIONS: Dict[str, List[str]] = {
         CaseStatus.RISK_ASSESSED.value,
         CaseStatus.FIELD_VERIFICATION.value,
         CaseStatus.VET_REVIEW.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
         CaseStatus.CLOSED.value
     ],
     CaseStatus.RISK_ASSESSED.value: [
@@ -36,12 +37,15 @@ VALID_TRANSITIONS: Dict[str, List[str]] = {
         CaseStatus.VET_REVIEW.value,
         CaseStatus.SAMPLE_COLLECTED.value,
         CaseStatus.LAB_PENDING.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
+        CaseStatus.ACTION_TAKEN.value,
         CaseStatus.CLOSED.value
     ],
     CaseStatus.FIELD_VERIFICATION.value: [
         CaseStatus.VET_REVIEW.value,
         CaseStatus.SAMPLE_COLLECTED.value,
         CaseStatus.LAB_PENDING.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
         CaseStatus.ACTION_TAKEN.value,
         CaseStatus.CLOSED.value
     ],
@@ -49,17 +53,20 @@ VALID_TRANSITIONS: Dict[str, List[str]] = {
         CaseStatus.FIELD_VERIFICATION.value,
         CaseStatus.SAMPLE_COLLECTED.value,
         CaseStatus.LAB_PENDING.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
         CaseStatus.ACTION_TAKEN.value,
         CaseStatus.CLOSED.value
     ],
     CaseStatus.SAMPLE_COLLECTED.value: [
         CaseStatus.LAB_PENDING.value,
         CaseStatus.VET_REVIEW.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
         CaseStatus.ACTION_TAKEN.value,
         CaseStatus.CLOSED.value
     ],
     CaseStatus.LAB_PENDING.value: [
         CaseStatus.LAB_RESULT.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
         CaseStatus.CLOSED.value
     ],
     CaseStatus.LAB_RESULT.value: [
@@ -70,16 +77,36 @@ VALID_TRANSITIONS: Dict[str, List[str]] = {
     ],
     CaseStatus.AUTHORITY_REVIEW.value: [
         CaseStatus.ACTION_TAKEN.value,
-        CaseStatus.CLOSED.value
+        CaseStatus.CLOSED.value,
+        CaseStatus.VET_REVIEW.value
     ],
     CaseStatus.ACTION_TAKEN.value: [
         CaseStatus.CLOSED.value,
         CaseStatus.FIELD_VERIFICATION.value,
-        CaseStatus.VET_REVIEW.value
+        CaseStatus.VET_REVIEW.value,
+        CaseStatus.AUTHORITY_REVIEW.value
     ],
     CaseStatus.CLOSED.value: [
         CaseStatus.FIELD_VERIFICATION.value,
         CaseStatus.VET_REVIEW.value
+    ],
+    "PENDING": [
+        CaseStatus.RISK_ASSESSED.value,
+        CaseStatus.VET_REVIEW.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
+        CaseStatus.ACTION_TAKEN.value,
+        CaseStatus.CLOSED.value
+    ],
+    "INVESTIGATING": [
+        CaseStatus.VET_REVIEW.value,
+        CaseStatus.AUTHORITY_REVIEW.value,
+        CaseStatus.ACTION_TAKEN.value,
+        CaseStatus.CLOSED.value
+    ],
+    "INVESTIGATED": [
+        CaseStatus.AUTHORITY_REVIEW.value,
+        CaseStatus.ACTION_TAKEN.value,
+        CaseStatus.CLOSED.value
     ]
 }
 
@@ -108,9 +135,12 @@ class CaseService:
             )
 
         current_status = getattr(case, "status", CaseStatus.RISK_ASSESSED.value) or CaseStatus.RISK_ASSESSED.value
-        allowed_next = VALID_TRANSITIONS.get(current_status, [])
+        allowed_next = VALID_TRANSITIONS.get(current_status, []) or VALID_TRANSITIONS.get(current_status.upper(), [])
 
-        if new_status not in allowed_next and new_status != current_status:
+        new_st_upper = new_status.upper()
+        allowed_next_upper = [s.upper() for s in allowed_next]
+
+        if new_st_upper not in allowed_next_upper and new_st_upper != current_status.upper():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid state transition from {current_status} to {new_status}. Allowed transitions: {', '.join(allowed_next)}"

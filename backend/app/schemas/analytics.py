@@ -10,6 +10,9 @@ class AnalyticsOverview(BaseModel):
     mortality_count: int = 0
     vaccination_coverage: float = 0.0
     cases_resolved: int = 0
+    total_vaccinations: int = 0
+    high_risk_cases: int = 0
+    pending_lab_results: int = 0
 
 class TimeSeriesPoint(BaseModel):
     date: str

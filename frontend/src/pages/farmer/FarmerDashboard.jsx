@@ -229,7 +229,7 @@ export default function FarmerDashboard() {
 
         {/* 3. VACCINATION */}
         <Link
-          to="/farmer/animals"
+          to="/farmer/vaccinations"
           className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
           <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
@@ -453,26 +453,35 @@ export default function FarmerDashboard() {
             </div>
 
             <div className="space-y-2.5">
-              {[
-                {
-                  title: 'Baramati FMD Surveillance Hotspot',
-                  msg: 'Oral vesicles reported in nearby village. Isolate any cattle showing drooling or foot sores immediately.',
-                  level: 'HIGH',
-                  icon: '🔴',
-                  date: 'Today'
-                },
-                {
-                  title: 'Taluka Free Vaccination Camp',
-                  msg: 'FMD + HS booster drive starts this Monday at Baramati Polyclinic.',
-                  level: 'INFO',
-                  icon: '🟢',
-                  date: 'Yesterday'
-                }
-              ].map((al, idx) => (
+              {(alerts.length > 0
+                ? alerts.map((al) => ({
+                    title: al.title,
+                    msg: al.message,
+                    level: al.risk_level || 'INFO',
+                    icon: al.risk_level === 'CRITICAL' || al.risk_level === 'HIGH' ? '🔴' : '🟢',
+                    date: al.created_at ? new Date(al.created_at).toLocaleDateString() : 'Active'
+                  }))
+                : [
+                    {
+                      title: 'Baramati FMD Surveillance Hotspot',
+                      msg: 'Oral vesicles reported in nearby village. Isolate any cattle showing drooling or foot sores immediately.',
+                      level: 'HIGH',
+                      icon: '🔴',
+                      date: 'Today'
+                    },
+                    {
+                      title: 'Taluka Free Vaccination Camp',
+                      msg: 'FMD + HS booster drive starts this Monday at Baramati Polyclinic.',
+                      level: 'INFO',
+                      icon: '🟢',
+                      date: 'Yesterday'
+                    }
+                  ]
+              ).map((al, idx) => (
                 <div
                   key={idx}
                   className={`p-3.5 rounded-2xl border space-y-1 ${
-                    al.level === 'HIGH' ? 'bg-rose-50/80 border-rose-200' : 'bg-slate-50 border-slate-200'
+                    al.level === 'HIGH' || al.level === 'CRITICAL' ? 'bg-rose-50/80 border-rose-200' : 'bg-slate-50 border-slate-200'
                   }`}
                 >
                   <div className="flex items-center justify-between">

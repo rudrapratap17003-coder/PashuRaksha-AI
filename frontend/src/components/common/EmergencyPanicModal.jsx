@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import Card from './Card'
 import { playEmergencySiren, stopEmergencySiren } from '../../utils/audioAlarm'
+import apiClient from '../../services/api'
 
 export default function EmergencyPanicModal({ isOpen, onClose }) {
   const [sosSent, setSosSent] = useState(false)
@@ -23,10 +24,19 @@ export default function EmergencyPanicModal({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
-  const handleTriggerAlarm = (e) => {
+  const handleTriggerAlarm = async (e) => {
     e.preventDefault()
     playEmergencySiren(8)
     setSosSent(true)
+    try {
+      await apiClient.post('/alerts/emergency', {
+        village,
+        affected_heads: affectedHeads,
+        symptom_summary: symptomSummary
+      })
+    } catch (err) {
+      console.warn('Emergency alert API fallback:', err)
+    }
   }
 
   const handleClose = () => {

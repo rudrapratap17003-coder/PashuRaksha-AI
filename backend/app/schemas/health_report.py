@@ -31,10 +31,10 @@ class HealthReportBase(BaseModel):
     number_of_animals_affected: int = Field(default=1, ge=1, description="Count of animals displaying symptoms in vicinity")
     
     # Geospatial location
-    latitude: Optional[float] = Field(26.9124, example=26.9124)
-    longitude: Optional[float] = Field(75.7873, example=75.7873)
-    village: Optional[str] = Field("Rampur", example="Rampur")
-    district: Optional[str] = Field("Jaipur Rural", example="Jaipur Rural")
+    latitude: Optional[float] = Field(None, example=18.1515)
+    longitude: Optional[float] = Field(None, example=74.5772)
+    village: Optional[str] = Field(None, example="Baramati")
+    district: Optional[str] = Field(None, example="Pune")
 
 class HealthReportCreate(HealthReportBase):
     reported_by: Optional[str] = Field(None, example="usr-101")
@@ -54,3 +54,6 @@ class HealthReportResponse(HealthReportBase):
     recommendation: Optional[str] = Field("Veterinary assessment recommended.", example="Veterinary assessment recommended.")
     status: Optional[str] = Field("RISK_ASSESSED", example="RISK_ASSESSED")
     contributing_factors: Optional[list] = None
+
+    class Config:
+        from_attributes = True

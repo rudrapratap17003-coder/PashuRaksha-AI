@@ -31,3 +31,43 @@ def mark_alert_read(
     if not success:
         raise HTTPException(status_code=404, detail="Alert not found")
     return {"status": "success", "message": f"Alert {alert_id} marked as read"}
+
+@router.post("/broadcast", response_model=AlertResponse)
+def broadcast_alert(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    title = payload.get("title") or "🚨 Official Biosecurity Advisory"
+    message = payload.get("message") or payload.get("text") or "Emergency livestock alert."
+    target_role = payload.get("target_role") or "farmer"
+    risk_level = payload.get("risk_level") or payload.get("severity") or "CRITICAL"
+    village = payload.get("village") or "Baramati"
+    return AlertService.create_alert(
+        db,
+        title=title,
+        message=message,
+        target_role=target_role,
+        alert_type="broadcast",
+        risk_level=risk_level,
+        village=village
+    )
+
+@router.post("/emergency", response_model=AlertResponse)
+def trigger_emergency_alert(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    village = payload.get("village") or "Baramati East"
+    affected = payload.get("affected_heads") or "4"
+    obs = payload.get("symptom_summary") or "Sudden severe salivation, mouth blisters & high fever"
+    return AlertService.create_alert(
+        db,
+        title=f"🚨 1962 SOS PANIC ALARM: {village}",
+        message=f"Emergency outbreak alarm triggered in {village}. Affected heads: {affected}. Observations: {obs}",
+        target_role="authority",
+        alert_type="emergency_panic",
+        risk_level="CRITICAL",
+        village=village
+    )

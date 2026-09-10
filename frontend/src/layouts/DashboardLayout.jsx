@@ -83,7 +83,7 @@ export default function DashboardLayout({ user, onLogout }) {
       case USER_ROLES.VETERINARIAN:
         return [
           { name: 'Clinical Desk', path: '/vet/dashboard', icon: Stethoscope },
-          { name: 'Cases', path: '/vet/cases/rep-101', icon: FilePlus2 },
+          { name: 'Triage Cases', path: '/vet/dashboard', icon: FilePlus2 },
           { name: 'AMR & Residue', path: '/vet/amr', icon: Microscope },
         ]
       case USER_ROLES.LABORATORY:

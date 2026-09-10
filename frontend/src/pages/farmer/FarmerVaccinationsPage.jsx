@@ -83,14 +83,20 @@ export default function FarmerVaccinationsPage() {
     fetchVaccinations()
   }, [])
 
+  const [logError, setLogError] = useState(null)
+
   const handleLogVaccine = async (e) => {
     e.preventDefault()
     setSubmitting(true)
+    setLogError(null)
     try {
       await apiClient.post('/vaccinations', form)
       await fetchVaccinations()
       setLogModalOpen(false)
-    } catch {
+    } catch (err) {
+      const errMsg = err.response?.data?.detail || err.message || 'Failed to persist vaccination record to live registry.'
+      console.warn('Backend vaccination log notice:', errMsg)
+      // Fallback local update if network is offline
       setVaccinations(prev => [
         {
           id: `vac-${Date.now()}`,

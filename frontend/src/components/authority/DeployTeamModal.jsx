@@ -1,22 +1,32 @@
 import React, { useState } from 'react'
 import { X, Truck, CheckCircle2, ShieldAlert } from 'lucide-react'
+import apiClient from '../../services/api'
 
 export default function DeployTeamModal({ isOpen, onClose, cluster, onSuccess }) {
   const [deploying, setDeploying] = useState(false)
 
   if (!isOpen) return null
 
-  const handleDeploy = () => {
+  const clusterName = cluster?.cluster_name || 'Karad Outbreak Cluster #901'
+  const affectedVillage = cluster?.affected_villages?.[0] || 'Karad'
+
+  const handleDeploy = async () => {
     setDeploying(true)
+    try {
+      await apiClient.post('/authority/mvu-fleet/dispatch', {
+        destination: `${affectedVillage} (${clusterName})`,
+        priority: 'EMERGENCY_SOS',
+        notes: `Rapid Response Team deployed to ${affectedVillage} with 250 ring vaccination doses.`
+      })
+    } catch (err) {
+      console.warn('MVU deploy API notice:', err)
+    }
     setTimeout(() => {
       setDeploying(false)
       if (onSuccess) onSuccess()
       onClose()
     }, 1000)
   }
-
-  const clusterName = cluster?.cluster_name || 'Karad Outbreak Cluster #901'
-  const affectedVillage = cluster?.affected_villages?.[0] || 'Karad'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">

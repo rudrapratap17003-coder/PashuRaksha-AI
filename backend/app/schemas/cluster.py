@@ -32,3 +32,6 @@ class ClusterResponse(BaseModel):
     recommended_action: str = Field(
         default="Immediate on-site veterinary investigation recommended. Initiate ring vaccination check."
     )
+
+    class Config:
+        from_attributes = True

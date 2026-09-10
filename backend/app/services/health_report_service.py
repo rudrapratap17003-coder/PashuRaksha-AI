@@ -243,9 +243,10 @@ class HealthReportService:
             animal.current_risk_score = score
             animal.current_risk_level = level
 
-        # If high/critical risk, create alert and timeline event
+        # If high/critical risk, create alerts and timeline event
         if score >= 60.0:
-            alert = Alert(
+            # Vet Alert
+            alert_vet = Alert(
                 id=f"alt-{str(uuid.uuid4())[:8]}",
                 user_id=reported_by,
                 target_role="veterinarian",
@@ -255,13 +256,26 @@ class HealthReportService:
                 risk_level=level,
                 village=rep.village,
             )
-            db.add(alert)
+            db.add(alert_vet)
+
+            # Authority Early Warning Alert
+            alert_auth = Alert(
+                id=f"alt-auth-{str(uuid.uuid4())[:6]}",
+                user_id=reported_by,
+                target_role="authority",
+                alert_type="surveillance_warning",
+                title=f"Elevated Health Risk ({level}): {rep.village}",
+                message=f"Clinical report filed for {species} ({animal.animal_id if animal else rep.animal_id}) with risk score {score}/100. Differential: {primary_disease}.",
+                risk_level=level,
+                village=rep.village,
+            )
+            db.add(alert_auth)
 
             tl_event3 = CaseTimelineEvent(
                 case_id=rep.id,
                 event_type="risk_identified",
                 title=f"High Risk Alert Generated for {rep.village}",
-                description=f"Priority alert dispatched to area veterinary polyclinic and field worker team for {animal.animal_id if animal else rep.animal_id}.",
+                description=f"Priority alert dispatched to area veterinary polyclinic and authority surveillance desk for {animal.animal_id if animal else rep.animal_id}.",
                 actor_name="Alert Engine",
                 actor_role="system",
                 created_at=rep.reported_at
@@ -269,6 +283,14 @@ class HealthReportService:
             db.add(tl_event3)
 
         db.commit()
+
+        # Trigger cluster detection if multiple animals affected or high risk
+        if score >= 60.0 or report_in.number_of_animals_affected > 1:
+            try:
+                from app.services.cluster_service import ClusterService
+                ClusterService.run_detection(db, window_days=14)
+            except Exception as e:
+                pass
 
         return HealthReportResponse(
             id=rep.id,

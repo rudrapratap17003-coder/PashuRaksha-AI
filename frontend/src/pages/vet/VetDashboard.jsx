@@ -164,6 +164,17 @@ export default function VetDashboard() {
               </div>
             </div>
 
+            {/* Search Input Bar */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search by Ear-tag ID, species, farmer name, or village..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+              />
+            </div>
+
             {/* Cases List */}
             <div className="space-y-3">
               {loading ? (

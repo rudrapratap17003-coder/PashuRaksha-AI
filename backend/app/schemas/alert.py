@@ -11,6 +11,9 @@ class AlertResponse(BaseModel):
     message: str = Field(..., example="4 nearby livestock health reports received in Rampur. Please observe your animals.")
     risk_level: str = Field(..., example="HIGH")
     related_cluster_id: Optional[str] = Field(None, example="clust-101")
-    village: Optional[str] = Field("Rampur", example="Rampur")
+    village: Optional[str] = Field(None, example="Baramati")
     is_read: bool = Field(False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Config:
+        from_attributes = True

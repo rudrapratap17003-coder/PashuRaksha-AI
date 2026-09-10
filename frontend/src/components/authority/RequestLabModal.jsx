@@ -1,22 +1,34 @@
 import React, { useState } from 'react'
 import { X, Microscope, ShieldAlert } from 'lucide-react'
+import apiClient from '../../services/api'
 
 export default function RequestLabModal({ isOpen, onClose, cluster, onSuccess }) {
   const [requesting, setRequesting] = useState(false)
   
   if (!isOpen) return null
 
-  const handleRequest = () => {
+  const clusterName = cluster?.cluster_name || 'Karad Outbreak Cluster #901'
+  const affectedVillage = cluster?.affected_villages?.[0] || 'Karad'
+
+  const handleRequest = async () => {
     setRequesting(true)
+    try {
+      await apiClient.post('/alerts/broadcast', {
+        title: `🧪 Urgent RT-PCR Request: ${affectedVillage}`,
+        message: `Authority requested immediate molecular diagnostic confirmation and epithelial swab typing for ${affectedVillage} (${clusterName}).`,
+        target_role: 'laboratory',
+        risk_level: 'CRITICAL',
+        village: affectedVillage
+      })
+    } catch (err) {
+      console.warn('Lab request API notice:', err)
+    }
     setTimeout(() => {
       setRequesting(false)
       if (onSuccess) onSuccess()
       onClose()
     }, 1000)
   }
-
-  const clusterName = cluster?.cluster_name || 'Karad Outbreak Cluster #901'
-  const affectedVillage = cluster?.affected_villages?.[0] || 'Karad'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">

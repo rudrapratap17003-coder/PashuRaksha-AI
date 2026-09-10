@@ -138,16 +138,17 @@ class ClusterService:
 
                 # If High or Critical, generate multi-tier alerts
                 if d["risk_level"] in ["HIGH", "CRITICAL"]:
+                    village_name = d["affected_villages"][0] if d.get("affected_villages") else "Baramati"
                     # Vet Alert
                     db.add(Alert(
                         id=f"alt-vet-{str(uuid.uuid4())[:6]}",
                         target_role="veterinarian",
                         alert_type="outbreak_cluster",
                         title=f"Outbreak Alert: {d['cluster_name']}",
-                        message=f"{d['disease_concern']} detected affecting {d['affected_animals_count']} livestock across {', '.join(d['affected_villages'])}. Cluster score: {d['cluster_score']}/100.",
+                        message=f"{d['disease_concern']} detected affecting {d['affected_animals_count']} livestock across {', '.join(d.get('affected_villages', [village_name]))}. Cluster score: {d['cluster_score']}/100.",
                         risk_level=d["risk_level"],
                         related_cluster_id=d["id"],
-                        village=d["affected_villages"][0] if d["affected_villages"] else "Rampur",
+                        village=village_name,
                     ))
                     # Authority Alert
                     db.add(Alert(
@@ -155,21 +156,21 @@ class ClusterService:
                         target_role="authority",
                         alert_type="outbreak_cluster",
                         title=f"Epidemic Surveillance Alert: {d['cluster_name']}",
-                        message=f"Spatial cluster formed in {', '.join(d['affected_villages'])} with {d['case_count']} reports ({d['affected_animals_count']} animals). Action required: {d['recommended_action']}",
+                        message=f"Spatial cluster formed in {', '.join(d.get('affected_villages', [village_name]))} with {d['case_count']} reports ({d['affected_animals_count']} animals). Action required: {d['recommended_action']}",
                         risk_level=d["risk_level"],
                         related_cluster_id=d["id"],
-                        village=d["affected_villages"][0] if d["affected_villages"] else "Rampur",
+                        village=village_name,
                     ))
                     # Farmer Advisory Broadcast
                     db.add(Alert(
                         id=f"alt-farm-{str(uuid.uuid4())[:6]}",
                         target_role="farmer",
                         alert_type="village_advisory",
-                        title=f"Livestock Advisory for {d['affected_villages'][0] if d['affected_villages'] else 'Your Village'}",
+                        title=f"Livestock Advisory for {village_name}",
                         message=f"Elevated livestock health concern ({d['disease_concern']}) reported nearby. Check your livestock vitals and isolate animals with fever or lesions.",
                         risk_level=d["risk_level"],
                         related_cluster_id=d["id"],
-                        village=d["affected_villages"][0] if d["affected_villages"] else "Rampur",
+                        village=village_name,
                     ))
             else:
                 existing.case_count = d["case_count"]

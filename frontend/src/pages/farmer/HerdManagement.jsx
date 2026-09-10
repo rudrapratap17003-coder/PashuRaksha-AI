@@ -97,15 +97,15 @@ export default function HerdManagement() {
   // Enrich animals with vaccination status
   const enrichedAnimals = useMemo(() => {
     return animals.map(a => {
-      const animalVaccs = vaccinations.filter(v => v.animal_id === a.id)
+      const animalVaccs = vaccinations.filter(v => v.animal_id === a.animal_id || v.animal_id === a.id)
       return {
         ...a,
-        vacc_status: getVaccStatus(animalVaccs),
+        vacc_status: a.vaccination_status || getVaccStatus(animalVaccs),
         vacc_count: animalVaccs.length,
-        age_display: getAge(a.date_of_birth),
-        species: a.species || 'Cattle',
-        health_status: a.health_status || 'Healthy',
-        lactation_yield: a.lactation_yield || (a.species === 'Cattle' || a.species === 'Buffalo' ? `${(Math.random() * 12 + 3).toFixed(1)} L/day` : '-'),
+        age_display: a.age ? `${a.age}y` : getAge(a.date_of_birth),
+        species: a.species || 'Cattle (Cow)',
+        health_status: a.health_status || (a.current_risk_level === 'CRITICAL' || a.current_risk_level === 'HIGH' ? 'Under Observation' : 'Healthy'),
+        lactation_yield: a.milk_production ? `${a.milk_production} L/day` : (a.lactation_yield || '-'),
         village: a.village || a.location || 'Baramati',
       }
     })

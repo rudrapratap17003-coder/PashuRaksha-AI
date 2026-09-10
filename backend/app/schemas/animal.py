@@ -36,3 +36,6 @@ class AnimalResponse(AnimalBase):
     current_risk_score: Optional[float] = Field(12.0, example=12.0)
     current_risk_level: Optional[str] = Field("LOW", example="LOW")
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Config:
+        from_attributes = True
