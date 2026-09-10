@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import { 
   Syringe, 
@@ -17,6 +18,8 @@ import StatCard from '../../components/common/StatCard'
 import apiClient from '../../services/api'
 
 export default function FarmerVaccinationsPage() {
+  const { t } = useLanguage()
+
   const [vaccinations, setVaccinations] = useState([])
   const [loading, setLoading] = useState(true)
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -112,13 +115,13 @@ export default function FarmerVaccinationsPage() {
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Syringe className="w-4 h-4" />
-            <span>Immunization & Herd Prophylaxis Registry</span>
+            <span>{t("vaccination.registry")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Livestock Vaccination Records & Schedules
+            {t("vaccination.title")}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm mt-1">
-            Track mandatory state vaccination schedules for FMD, HS, BQ, and Brucellosis across Maharashtra districts.
+            {t("vaccination.subtitle")}
           </p>
         </div>
 
@@ -129,7 +132,7 @@ export default function FarmerVaccinationsPage() {
             icon={Plus}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
           >
-            Log New Dose
+            {t("vaccination.logNewDose")}
           </Button>
         </div>
       </div>
@@ -137,30 +140,30 @@ export default function FarmerVaccinationsPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Completed Vaccinations"
+          title={t("vaccination.completed")}
           value={vaccinations.length || 4}
-          subtitle="Doses certified on-record"
+          subtitle={t("vaccination.dosesOnRecord")}
           icon={CheckCircle2}
           iconBg="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
         />
         <StatCard
-          title="FMD Status"
-          value="Protected (100%)"
-          subtitle="Bi-annual booster valid"
+          title={t("vaccination.fmdStatus")}
+          value={t("vaccination.protected")}
+          subtitle={t("vaccination.boosterValid")}
           icon={ShieldCheck}
           iconBg="bg-teal-500/10 text-teal-400 border border-teal-500/20"
         />
         <StatCard
-          title="Upcoming Due"
+          title={t("vaccination.upcomingDue")}
           value="Sept 2026"
-          subtitle="HS+BQ Pre-Monsoon Cycle"
+          subtitle={t("vaccination.preMonsoon")}
           icon={Clock}
           iconBg="bg-amber-500/10 text-amber-400 border border-amber-500/20"
         />
         <StatCard
-          title="Village Herd Immunity"
+          title={t("vaccination.herdImmunity")}
           value="78.5%"
-          subtitle="Baramati Cluster Target: 90%"
+          subtitle={t("vaccination.target90")}
           icon={Syringe}
           iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
         />
@@ -169,33 +172,33 @@ export default function FarmerVaccinationsPage() {
       {/* Main Table */}
       <Card className="bg-slate-900/80 border-slate-800">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-black text-white">Animal Vaccination History</h3>
-          <span className="text-xs font-mono text-slate-400 font-bold">{vaccinations.length} Immunization Records</span>
+          <h3 className="text-base font-black text-white">{t("vaccination.history")}</h3>
+          <span className="text-xs font-mono text-slate-400 font-bold">{t("vaccination.recordsCount", { count: vaccinations.length })}</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
               <tr>
-                <th className="py-3 px-4">Animal Tag ID</th>
-                <th className="py-3 px-4">Vaccine & Prophylaxis</th>
-                <th className="py-3 px-4">Administered Date</th>
-                <th className="py-3 px-4">Next Due Date</th>
-                <th className="py-3 px-4">Administering Authority</th>
-                <th className="py-3 px-4">Immunity Status</th>
+                <th className="py-3 px-4">{t("vaccination.animalId")}</th>
+                <th className="py-3 px-4">{t("vaccination.vaccineName")}</th>
+                <th className="py-3 px-4">{t("vaccination.adminDate")}</th>
+                <th className="py-3 px-4">{t("vaccination.nextDue")}</th>
+                <th className="py-3 px-4">{t("vaccination.authority")}</th>
+                <th className="py-3 px-4">{t("vaccination.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {vaccinations.map((v) => (
                 <tr key={v.id} className="hover:bg-slate-800/40 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-white">{v.animal_id}</td>
-                  <td className="py-3.5 px-4 font-bold text-teal-300">{v.vaccine_name}</td>
+                  <td className="py-3.5 px-4 font-bold text-teal-300">{t("data.vaccine." + v.vaccine_name) || v.vaccine_name}</td>
                   <td className="py-3.5 px-4 text-slate-400">{v.vaccination_date}</td>
                   <td className="py-3.5 px-4 font-bold text-amber-300">{v.next_due_date}</td>
-                  <td className="py-3.5 px-4 text-slate-400">{v.notes || 'Veterinary Team'}</td>
+                  <td className="py-3.5 px-4 text-slate-400">{t('data.authority.' + v.notes) || v.notes || t('vaccination.vetTeam')}</td>
                   <td className="py-3.5 px-4">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {v.status || 'Active'}
+                      {t('data.status.' + (v.status || 'Active')) || (v.status || 'Active')}
                     </span>
                   </td>
                 </tr>
@@ -212,7 +215,7 @@ export default function FarmerVaccinationsPage() {
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
               <div className="flex items-center space-x-2">
                 <Syringe className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-black text-white">Log Administered Vaccine</h3>
+                <h3 className="text-base font-black text-white">{t("vaccination.logModalTitle")}</h3>
               </div>
               <button onClick={() => setLogModalOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
@@ -221,7 +224,7 @@ export default function FarmerVaccinationsPage() {
 
             <form onSubmit={handleLogVaccine} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Animal Tag ID</label>
+                <label className="block text-slate-300 font-bold mb-1">{t("vaccination.animalId")}</label>
                 <input
                   type="text"
                   required
@@ -232,7 +235,7 @@ export default function FarmerVaccinationsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Vaccine Name</label>
+                <label className="block text-slate-300 font-bold mb-1">{t("vaccination.vaccineName")}</label>
                 <select
                   value={form.vaccine_name}
                   onChange={(e) => setForm({ ...form, vaccine_name: e.target.value })}
@@ -259,7 +262,7 @@ export default function FarmerVaccinationsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Next Due Date</label>
+                  <label className="block text-slate-300 font-bold mb-1">{t("vaccination.nextDue")}</label>
                   <input
                     type="date"
                     required
@@ -271,7 +274,7 @@ export default function FarmerVaccinationsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Veterinary Notes & Batch Number</label>
+                <label className="block text-slate-300 font-bold mb-1">{t("vaccination.notes")}</label>
                 <input
                   type="text"
                   value={form.notes}
@@ -283,10 +286,10 @@ export default function FarmerVaccinationsPage() {
 
               <div className="flex justify-end space-x-2 pt-2">
                 <Button type="button" variant="outline" onClick={() => setLogModalOpen(false)}>
-                  Cancel
+                  {t("vaccination.cancel")}
                 </Button>
                 <Button type="submit" variant="primary" loading={submitting} className="bg-emerald-600 hover:bg-emerald-500">
-                  Save Vaccine Record
+                  {t("vaccination.saveRecord")}
                 </Button>
               </div>
             </form>

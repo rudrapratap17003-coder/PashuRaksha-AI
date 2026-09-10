@@ -18,9 +18,13 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import { SPECIES_BREEDS_MAP } from '../../utils/speciesBreeds'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
+
 import apiClient from '../../services/api'
 
 export default function AddAnimalPage() {
+  const { t } = useLanguage()
+
   const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)

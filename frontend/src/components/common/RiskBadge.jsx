@@ -1,6 +1,7 @@
 import React from 'react'
 import { RISK_LEVELS } from '../../utils/constants'
 import { AlertCircle, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
 
 const ICONS = {
   LOW: CheckCircle,
@@ -16,6 +17,7 @@ export default function RiskBadge({
   size = 'md',
   className = '',
 }) {
+  const { t } = useLanguage()
   const normalizedLevel = (level || 'LOW').toUpperCase()
   const config = RISK_LEVELS[normalizedLevel] || RISK_LEVELS.LOW
   const Icon = ICONS[normalizedLevel] || CheckCircle
@@ -28,13 +30,13 @@ export default function RiskBadge({
 
   return (
     <span
-      title={`${config.label} Risk ${score !== null ? `(${score}/100)` : ''} • Pattern flag only — veterinary verification required.`}
-      aria-label={`${config.label} risk level ${score !== null ? `${score} out of 100` : ''}`}
+      title={`${t('data.risk.' + normalizedLevel)} Risk ${score !== null ? `(${score}/100)` : ''} • Pattern flag only — veterinary verification required.`}
+      aria-label={`${t('data.risk.' + normalizedLevel)} risk level ${score !== null ? `${score} out of 100` : ''}`}
       className={`inline-flex items-center space-x-1.5 rounded-full border shadow-sm ${config.badge} ${sizeClasses} ${className}`}
     >
       {showIcon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
       <span>
-        {config.label} {score !== null && score !== undefined ? `(${score}/100)` : ''}
+        {t('data.risk.' + normalizedLevel)} {score !== null && score !== undefined ? `(${score}/100)` : ''}
       </span>
     </span>
   )

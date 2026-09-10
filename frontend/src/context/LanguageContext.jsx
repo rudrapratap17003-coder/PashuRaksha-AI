@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import en from '../locales/en'
+import hi from '../locales/hi'
+import mr from '../locales/mr'
 
 export const LANGUAGES = [
   { code: 'en', label: 'English', nativeName: 'English' },
@@ -6,130 +9,17 @@ export const LANGUAGES = [
   { code: 'mr', label: 'मराठी', nativeName: 'Marathi' }
 ]
 
-export const translations = {
-  en: {
-    // Brand & SIH
-    brandName: 'PASHURAKSHA AI',
-    prototypeNotice: 'Prototype developed for SIH Problem Statement SIH26128',
-    
-    // Auth & Login
-    selectRole: 'Select Your Role',
-    email: 'Email',
-    password: 'Password',
-    login: 'Login',
-    signingIn: 'Signing in...',
-    newUser: 'New user?',
-    register: 'Register',
-    
-    // Roles
-    roles: {
-      farmer: 'Farmer',
-      farmerSub: 'Cattle / Herd Owner',
-      fieldWorker: 'Pashu Sakhi',
-      fieldWorkerSub: 'Field Worker',
-      vetDoctor: 'Vet Doctor',
-      vetDoctorSub: 'Veterinarian',
-      lab: 'Lab',
-      labSub: 'Diagnostics',
-      authority: 'Authority',
-      authoritySub: 'District Officer',
-      admin: 'Admin',
-      adminSub: 'Governance'
-    },
-    
-    // Password visibility
-    showPassword: 'Show password',
-    hidePassword: 'Hide password',
-    
-    // Validation & Errors
-    invalidCredentials: 'Invalid email or password.',
-    networkError: 'Cannot connect to PASHURAKSHA AI server. Please make sure the backend is running at 127.0.0.1:8000.',
-    authFailed: 'Authentication failed. Please check your credentials.'
-  },
-  hi: {
-    // Brand & SIH
-    brandName: 'PASHURAKSHA AI',
-    prototypeNotice: 'SIH समस्या विवरण SIH26128 के लिए विकसित प्रोटोटाइप',
-    
-    // Auth & Login
-    selectRole: 'भूमिका चुनें',
-    email: 'ईमेल',
-    password: 'पासवर्ड',
-    login: 'लॉगिन',
-    signingIn: 'लॉगिन हो रहा है...',
-    newUser: 'नए उपयोगकर्ता?',
-    register: 'पंजीकरण करें',
-    
-    // Roles
-    roles: {
-      farmer: 'किसान',
-      farmerSub: 'पशुपालक',
-      fieldWorker: 'पशु सखी',
-      fieldWorkerSub: 'फील्ड वर्कर',
-      vetDoctor: 'पशु चिकित्सक',
-      vetDoctorSub: 'पशु डॉक्टर',
-      lab: 'प्रयोगशाला',
-      labSub: 'जांच केंद्र',
-      authority: 'अधिकारी',
-      authoritySub: 'जिला अधिकारी',
-      admin: 'प्रशासक',
-      adminSub: 'सिस्टम प्रशासन'
-    },
-    
-    // Password visibility
-    showPassword: 'पासवर्ड दिखाएं',
-    hidePassword: 'पासवर्ड छुपाएं',
-    
-    // Validation & Errors
-    invalidCredentials: 'अमान्य ईमेल या पासवर्ड।',
-    networkError: 'PASHURAKSHA AI सर्वर से कनेक्ट नहीं हो सका। कृपया सुनिश्चित करें कि बैकएंड 127.0.0.1:8000 पर चल रहा है।',
-    authFailed: 'प्रमाणीकरण विफल। कृपया अपने क्रेडेंशियल्स की जांच करें।'
-  },
-  mr: {
-    // Brand & SIH
-    brandName: 'PASHURAKSHA AI',
-    prototypeNotice: 'SIH समस्या विवरण SIH26128 साठी विकसित प्रोटोटाइप',
-    
-    // Auth & Login
-    selectRole: 'भूमिका निवडा',
-    email: 'ईमेल',
-    password: 'पासवर्ड',
-    login: 'लॉगिन',
-    signingIn: 'लॉगिन होत आहे...',
-    newUser: 'नवीन वापरकर्ता?',
-    register: 'नोंदणी करा',
-    
-    // Roles
-    roles: {
-      farmer: 'शेतकरी',
-      farmerSub: 'पशुपालक शेतकरी',
-      fieldWorker: 'पशु सखी',
-      fieldWorkerSub: 'फील्ड वर्कर',
-      vetDoctor: 'पशुवैद्यक',
-      vetDoctorSub: 'पशुवैद्यकीय अधिकारी',
-      lab: 'प्रयोगशाळा',
-      labSub: 'तपासणी केंद्र',
-      authority: 'अधिकारी',
-      authoritySub: 'जिल्हा अधिकारी',
-      admin: 'प्रशासक',
-      adminSub: 'प्रशासन'
-    },
-    
-    // Password visibility
-    showPassword: 'पासवर्ड दाखवा',
-    hidePassword: 'पासवर्ड लपवा',
-    
-    // Validation & Errors
-    invalidCredentials: 'अवैध ईमेल किंवा पासवर्ड.',
-    networkError: 'PASHURAKSHA AI सर्व्हरशी कनेक्ट होऊ शकले नाही. कृपया बॅकएंड 127.0.0.1:8000 वर चालू असल्याची खात्री करा.',
-    authFailed: 'प्रमाणीकरण अयशस्वी. कृपया तुमची माहिती तपासा.'
-  }
+const dictionaries = { en, hi, mr }
+
+// Utility to resolve nested keys (e.g., 'auth.login')
+function resolveKey(obj, path) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
 }
 
 const LanguageContext = createContext({
   language: 'en',
   setLanguage: () => {},
-  t: translations.en,
+  t: (key, params) => key,
   languages: LANGUAGES
 })
 
@@ -157,7 +47,33 @@ export function LanguageProvider({ children }) {
     }
   }
 
-  const t = translations[language] || translations.en
+  // Translation function with nested keys and interpolation
+  const t = (key, params = {}) => {
+    const dict = dictionaries[language] || dictionaries.en
+    let str = resolveKey(dict, key)
+
+    // Fallback to English if missing in current locale
+    if (str === undefined) {
+      if (language !== 'en') {
+        str = resolveKey(dictionaries.en, key)
+      }
+      
+      // If still missing, log warning and return key
+      if (str === undefined) {
+        console.warn(`[i18n] Missing translation key: ${key}`)
+        return key
+      }
+    }
+
+    // Handle interpolation, e.g., "Hello {name}"
+    if (typeof str === 'string' && Object.keys(params).length > 0) {
+      return str.replace(/\{(\w+)\}/g, (match, paramKey) => {
+        return params[paramKey] !== undefined ? params[paramKey] : match
+      })
+    }
+
+    return str
+  }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, languages: LANGUAGES }}>
@@ -172,7 +88,7 @@ export function useLanguage() {
     return {
       language: 'en',
       setLanguage: () => {},
-      t: translations.en,
+      t: (key) => key,
       languages: LANGUAGES
     }
   }

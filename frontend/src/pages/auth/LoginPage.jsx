@@ -68,22 +68,22 @@ export default function LoginPage() {
       // Distinguish between backend unreachable and auth failure
       const msg = err.message || 'Authentication failed'
       if (msg === 'Network Error' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Unable to connect')) {
-        setError(t.networkError)
+        setError(t("networkError"))
       } else if (msg.includes('Invalid credentials') || msg.includes('Incorrect password') || msg.includes('not found')) {
-        setError(t.invalidCredentials)
+        setError(t("invalidCredentials"))
       } else {
-        setError(msg || t.authFailed)
+        setError(msg || t("authFailed"))
       }
     }
   }
 
   const roleConfigs = [
-    { role: USER_ROLES.FARMER, label: t.roles.farmer, sub: t.roles.farmerSub },
-    { role: USER_ROLES.FIELD_WORKER, label: t.roles.fieldWorker, sub: t.roles.fieldWorkerSub },
-    { role: USER_ROLES.VETERINARIAN, label: t.roles.vetDoctor, sub: t.roles.vetDoctorSub },
-    { role: USER_ROLES.LABORATORY, label: t.roles.lab, sub: t.roles.labSub },
-    { role: USER_ROLES.AUTHORITY, label: t.roles.authority, sub: t.roles.authoritySub },
-    { role: USER_ROLES.ADMIN, label: t.roles.admin, sub: t.roles.adminSub },
+    { role: USER_ROLES.FARMER, label: t("roles.farmer"), sub: t("roles.farmerSub") },
+    { role: USER_ROLES.FIELD_WORKER, label: t("roles.fieldWorker"), sub: t("roles.fieldWorkerSub") },
+    { role: USER_ROLES.VETERINARIAN, label: t("roles.vetDoctor"), sub: t("roles.vetDoctorSub") },
+    { role: USER_ROLES.LABORATORY, label: t("roles.lab"), sub: t("roles.labSub") },
+    { role: USER_ROLES.AUTHORITY, label: t("roles.authority"), sub: t("roles.authoritySub") },
+    { role: USER_ROLES.ADMIN, label: t("roles.admin"), sub: t("roles.adminSub") },
   ]
 
   return (
@@ -102,7 +102,7 @@ export default function LoginPage() {
                   PASHURAKSHA <span className="text-sky-600">AI</span>
                 </h2>
                 <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-1">
-                  {t.prototypeNotice}
+                  {t("prototypeNotice")}
                 </p>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
 
           {/* Role Selector — Big Buttons */}
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-2">{t.selectRole}</label>
+            <label className="text-xs font-bold text-slate-600 block mb-2">{t("selectRole")}</label>
             <div className="grid grid-cols-3 gap-2">
               {roleConfigs.map((p) => (
                 <button
@@ -144,14 +144,14 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">{t.email}</label>
+              <label className="text-sm font-semibold text-slate-700">{t("email")}</label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="text"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target("value"))}
                   className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-4 py-3 text-sm rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
                   autoComplete="username"
                 />
@@ -159,22 +159,22 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">{t.password}</label>
+              <label className="text-sm font-semibold text-slate-700">{t("password")}</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target("value"))}
                   className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-10 py-3 text-sm rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? t.hidePassword : t.showPassword}
-                  title={showPassword ? t.hidePassword : t.showPassword}
+                  aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                  title={showPassword ? t("hidePassword") : t("showPassword")}
                   className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none focus:text-sky-600 transition-colors p-0.5 rounded cursor-pointer"
                   tabIndex={0}
                 >
@@ -194,14 +194,14 @@ export default function LoginPage() {
               icon={ArrowRight}
               className="w-full font-bold bg-sky-600 hover:bg-sky-700 text-white border-0 py-3.5 text-base rounded-xl transition-colors duration-200"
             >
-              {loading ? t.signingIn : t.login}
+              {loading ? t("signingIn") : t("login")}
             </Button>
           </form>
 
           <div className="text-center text-sm text-slate-500 pt-3 border-t border-slate-200">
-            <span>{t.newUser} </span>
+            <span>{t("newUser")} </span>
             <Link to="/register" className="text-sky-600 font-semibold hover:underline">
-              {t.register}
+              {t("register")}
             </Link>
           </div>
         </div>

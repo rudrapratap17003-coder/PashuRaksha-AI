@@ -29,10 +29,12 @@ import VisualLesionScannerModal from '../../components/common/VisualLesionScanne
 import apiClient from '../../services/api'
 import { SYMPTOM_DEFINITIONS } from '../../utils/symptomDefinitions'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 import { saveOfflineReport } from '../../utils/offlineQueue'
 
 export default function SymptomReportPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [animals, setAnimals] = useState([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
@@ -186,14 +188,14 @@ export default function SymptomReportPage() {
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xs font-mono font-bold text-emerald-400 uppercase">
-              Clinical Symptom Reporting
+              {t('report.subtitle')}
             </span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/40 text-emerald-400 text-[10px] font-bold">
-              AI Decision Support
+              {t('report.aiSupport')}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Livestock Health Problem Intake
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
+            {t('report.title')}
           </h1>
         </div>
 
@@ -205,7 +207,7 @@ export default function SymptomReportPage() {
             title="Pre-fill with Baramati FMD Demo Data (7 Clinical Signs)"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>⚡ Auto-Fill Baramati FMD (Demo)</span>
+            <span>{t('report.autofill')}</span>
           </button>
           <button
             type="button"
@@ -213,7 +215,7 @@ export default function SymptomReportPage() {
             className="px-3.5 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950 font-bold text-xs flex items-center space-x-2 transition shadow-md"
           >
             <Sparkles className="w-4 h-4 text-emerald-400" />
-            <span>AI Lesion Scan</span>
+            <span>{t('report.aiScan')}</span>
           </button>
           <Button
             type="button"
@@ -221,7 +223,7 @@ export default function SymptomReportPage() {
             icon={Mic}
             className="font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"
           >
-            Voice Intake
+            {t('report.voiceIntake')}
           </Button>
         </div>
       </div>
@@ -240,9 +242,9 @@ export default function SymptomReportPage() {
         <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-mono font-black uppercase text-emerald-400">
-              STEP 1 • SELECT ANIMAL
+              {t('report.step1')}
             </span>
-            <span className="text-[11px] text-slate-400">Select livestock from your digital registry</span>
+            <span className="text-[11px] text-slate-400">{t('report.selectLivestock')}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -260,8 +262,8 @@ export default function SymptomReportPage() {
                   <span className="text-xs font-mono font-black text-emerald-400">{anim.animal_id}</span>
                   <PawPrint className="w-3.5 h-3.5 text-emerald-400" />
                 </div>
-                <h4 className="font-bold text-sm text-white">{anim.species}</h4>
-                <span className="text-[11px] text-slate-400 block">{anim.breed || 'Gir'} • {anim.age} yrs</span>
+                <h4 className="font-bold text-sm text-white">{t('data.species.' + anim.species) || anim.species}</h4>
+                <span className="text-[11px] text-slate-400 block">{anim.breed || 'Gir'} • {anim.age} {t('units.yrs')}</span>
               </div>
             ))}
           </div>
@@ -272,9 +274,9 @@ export default function SymptomReportPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
             <div>
               <span className="text-xs font-mono font-black uppercase text-emerald-400 block">
-                STEP 2 • OBSERVED CLINICAL SYMPTOMS ({selectedSymptoms.length} SELECTED)
+                {t('report.step2')} ({selectedSymptoms.length} SELECTED)
               </span>
-              <span className="text-[11px] text-slate-400">Tap to select or speak your symptoms below</span>
+              <span className="text-[11px] text-slate-400">{t('report.step2Sub')}</span>
             </div>
             <VoiceReportButton
               size="sm"
@@ -320,43 +322,43 @@ export default function SymptomReportPage() {
         <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-mono font-black uppercase text-emerald-400">
-              STEP 3 • CLINICAL CONTEXT &amp; LOCATION
+              {t('report.step3')}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             {/* Severity */}
             <div className="space-y-1.5">
-              <label className="font-bold text-slate-300">Severity Level</label>
+              <label className="font-bold text-slate-300">{t('report.severityLevel')}</label>
               <select
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               >
-                <option value="mild">Mild (हल्का)</option>
-                <option value="moderate">Moderate (मध्यम)</option>
-                <option value="severe">Severe (गंभीर - Emergency)</option>
+                <option value="mild">{t('report.mild')}</option>
+                <option value="moderate">{t('report.moderate')}</option>
+                <option value="severe">{t('report.severe')}</option>
               </select>
             </div>
 
             {/* Duration */}
             <div className="space-y-1.5">
-              <label className="font-bold text-slate-300">Duration (Days)</label>
+              <label className="font-bold text-slate-300">{t('report.duration')}</label>
               <select
                 value={durationDays}
                 onChange={(e) => setDurationDays(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               >
-                <option value="1">1 Day (आज से)</option>
-                <option value="2">2–3 Days</option>
-                <option value="5">4–7 Days</option>
-                <option value="10">More than 7 Days</option>
+                <option value="1">{t('report.day1')}</option>
+                <option value="2">{t('report.days2to3')}</option>
+                <option value="5">{t('report.days4to7')}</option>
+                <option value="10">{t('report.moreThan7')}</option>
               </select>
             </div>
 
             {/* Affected Animals Count */}
             <div className="space-y-1.5">
-              <label className="font-bold text-slate-300">Animals Affected in Herd</label>
+              <label className="font-bold text-slate-300">{t('report.animalsAffected')}</label>
               <input
                 type="number"
                 min="1"
@@ -374,10 +376,10 @@ export default function SymptomReportPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
             <div>
               <span className="text-xs font-mono font-black uppercase text-emerald-400 block">
-                STEP 4 • SPOKEN / TYPED CLINICAL OBSERVATIONS
+                {t('report.step4')}
               </span>
               <span className="text-[11px] text-slate-400">
-                Speak or type additional symptoms (automatically parsed &amp; sent to AI analysis)
+                {t('report.step4Sub')}
               </span>
             </div>
             <VoiceReportButton
@@ -393,7 +395,7 @@ export default function SymptomReportPage() {
             rows={3}
             value={otherSymptoms}
             onChange={(e) => setOtherSymptoms(e.target.value)}
-            placeholder="Spoken or typed observations (e.g., 'My cow has high fever, blisters in mouth, excessive salivation and stopped eating')..."
+            placeholder={t('report.placeholder')}
             className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm text-slate-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none font-medium"
           />
         </Card>
@@ -405,7 +407,7 @@ export default function SymptomReportPage() {
           icon={Sparkles}
           className="w-full font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-emerald-500/30 text-base py-3.5"
         >
-          Analyze Livestock Health Risk →
+          {t('report.analyzeBtn')}
         </Button>
       </form>
 
@@ -419,7 +421,7 @@ export default function SymptomReportPage() {
 
             <div className="space-y-1">
               <h3 className="font-black text-xl text-white">
-                ANALYZING LIVESTOCK HEALTH...
+                {t('report.analyzing')}
               </h3>
               <p className="text-xs text-slate-300">
                 PASHURAKSHA AI Explainable Risk Engine Active
@@ -470,9 +472,9 @@ export default function SymptomReportPage() {
             <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start space-x-2.5">
               <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <strong className="block font-bold text-amber-300">MANDATORY CLINICAL DISCLAIMER:</strong>
+                <strong className="block font-bold text-amber-300">{t('report.disclaimer')}</strong>
                 <p className="text-amber-200/90">
-                  Pattern flag only — veterinary verification required. PASHURAKSHA AI provides decision-support and surveillance intelligence. It does not replace physical examination by a registered veterinarian.
+                  {t('report.disclaimerText')}
                 </p>
               </div>
             </div>
@@ -480,18 +482,18 @@ export default function SymptomReportPage() {
             {/* Score & Disease Match */}
             <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-bold">Health Risk Score:</span>
+                <span className="text-slate-400 font-bold">{t('report.healthRiskScore')}</span>
                 <span className="text-2xl font-black text-rose-400">{analysisResult.risk_score} / 100</span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-bold">Risk Level:</span>
+                <span className="text-slate-400 font-bold">{t('report.riskLevel')}</span>
                 <span className="px-2.5 py-0.5 rounded-full font-black text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase">
                   {analysisResult.risk_level || 'CRITICAL'}
                 </span>
               </div>
 
               <div className="text-xs space-y-1 pt-2 border-t border-slate-800">
-                <span className="text-slate-400 block font-bold">Possible Disease Pattern:</span>
+                <span className="text-slate-400 block font-bold">{t('report.possibleDisease')}</span>
                 <strong className="text-rose-400 block text-sm">
                   {analysisResult.possible_disease_concern || 'Foot-and-Mouth Disease (suspected)'}
                 </strong>
@@ -500,7 +502,7 @@ export default function SymptomReportPage() {
               {/* Contributing Factors */}
               <div className="pt-2 border-t border-slate-800 space-y-1.5">
                 <span className="text-xs font-bold text-slate-300 block uppercase tracking-wider">
-                  Transparent Contributing Factors:
+                  {t('report.contributingFactors')}
                 </span>
                 <div className="space-y-1 text-xs">
                   {analysisResult.contributing_factors && analysisResult.contributing_factors.length > 0 ? (
@@ -546,7 +548,7 @@ export default function SymptomReportPage() {
 
             {/* Action Advice */}
             <div className="p-3.5 rounded-2xl bg-amber-950/70 border border-amber-500/40 text-xs text-amber-200 space-y-1">
-              <strong className="text-amber-400 block font-bold">Recommended Next Action:</strong>
+              <strong className="text-amber-400 block font-bold">{t('report.nextAction')}</strong>
               <p>{analysisResult.recommendation || analysisResult.recommended_action || 'Immediate isolation + urgent veterinary inspection'}</p>
             </div>
 
@@ -558,7 +560,7 @@ export default function SymptomReportPage() {
               </div>
               <Link to="/presentation">
                 <Button size="sm" className="font-bold bg-rose-600 hover:bg-rose-500 text-white">
-                  View Outbreak Map →
+                  {t('report.viewMap')}
                 </Button>
               </Link>
             </div>
@@ -570,7 +572,7 @@ export default function SymptomReportPage() {
                 size="md"
                 className="flex-1 font-black bg-emerald-500 text-slate-950"
               >
-                Return to Dashboard
+                {t('report.returnBtn')}
               </Button>
             </div>
 
