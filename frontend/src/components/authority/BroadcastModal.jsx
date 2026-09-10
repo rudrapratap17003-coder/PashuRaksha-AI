@@ -31,7 +31,7 @@ const BROADCAST_TEMPLATES = {
   }
 }
 
-export default function BroadcastModal({ isOpen, onClose }) {
+export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
   const [lang, setLang] = useState('mr')
   const [templateType, setTemplateType] = useState('outbreak')
   const [channel, setChannel] = useState('both') // whatsapp | sms | both
@@ -57,6 +57,7 @@ export default function BroadcastModal({ isOpen, onClose }) {
     setTimeout(() => {
       setSending(false)
       setSentSuccess(true)
+      if (onSuccess) onSuccess()
     }, 1200)
   }
 
