@@ -35,6 +35,7 @@ import StatCard from '../../components/common/StatCard'
 import RiskBadge from '../../components/common/RiskBadge'
 import { LoadingState, ErrorState, EmptyState } from '../../components/common/StateFeedback'
 import apiClient from '../../services/api'
+import { useLanguage } from '../../context/LanguageContext'
 
 const COLORS = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6']
 
@@ -48,6 +49,7 @@ const TIME_WINDOWS = [
 const RISK_FILTERS = ['All', 'CRITICAL', 'HIGH', 'MODERATE', 'LOW']
 
 export default function AnalyticsPage() {
+  const { t } = useLanguage()
   const [overview, setOverview] = useState(null)
   const [trendData, setTrendData] = useState([])
   const [speciesData, setSpeciesData] = useState([])
@@ -165,10 +167,10 @@ export default function AnalyticsPage() {
             <span>Epidemiological Intelligence &amp; Surveillance Analytics</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Maharashtra State Livestock Health Analytics
+            {t('analytics.heroTitle')}
           </h1>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-            Real-time geospatial incidence curve, species susceptibility matrices, and vaccination gap analysis supporting the Maharashtra State Innovation Society initiatives.
+            {t('analytics.heroSubtitle')}
           </p>
         </div>
         <div className="flex items-center space-x-3 flex-wrap gap-2">
@@ -193,7 +195,7 @@ export default function AnalyticsPage() {
             ) : (
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-purple-400' : 'text-purple-300'}`} />
             )}
-            <span>{refreshing ? 'Refreshing...' : refreshSuccess ? '✓ Refreshed' : 'Refresh Data'}</span>
+            <span>{refreshing ? t('common.loading') : refreshSuccess ? '✓ Refreshed' : t('analytics.refreshData')}</span>
           </button>
         </div>
       </div>
@@ -237,14 +239,14 @@ export default function AnalyticsPage() {
       {/* 4 KPI Overview StatCards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Monitored Livestock"
+          title={t('analytics.monitoredLivestock')}
           value={overview?.total_animals?.toLocaleString() || '1,247'}
           subtitle={`Across ${selectedDistrict === 'All Districts' ? '15 Western Maharashtra' : selectedDistrict} hubs`}
           icon={Activity}
           iconBg="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
         />
         <StatCard
-          title="Active Disease Clusters"
+          title={t('analytics.activeOutbreaks')}
           value={overview?.active_clusters ?? 2}
           subtitle="Baramati &amp; Shirur zones"
           icon={ShieldAlert}
@@ -273,7 +275,7 @@ export default function AnalyticsPage() {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 h-full flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">Epidemic Incidence &amp; Intake Curve</h3>
+                <h3 className="text-base font-black text-slate-900">{t('analytics.epidemiologicalCurve')}</h3>
                 <p className="text-xs text-slate-500">{selectedDays}-day syndromic intake telemetry ({selectedDistrict})</p>
               </div>
               <span className="text-xs bg-purple-50 text-purple-800 border border-purple-200 px-3 py-1 rounded-full font-bold">
@@ -312,7 +314,7 @@ export default function AnalyticsPage() {
         <div className="lg:col-span-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 h-full flex flex-col justify-between">
             <div>
-              <h3 className="text-base font-black text-slate-900">Species Distribution</h3>
+              <h3 className="text-base font-black text-slate-900">{t('analytics.speciesDistribution')}</h3>
               <p className="text-xs text-slate-500">Breakdown of monitored livestock</p>
             </div>
 
@@ -362,7 +364,7 @@ export default function AnalyticsPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
           <div>
-            <h3 className="text-base font-black text-slate-900">Village-Level Risk Stratification Matrix</h3>
+            <h3 className="text-base font-black text-slate-900">{t('analytics.villageRiskMatrix')}</h3>
             <p className="text-xs text-slate-500">Ranked by composite epidemiological risk index</p>
           </div>
 

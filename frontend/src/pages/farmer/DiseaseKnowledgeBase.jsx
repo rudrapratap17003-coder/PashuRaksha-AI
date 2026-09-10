@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState } from 'react'
 import {
   BookOpen,
@@ -123,6 +124,8 @@ const MAHARASHTRA_DISEASES = [
 ]
 
 export default function DiseaseKnowledgeBase() {
+  const { t } = useLanguage()
+
   const [search, setSearch] = useState('')
   const [selectedDisease, setSelectedDisease] = useState(MAHARASHTRA_DISEASES[0])
 
@@ -139,13 +142,13 @@ export default function DiseaseKnowledgeBase() {
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <BookOpen className="w-4 h-4" />
-            <span>State Epidemiological Manual • महाराष्ट्र पशु आरोग्य मार्गदर्शिका</span>
+            <span>{t("diseaseGuide.manualBadge")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Livestock Disease Knowledge Base &amp; Biosecurity Guide
+            {t("diseaseGuide.title")}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-            Official guidelines, pathogen transmission vectors, cardinal signs, and containment protocols approved by the Department of Animal Husbandry, Govt. of Maharashtra.
+            {t("diseaseGuide.subtitle")}
           </p>
         </div>
       </div>
@@ -157,7 +160,7 @@ export default function DiseaseKnowledgeBase() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by disease name (e.g. FMD, लाळ-खुरकूत, Lumpy Skin, घटसर्प)..."
+          placeholder={t("diseaseGuide.searchPlaceholder")}
           className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 pl-10 pr-4 py-3 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
         />
       </div>
@@ -192,13 +195,13 @@ export default function DiseaseKnowledgeBase() {
             <Card className={`p-6 rounded-3xl border ${selectedDisease.color} space-y-5 bg-slate-900/90 shadow-2xl`}>
               <div>
                 <div className="flex items-center space-x-2 text-[10px] font-mono text-emerald-400 font-bold uppercase mb-1">
-                  <span>Pathogen Profile</span>
+                  <span>{t("diseaseGuide.pathogenProfile")}</span>
                   <span>•</span>
                   <span>{selectedDisease.pathogen}</span>
                 </div>
                 <h3 className="text-xl font-black text-white">{selectedDisease.name}</h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  <strong>Susceptible Species:</strong> {selectedDisease.susceptible}
+                  <strong>{t("diseaseGuide.susceptibleSpecies")}</strong> {selectedDisease.susceptible}
                 </p>
               </div>
 
@@ -206,7 +209,7 @@ export default function DiseaseKnowledgeBase() {
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Cardinal Clinical Signs (प्रमुख लक्षणे)</span>
+                  <span>{t("diseaseGuide.cardinalSigns")}</span>
                 </h4>
                 <ul className="space-y-1.5 bg-slate-950 p-3.5 rounded-2xl border border-slate-800/80 text-xs">
                   {selectedDisease.cardinalSigns.map((sign, idx) => (
@@ -222,7 +225,7 @@ export default function DiseaseKnowledgeBase() {
               <div className="space-y-1 text-xs">
                 <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                   <Bug className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Transmission &amp; Vector Ecology</span>
+                  <span>{t("diseaseGuide.transmission")}</span>
                 </h4>
                 <p className="text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 leading-relaxed">
                   {selectedDisease.transmission}
@@ -233,7 +236,7 @@ export default function DiseaseKnowledgeBase() {
               <div className="space-y-1 text-xs">
                 <h4 className="font-bold text-amber-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Biosecurity &amp; Quarantine Protocol</span>
+                  <span>{t("diseaseGuide.containment")}</span>
                 </h4>
                 <p className="text-amber-200 bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 leading-relaxed">
                   {selectedDisease.containmentProtocol}
@@ -244,7 +247,7 @@ export default function DiseaseKnowledgeBase() {
               <div className="space-y-1 text-xs">
                 <h4 className="font-bold text-sky-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                   <Syringe className="w-3.5 h-3.5" />
-                  <span>Maharashtra State Vaccination Schedule</span>
+                  <span>{t("diseaseGuide.vaccineSchedule")}</span>
                 </h4>
                 <p className="text-sky-200 bg-sky-950/40 p-3 rounded-xl border border-sky-500/30 leading-relaxed">
                   {selectedDisease.vaccineSchedule}

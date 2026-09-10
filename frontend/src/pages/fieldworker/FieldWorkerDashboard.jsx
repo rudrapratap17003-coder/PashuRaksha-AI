@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import { 
   Users, 
@@ -24,6 +25,7 @@ import { LoadingState, ErrorState, EmptyState } from '../../components/common/St
 import apiClient from '../../services/api'
 
 export default function FieldWorkerDashboard() {
+  const { t } = useLanguage()
   const [dashboard, setDashboard] = useState(null)
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
@@ -79,14 +81,14 @@ export default function FieldWorkerDashboard() {
     setSubmitting(true)
     try {
       await apiClient.post('/field-worker/report', reportForm)
-      setSuccessMsg('Health report successfully lodged on behalf of farmer.')
+      setSuccessMsg('{t("fieldWorker.successLodge")}')
       setTimeout(() => {
         setReportModalOpen(false)
         setSuccessMsg('')
         fetchFieldData()
       }, 1500)
     } catch {
-      setSuccessMsg('Health report registered in local sync queue.')
+      setSuccessMsg('{t("fieldWorker.successSync")}')
       setTimeout(() => {
         setReportModalOpen(false)
         setSuccessMsg('')
@@ -163,13 +165,13 @@ export default function FieldWorkerDashboard() {
         <div>
           <div className="flex items-center space-x-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Users className="w-4 h-4" />
-            <span>Field Livestock Extension & Pashu Sakhi Console</span>
+            <span>{t("fieldWorker.headerBadge")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Field Worker Rapid Outreach & Triage Hub
+            {t("fieldWorker.title")}
           </h1>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-            Empowering grassroots livestock service providers to conduct door-to-door farm inspections, collect bio-samples, and lodge AI symptom reports for rural farmers.
+            {t("fieldWorker.subtitle")}
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -179,7 +181,7 @@ export default function FieldWorkerDashboard() {
             icon={PlusCircle}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
           >
-            Report For Farmer
+            {t("fieldWorker.reportBtn")}
           </Button>
         </div>
       </div>
@@ -187,30 +189,30 @@ export default function FieldWorkerDashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Assigned Villages"
+          title={t("fieldWorker.assignedVillages")}
           value={dashboard?.assigned_villages?.length || 3}
-          subtitle="Pune district cluster zone"
+          subtitle={t("fieldWorker.puneCluster")}
           icon={MapPin}
           iconBg="bg-teal-500/10 text-teal-400 border border-teal-500/20"
         />
         <StatCard
-          title="Pending Farm Visits"
+          title={t("fieldWorker.pendingVisits")}
           value={dashboard?.stats?.pending_visits || 6}
-          subtitle="Priority visits scheduled"
+          subtitle={t("fieldWorker.priorityScheduled")}
           icon={AlertTriangle}
           iconBg="bg-amber-500/10 text-amber-400 border border-amber-500/20"
         />
         <StatCard
-          title="Field Visits Done"
+          title={t("fieldWorker.visitsDone")}
           value={dashboard?.stats?.completed_visits || 18}
-          subtitle="This month"
+          subtitle={t("fieldWorker.thisMonth")}
           icon={CheckCircle2}
           iconBg="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
         />
         <StatCard
-          title="Bio-Samples Taken"
+          title={t("fieldWorker.samplesTaken")}
           value={dashboard?.stats?.samples_collected || 8}
-          subtitle="Forwarded to Pune Lab"
+          subtitle={t("fieldWorker.forwardedLab")}
           icon={PackageCheck}
           iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
         />
@@ -223,23 +225,23 @@ export default function FieldWorkerDashboard() {
           <Card className="bg-slate-900/80 border-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-black text-white">Priority Farm Visits Assigned</h3>
-                <p className="text-xs text-slate-400">High-risk cases requiring ground verification</p>
+                <h3 className="text-base font-black text-white">{t("fieldWorker.priorityVisitsTitle")}</h3>
+                <p className="text-xs text-slate-400">{t("fieldWorker.priorityVisitsSub")}</p>
               </div>
               <span className="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full font-bold">
-                {cases.length} Cases Active
+                {t("fieldWorker.casesActive", { count: cases.length })}
               </span>
             </div>
 
             <div className="space-y-3">
               {loading ? (
-                <LoadingState message="Loading assigned farm visits..." />
+                <LoadingState message={t("fieldWorker.loadingVisits")} />
               ) : error ? (
                 <ErrorState message={error} onRetry={fetchFieldData} />
               ) : cases.length === 0 ? (
                 <EmptyState
-                  title="No Pending Farm Visits"
-                  description="All assigned livestock inspections and priority verification visits are up to date."
+                  title={t("fieldWorker.noPendingVisitsTitle")}
+                  description={t("fieldWorker.noPendingVisitsSub")}
                 />
               ) : (
                 cases.map((c) => (
@@ -259,7 +261,7 @@ export default function FieldWorkerDashboard() {
                       <div className="flex flex-wrap gap-1">
                         {c.symptoms?.map((s, idx) => (
                           <span key={idx} className="bg-slate-900 text-teal-300 text-[10px] px-2 py-0.5 rounded border border-teal-500/20 font-medium">
-                            {s}
+                            {t(`data.symptom.${s}`) || s}
                           </span>
                         ))}
                       </div>
@@ -274,7 +276,7 @@ export default function FieldWorkerDashboard() {
                           onClick={() => handleAcceptCase(c.id)}
                           className="bg-slate-900 border-teal-500/40 text-teal-300 hover:bg-teal-950 text-xs font-bold py-1 px-2.5"
                         >
-                          1. Accept Case
+                          {t("fieldWorker.actionAccept")}
                         </Button>
                       ) : !caseProgress[c.id]?.visited && c.status !== 'visited' ? (
                         <Button
@@ -284,7 +286,7 @@ export default function FieldWorkerDashboard() {
                           onClick={() => handleRecordVisit(c.id)}
                           className="bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-1 px-2.5"
                         >
-                          2. Record Visit &amp; Observation
+                          {t("fieldWorker.actionVisit")}
                         </Button>
                       ) : !caseProgress[c.id]?.sampled ? (
                         <Button
@@ -294,7 +296,7 @@ export default function FieldWorkerDashboard() {
                           onClick={() => handleCollectSample(c.id)}
                           className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-1 px-2.5"
                         >
-                          3. Collect Oral Swab
+                          {t("fieldWorker.actionSample")}
                         </Button>
                       ) : !caseProgress[c.id]?.forwarded ? (
                         <Button
@@ -304,12 +306,12 @@ export default function FieldWorkerDashboard() {
                           onClick={() => handleForwardVet(c.id)}
                           className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1 px-2.5"
                         >
-                          4. Forward to Vet
+                          {t("fieldWorker.actionForward")}
                         </Button>
                       ) : (
                         <span className="text-xs font-bold text-emerald-400 flex items-center space-x-1 bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-500/30">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Forwarded to Dr. Priya Sharma</span>
+                          <span>{t("fieldWorker.actionDone")}</span>
                         </span>
                       )}
                     </div>
@@ -323,16 +325,16 @@ export default function FieldWorkerDashboard() {
         {/* Right Col: Village Breakdown & Vaccination Drives */}
         <div className="space-y-6">
           <Card className="bg-slate-900/80 border-slate-800">
-            <h3 className="text-sm font-black text-white mb-3">Assigned Gram Panchayats</h3>
+            <h3 className="text-sm font-black text-white mb-3">{t("fieldWorker.assignedPanchayats")}</h3>
             <div className="space-y-2.5">
               {dashboard?.assigned_villages?.map((v, idx) => (
                 <div key={idx} className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-white block">{v.name}</span>
-                    <span className="text-[11px] text-slate-400">{v.farms} registered farms • {v.animals} animals</span>
+                    <span className="text-[11px] text-slate-400">{v.farms} {t("fieldWorker.registeredFarms")} • {v.animals} {t("fieldWorker.animals")}</span>
                   </div>
                   <span className="bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded text-[10px] border border-amber-500/30">
-                    {v.pending_cases} pending
+                    {v.pending_cases} {t("fieldWorker.pending")}
                   </span>
                 </div>
               ))}
@@ -342,7 +344,7 @@ export default function FieldWorkerDashboard() {
           <Card className="bg-slate-900/80 border-slate-800">
             <h3 className="text-sm font-black text-white mb-3 flex items-center space-x-2">
               <Syringe className="w-4 h-4 text-emerald-400" />
-              <span>Village Vaccination Drives</span>
+              <span>{t("fieldWorker.vaccinationDrives")}</span>
             </h3>
             <div className="space-y-3">
               {dashboard?.vaccination_campaigns?.map((camp, idx) => (
@@ -355,7 +357,7 @@ export default function FieldWorkerDashboard() {
                     <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${camp.coverage}%` }} />
                   </div>
                   <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>{camp.vaccinated} / {camp.target_animals} Doses Administered</span>
+                    <span>{camp.vaccinated} / {camp.target_animals} {t("fieldWorker.dosesAdministered")}</span>
                     <span className="text-teal-400 font-medium">{camp.status}</span>
                   </div>
                 </div>
@@ -375,8 +377,8 @@ export default function FieldWorkerDashboard() {
                   <PlusCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white">Lodge Report on Behalf of Farmer</h3>
-                  <p className="text-xs text-slate-400">Pashu Sakhi Rural Outreach Protocol</p>
+                  <h3 className="text-lg font-black text-white">{t("fieldWorker.modalTitle")}</h3>
+                  <p className="text-xs text-slate-400">{t("fieldWorker.modalSubtitle")}</p>
                 </div>
               </div>
               <button onClick={() => setReportModalOpen(false)} className="text-slate-400 hover:text-white">
@@ -388,30 +390,30 @@ export default function FieldWorkerDashboard() {
               <div className="p-8 text-center space-y-3">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
                 <h4 className="text-base font-bold text-white">{successMsg}</h4>
-                <p className="text-xs text-slate-400">AI Risk Assessment has updated the district map.</p>
+                <p className="text-xs text-slate-400">{t("fieldWorker.successLodgeSub")}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmitOnBehalf} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Farmer Full Name</label>
+                    <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.farmerName")}</label>
                     <input
                       type="text"
                       required
                       value={reportForm.reporter_name}
                       onChange={(e) => setReportForm({ ...reportForm, reporter_name: e.target.value })}
-                      placeholder="e.g. Ramesh Patil"
+                      placeholder={t("fieldWorker.farmerPlaceholder")}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Animal Tag ID</label>
+                    <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.tagId")}</label>
                     <input
                       type="text"
                       required
                       value={reportForm.animal_id}
                       onChange={(e) => setReportForm({ ...reportForm, animal_id: e.target.value })}
-                      placeholder="e.g. COW-112"
+                      placeholder={t("fieldWorker.tagIdPlaceholder")}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500 focus:outline-none"
                     />
                   </div>
@@ -419,7 +421,7 @@ export default function FieldWorkerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Village / Gram Panchayat</label>
+                    <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.villageLabel")}</label>
                     <select
                       value={reportForm.village}
                       onChange={(e) => setReportForm({ ...reportForm, village: e.target.value })}
@@ -432,7 +434,7 @@ export default function FieldWorkerDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Number of Herd Animals Affected</label>
+                    <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.affectedCount")}</label>
                     <input
                       type="number"
                       min="1"
@@ -445,20 +447,20 @@ export default function FieldWorkerDashboard() {
 
                 {/* 11 Symptoms Checklist */}
                 <div>
-                  <label className="block text-slate-300 font-bold mb-2">Observed Clinical Signs (Tick all that apply)</label>
+                  <label className="block text-slate-300 font-bold mb-2">{t("fieldWorker.clinicalSigns")}</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
                     {[
-                      { id: 'fever', label: 'Fever / High Temp' },
-                      { id: 'cough', label: 'Cough / Wheezing' },
-                      { id: 'nasal_discharge', label: 'Nasal Discharge' },
-                      { id: 'reduced_appetite', label: 'Loss of Appetite' },
-                      { id: 'diarrhea', label: 'Diarrhea' },
-                      { id: 'lethargy', label: 'Lethargy / Weakness' },
-                      { id: 'reduced_milk', label: 'Milk Drop' },
-                      { id: 'difficulty_breathing', label: 'Dyspnea / Panting' },
-                      { id: 'salivation', label: 'Excess Salivation' },
-                      { id: 'lesions', label: 'Blisters / Lesions' },
-                      { id: 'swelling', label: 'Swelling / Lameness' },
+                      { id: 'fever', label: t('data.symptom.fever') },
+                      { id: 'cough', label: t('data.symptom.cough') },
+                      { id: 'nasal_discharge', label: t('data.symptom.nasal_discharge') },
+                      { id: 'reduced_appetite', label: t('data.symptom.reduced_appetite') },
+                      { id: 'diarrhea', label: t('data.symptom.diarrhea') },
+                      { id: 'lethargy', label: t('data.symptom.lethargy') },
+                      { id: 'reduced_milk', label: t('data.symptom.reduced_milk') },
+                      { id: 'difficulty_breathing', label: t('data.symptom.difficulty_breathing') },
+                      { id: 'salivation', label: t('data.symptom.salivation') },
+                      { id: 'lesions', label: t('data.symptom.lesions') },
+                      { id: 'swelling', label: t('data.symptom.swelling') },
                     ].map((sym) => (
                       <label key={sym.id} className="flex items-center space-x-2 text-slate-300 cursor-pointer hover:text-white">
                         <input
@@ -475,10 +477,10 @@ export default function FieldWorkerDashboard() {
 
                 <div className="flex items-center justify-end space-x-3 pt-3">
                   <Button type="button" variant="outline" onClick={() => setReportModalOpen(false)}>
-                    Cancel
+                    {t("fieldWorker.cancelBtn")}
                   </Button>
                   <Button type="submit" variant="primary" loading={submitting} className="bg-teal-600 hover:bg-teal-500">
-                    Submit & Evaluate Risk
+                    {t("fieldWorker.submitBtn")}
                   </Button>
                 </div>
               </form>

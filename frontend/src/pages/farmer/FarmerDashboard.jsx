@@ -34,7 +34,7 @@ import { useLanguage } from '../../context/LanguageContext'
 export default function FarmerDashboard() {
   const { user } = useAuth()
   const { scenarioData, currentScenario } = useScenario()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t: globalT } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
   const [recentReports, setRecentReports] = useState([])
@@ -335,17 +335,17 @@ export default function FarmerDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id || animal.id}</span>
-                          <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {animal.species}</span>
+                          <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {globalT('data.species.' + animal.species) || animal.species}</span>
                         </div>
                         <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
                       </div>
                       <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                         <span className="flex items-center space-x-1">
                           <Syringe className="w-3.5 h-3.5 text-purple-600" />
-                          <span>{animal.vaccination_status || 'Up to date'}</span>
+                          <span>{globalT('data.status.' + (animal.vaccination_status || 'Up to date')) || (animal.vaccination_status || 'Up to date')}</span>
                         </span>
                         <span className="text-emerald-700 font-bold flex items-center group-hover:translate-x-0.5 transition-transform">
-                          Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                          {globalT('data.actions.details')} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                         </span>
                       </div>
                     </Link>
@@ -421,8 +421,8 @@ export default function FarmerDashboard() {
                 {dueVaccineAnimals.map((anim) => (
                   <div key={anim.id} className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between text-xs">
                     <div>
-                      <strong className="text-purple-950 block">{anim.animal_id || anim.id} ({anim.species})</strong>
-                      <span className="text-[11px] text-purple-700">{anim.vaccination_status}</span>
+                      <strong className="text-purple-950 block">{anim.animal_id || anim.id} ({globalT('data.species.' + anim.species) || anim.species})</strong>
+                      <span className="text-[11px] text-purple-700">{globalT('data.status.' + anim.vaccination_status) || anim.vaccination_status}</span>
                     </div>
                     <button
                       type="button"
@@ -434,7 +434,7 @@ export default function FarmerDashboard() {
                       }}
                       className="px-2.5 py-1 rounded-xl bg-purple-600 text-white font-bold text-[11px] hover:bg-purple-700 active:scale-95 transition shadow-xs cursor-pointer"
                     >
-                      Book Camp
+                      {globalT('data.actions.bookCamp')}
                     </button>
                   </div>
                 ))}

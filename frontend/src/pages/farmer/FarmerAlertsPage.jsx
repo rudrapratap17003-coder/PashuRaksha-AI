@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import { Bell, AlertTriangle, ShieldAlert, CheckCircle, RefreshCw } from 'lucide-react'
 import Card from '../../components/common/Card'
@@ -5,6 +6,8 @@ import Badge from '../../components/common/Badge'
 import apiClient from '../../services/api'
 
 export default function FarmerAlertsPage() {
+  const { t } = useLanguage()
+
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
 

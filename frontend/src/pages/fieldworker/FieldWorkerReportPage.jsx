@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState } from 'react'
 import { PlusCircle, CheckCircle2, X } from 'lucide-react'
 import Button from '../../components/common/Button'
@@ -5,6 +6,7 @@ import apiClient from '../../services/api'
 import { useNavigate } from 'react-router-dom'
 
 export default function FieldWorkerReportPage() {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [reportForm, setReportForm] = useState({
     animal_id: '',
@@ -34,7 +36,7 @@ export default function FieldWorkerReportPage() {
     setSubmitting(true)
     try {
       await apiClient.post('/field-worker/report', reportForm)
-      setSuccessMsg('Health report successfully lodged on behalf of farmer.')
+      setSuccessMsg('{t("fieldWorker.successLodge")}')
       setTimeout(() => {
         navigate('/field-worker/dashboard')
       }, 1500)
@@ -55,13 +57,13 @@ export default function FieldWorkerReportPage() {
         <div>
           <div className="flex items-center space-x-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
             <PlusCircle className="w-4 h-4" />
-            <span>Outreach Protocol</span>
+            <span>{t("fieldWorker.outreachBadge")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Lodge Report on Behalf of Farmer
+            {t("fieldWorker.modalTitle")}
           </h1>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-            Pashu Sakhi Rural Outreach Protocol - Record symptom observations for farmers without app access.
+            {t("fieldWorker.modalSubtitle2")}
           </p>
         </div>
       </div>
@@ -71,30 +73,30 @@ export default function FieldWorkerReportPage() {
           <div className="p-8 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
             <h4 className="text-base font-bold text-white">{successMsg}</h4>
-            <p className="text-xs text-slate-400">AI Risk Assessment has updated the district map.</p>
+            <p className="text-xs text-slate-400">{t("fieldWorker.successLodgeSub")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmitOnBehalf} className="space-y-6 text-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-300 font-bold mb-2">Farmer Full Name</label>
+                <label className="block text-slate-300 font-bold mb-2">{t("fieldWorker.farmerName")}</label>
                 <input
                   type="text"
                   required
                   value={reportForm.reporter_name}
                   onChange={(e) => setReportForm({ ...reportForm, reporter_name: e.target.value })}
-                  placeholder="e.g. Ramesh Patil"
+                  placeholder={t("fieldWorker.farmerPlaceholder")}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-bold mb-2">Animal Tag ID</label>
+                <label className="block text-slate-300 font-bold mb-2">{t("fieldWorker.tagId")}</label>
                 <input
                   type="text"
                   required
                   value={reportForm.animal_id}
                   onChange={(e) => setReportForm({ ...reportForm, animal_id: e.target.value })}
-                  placeholder="e.g. COW-112"
+                  placeholder={t("fieldWorker.tagIdPlaceholder")}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 focus:outline-none"
                 />
               </div>
@@ -102,7 +104,7 @@ export default function FieldWorkerReportPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-300 font-bold mb-2">Village / Gram Panchayat</label>
+                <label className="block text-slate-300 font-bold mb-2">{t("fieldWorker.villageLabel")}</label>
                 <select
                   value={reportForm.village}
                   onChange={(e) => setReportForm({ ...reportForm, village: e.target.value })}
@@ -115,7 +117,7 @@ export default function FieldWorkerReportPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-slate-300 font-bold mb-2">Number of Herd Animals Affected</label>
+                <label className="block text-slate-300 font-bold mb-2">{t("fieldWorker.affectedCount")}</label>
                 <input
                   type="number"
                   min="1"
@@ -128,20 +130,20 @@ export default function FieldWorkerReportPage() {
 
             {/* Symptoms Checklist */}
             <div>
-              <label className="block text-slate-300 font-bold mb-3">Observed Clinical Signs (Tick all that apply)</label>
+              <label className="block text-slate-300 font-bold mb-3">{t("fieldWorker.clinicalSigns")}</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 {[
-                  { id: 'fever', label: 'Fever / High Temp' },
-                  { id: 'cough', label: 'Cough / Wheezing' },
-                  { id: 'nasal_discharge', label: 'Nasal Discharge' },
-                  { id: 'reduced_appetite', label: 'Loss of Appetite' },
-                  { id: 'diarrhea', label: 'Diarrhea' },
-                  { id: 'lethargy', label: 'Lethargy / Weakness' },
-                  { id: 'reduced_milk', label: 'Milk Drop' },
-                  { id: 'difficulty_breathing', label: 'Dyspnea / Panting' },
-                  { id: 'salivation', label: 'Excess Salivation' },
-                  { id: 'lesions', label: 'Blisters / Lesions' },
-                  { id: 'swelling', label: 'Swelling / Lameness' },
+                  { id: 'fever', label: t('data.symptom.fever') },
+                  { id: 'cough', label: t('data.symptom.cough') },
+                  { id: 'nasal_discharge', label: t('data.symptom.nasal_discharge') },
+                  { id: 'reduced_appetite', label: t('data.symptom.reduced_appetite') },
+                  { id: 'diarrhea', label: t('data.symptom.diarrhea') },
+                  { id: 'lethargy', label: t('data.symptom.lethargy') },
+                  { id: 'reduced_milk', label: t('data.symptom.reduced_milk') },
+                  { id: 'difficulty_breathing', label: t('data.symptom.difficulty_breathing') },
+                  { id: 'salivation', label: t('data.symptom.salivation') },
+                  { id: 'lesions', label: t('data.symptom.lesions') },
+                  { id: 'swelling', label: t('data.symptom.swelling') },
                 ].map((sym) => (
                   <label key={sym.id} className="flex items-center space-x-2 text-slate-300 cursor-pointer hover:text-white">
                     <input
@@ -158,10 +160,10 @@ export default function FieldWorkerReportPage() {
 
             <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
               <Button type="button" variant="outline" onClick={() => navigate('/field-worker/dashboard')}>
-                Cancel
+                {t("fieldWorker.cancelBtn")}
               </Button>
               <Button type="submit" variant="primary" loading={submitting} className="bg-teal-600 hover:bg-teal-500 text-white font-bold">
-                Submit & Evaluate Risk
+                {t("fieldWorker.submitBtn")}
               </Button>
             </div>
           </form>

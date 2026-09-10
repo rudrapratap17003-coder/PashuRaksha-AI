@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { useParams, Link } from 'react-router-dom'
 import { 
   ArrowLeft, 
@@ -25,6 +26,7 @@ import apiClient from '../../services/api'
 import PrescriptionGeneratorModal from '../../components/vet/PrescriptionGeneratorModal'
 
 export default function CaseDetailsPage() {
+  const { t } = useLanguage()
   const { caseId } = useParams()
   const [caseData, setCaseData] = useState(null)
   const [timeline, setTimeline] = useState([])
@@ -50,7 +52,7 @@ export default function CaseDetailsPage() {
         district: caseData?.district || 'Pune'
       })
       setLabOrdered(true)
-      setNotice('🔬 Urgent RT-PCR diagnostic referral created for Pune District Diagnostic Lab!')
+      setNotice(`🔬 ${t("vetModule.caseDetail.noticeLab")}`)
       
       const evtRes = await apiClient.post(`/cases/${effectiveId}/timeline`, {
         event_type: 'sample_collected',
@@ -60,7 +62,7 @@ export default function CaseDetailsPage() {
       })
       setTimeline(prev => [...prev, evtRes.data])
     } catch (err) {
-      setNotice('🔬 Failed to order lab test or update timeline.')
+      setNotice(`🔬 ${t("vetModule.caseDetail.noticeFail")}`)
     } finally {
       setOrderingLab(false)
       setTimeout(() => setNotice(''), 6000)
@@ -184,7 +186,7 @@ export default function CaseDetailsPage() {
       {/* Back Link */}
       <Link to="/vet/dashboard" className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-400 hover:text-emerald-400 transition">
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Clinical Queue</span>
+        <span>{t("vetModule.caseDetail.backQueue")}</span>
       </Link>
 
       {/* Case Header */}
@@ -192,16 +194,16 @@ export default function CaseDetailsPage() {
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Stethoscope className="w-4 h-4" />
-            <span>Digital Clinical Case Record • Maharashtra Animal Husbandry</span>
+            <span>{t("vetModule.caseDetail.caseRecord")}</span>
           </div>
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Case #{caseData?.id || 'rep-101'}
+              {t("vetModule.caseDetail.caseHash")} #{caseData?.id || 'rep-101'}
             </h1>
             <RiskBadge level={caseData?.risk_level} score={caseData?.risk_score} />
           </div>
           <p className="text-slate-300 text-sm mt-1">
-            Animal Tag: <strong className="text-white">{caseData?.animal_id}</strong> ({caseData?.species}) • Owner: {caseData?.reporter_name}
+            {t("vetModule.caseDetail.animalTag")}: <strong className="text-white">{caseData?.animal_id}</strong> ({t(`data.species.${caseData?.species}`) || caseData?.species}) • {t("vetModule.queue.owner")}: {caseData?.reporter_name}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -212,14 +214,14 @@ export default function CaseDetailsPage() {
             icon={Microscope}
             className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-950 flex items-center space-x-1.5"
           >
-            {labOrdered ? '✓ Lab Test Ordered' : '🔬 Order RT-PCR Lab Test'}
+            {labOrdered ? '✓ {t("vetModule.caseDetail.labOrdered")}' : '🔬 {t("vetModule.caseDetail.orderLab")}'}
           </Button>
           <button
             onClick={() => setRxModalOpen(true)}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center space-x-2 transition"
           >
             <Stethoscope className="w-3.5 h-3.5" />
-            <span>Clinical Decision Support</span>
+            <span>{t("vetModule.caseDetail.decisionSupport")}</span>
           </button>
           <span className="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1.5">
             <MapPin className="w-3.5 h-3.5 text-emerald-400" />
@@ -241,37 +243,37 @@ export default function CaseDetailsPage() {
         <div className="lg:col-span-7 space-y-6">
           {/* Clinical Vitals */}
           <Card className="bg-slate-900/80 border-slate-800">
-            <h3 className="text-sm font-black text-white mb-3">Clinical Signs & AI Risk Attribution</h3>
+            <h3 className="text-sm font-black text-white mb-3">{t("vetModule.caseDetail.vitalsTitle")}</h3>
             
             <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 mb-4 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Suspected Disease Concern:</span>
-                <span className="font-bold text-amber-300">{caseData?.possible_disease_concern}</span>
+                <span className="text-slate-400">{t("vetModule.caseDetail.suspectedDisease")}:</span>
+                <span className="font-bold text-amber-300">{t(`data.disease.${caseData?.possible_disease_concern}`) || caseData?.possible_disease_concern}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Herd Animals Affected:</span>
+                <span className="text-slate-400">{t("vetModule.caseDetail.herdAffected")}:</span>
                 <span className="font-bold text-white">{caseData?.number_of_animals_affected} animals</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Symptom Duration:</span>
+                <span className="text-slate-400">{t("vetModule.caseDetail.symptomDuration")}:</span>
                 <span className="font-bold text-white">{caseData?.duration_days} days</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Observed Symptoms</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t("vetModule.caseDetail.observedSymptoms")}</span>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  caseData?.fever && 'Fever',
-                  caseData?.cough && 'Cough',
-                  caseData?.difficulty_breathing && 'Dyspnea / Panting',
-                  caseData?.reduced_appetite && 'Loss of Appetite',
-                  caseData?.reduced_milk && 'Milk Yield Drop',
-                  caseData?.salivation && 'Salivation',
-                  caseData?.lesions && 'Blisters/Lesions',
-                  caseData?.swelling && 'Swelling',
-                  caseData?.diarrhea && 'Diarrhea',
-                  caseData?.lethargy && 'Lethargy'
+                  caseData?.fever && t('data.symptom.Fever'),
+                  caseData?.cough && t('data.symptom.Cough'),
+                  caseData?.difficulty_breathing && t('data.symptom.Dyspnea'),
+                  caseData?.reduced_appetite && t('data.symptom.Loss of Appetite'),
+                  caseData?.reduced_milk && t('data.symptom.Milk Yield Drop'),
+                  caseData?.salivation && t('data.symptom.Salivation'),
+                  caseData?.lesions && t('data.symptom.Blisters'),
+                  caseData?.swelling && t('data.symptom.Swelling'),
+                  caseData?.diarrhea && t('data.symptom.Diarrhea'),
+                  caseData?.lethargy && t('data.symptom.Lethargy')
                 ].filter(Boolean).map((s, idx) => (
                   <span key={idx} className="bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-xl text-xs font-bold">
                     {s}
@@ -281,20 +283,20 @@ export default function CaseDetailsPage() {
             </div>
 
             <div className="mt-4 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-200 leading-relaxed">
-              <strong className="text-amber-300 block mb-1">Standard Veterinary Advisory:</strong>
+              <strong className="text-amber-300 block mb-1">{t("vetModule.caseDetail.standardAdvisory")}:</strong>
               {caseData?.recommendation}
             </div>
           </Card>
 
           {/* Add Treatment Note Form */}
           <Card className="bg-slate-900/80 border-slate-800">
-            <h3 className="text-sm font-black text-white mb-2">Record Clinical Action or Prescription</h3>
+            <h3 className="text-sm font-black text-white mb-2">{t("vetModule.caseDetail.recordAction")}</h3>
             <form onSubmit={handleAddNote} className="space-y-3">
               <textarea
                 rows="3"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Prescribe antipyretic, antibiotics, or record isolation orders..."
+                placeholder={t("vetModule.caseDetail.placeholder")}
                 className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-2xl p-3 text-xs text-white placeholder-slate-600 focus:outline-none"
               />
               <div className="flex justify-end">
@@ -310,15 +312,15 @@ export default function CaseDetailsPage() {
         <div className="lg:col-span-5">
           <Card className="bg-slate-900/80 border-slate-800 h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-black text-white">Case Lifecycle Timeline</h3>
+              <h3 className="text-base font-black text-white">{t("vetModule.caseDetail.timelineTitle")}</h3>
               <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
-                {timeline.length} Events
+                {timeline.length} {t("vetModule.caseDetail.events")}
               </span>
             </div>
 
             {timeline.length === 0 ? (
               <div className="text-slate-400 text-sm text-center py-8 border border-dashed border-slate-700 rounded-xl bg-slate-900/50">
-                No timeline events yet.
+                {t("vetModule.caseDetail.noEvents")}
               </div>
             ) : (
               <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
@@ -337,12 +339,12 @@ export default function CaseDetailsPage() {
 
                     <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-3.5 space-y-1 hover:border-slate-700 transition">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white text-xs">{evt.title}</span>
+                        <span className="font-bold text-white text-xs">{t(`data.events.${evt.title}`) || evt.title}</span>
                         <span className="text-[9px] text-slate-500 uppercase font-bold">{evt.actor_role}</span>
                       </div>
                       <p className="text-[11px] text-slate-300 leading-relaxed">{evt.description}</p>
                       <div className="flex items-center justify-between pt-1 text-[9px] text-slate-500">
-                        <span>By {evt.actor_name || 'System'}</span>
+                        <span>By {evt.actor_name || t("vetModule.caseDetail.bySystem")}</span>
                         <span>{new Date(evt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                     </div>

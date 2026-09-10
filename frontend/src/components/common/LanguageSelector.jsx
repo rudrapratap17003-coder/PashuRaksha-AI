@@ -3,7 +3,7 @@ import { Globe, ChevronDown, Check } from 'lucide-react'
 import { useLanguage, LANGUAGES } from '../../context/LanguageContext'
 
 export default function LanguageSelector({ className = '', compact = false }) {
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -45,7 +45,7 @@ export default function LanguageSelector({ className = '', compact = false }) {
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label="Select language / भाषा निवडा / भाषा चुनें"
+        aria-label={t('nav.selectLanguage')}
         className="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all duration-150"
       >
         <Globe className="w-3.5 h-3.5 text-sky-600 flex-shrink-0" />

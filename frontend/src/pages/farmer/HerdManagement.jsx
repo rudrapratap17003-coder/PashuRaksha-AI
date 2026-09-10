@@ -24,6 +24,7 @@ import Badge from '../../components/common/Badge'
 import RiskBadge from '../../components/common/RiskBadge'
 import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 const SPECIES_OPTIONS = ['All', 'Cattle', 'Buffalo', 'Goat', 'Sheep', 'Poultry']
 const STATUS_OPTIONS = ['All', 'Healthy', 'Under Observation', 'Sick', 'Quarantined']
@@ -63,6 +64,7 @@ function getVaccStatus(vaccinations) {
 
 export default function HerdManagement() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [vaccinations, setVaccinations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -172,17 +174,17 @@ export default function HerdManagement() {
             <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-xs flex items-center justify-center">
               <Layers className="w-6 h-6 text-emerald-600" />
             </div>
-            <span>Herd Management — Digital Passport Registry</span>
+            <span>{t("herd.title")}</span>
           </h1>
           <p className="text-xs sm:text-sm font-medium mt-1 ml-0 sm:ml-14 text-slate-600" style={{ color: '#475569' }}>
-            Farm-level livestock inventory with species, vaccination status, lactation yield & age breakdown
+            {t("herd.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={fetchData} 
-            title="Refresh Herd Data"
-            aria-label="Refresh Herd Data"
+            title={t("herd.refreshHerd")}
+            aria-label={t("herd.refreshHerd")}
             className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 shadow-xs transition cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -191,7 +193,7 @@ export default function HerdManagement() {
             to="/farmer/animals/add"
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-900/30 transition shadow-xs"
           >
-            <PawPrint className="w-4 h-4" /> Register Animal
+            <PawPrint className="w-4 h-4" /> {t("herd.registerAnimal")}
           </Link>
         </div>
       </div>
@@ -199,10 +201,10 @@ export default function HerdManagement() {
       {/* Overview Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total Livestock', value: stats.total, icon: PawPrint, color: 'emerald' },
-          { label: 'Healthy', value: stats.healthy, icon: ShieldCheck, color: 'green' },
-          { label: 'Sick / Quarantined', value: stats.sick, icon: AlertTriangle, color: 'red' },
-          { label: 'Fully Vaccinated', value: stats.fullyVacc, icon: Syringe, color: 'sky' },
+          { label: t('herd.totalLivestock'), value: stats.total, icon: PawPrint, color: 'emerald' },
+          { label: t('herd.healthy'), value: stats.healthy, icon: ShieldCheck, color: 'green' },
+          { label: t('herd.sickQuarantined'), value: stats.sick, icon: AlertTriangle, color: 'red' },
+          { label: t('herd.fullyVaccinated'), value: stats.fullyVacc, icon: Syringe, color: 'sky' },
         ].map((s, i) => (
           <div key={i} className={`p-4 rounded-2xl bg-slate-900/80 border border-${s.color}-500/20`}>
             <div className="flex items-center gap-2 mb-2">
@@ -217,7 +219,7 @@ export default function HerdManagement() {
       {/* Species Breakdown Bar */}
       <Card className="p-4">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <BarChart3 className="w-3.5 h-3.5" /> Species Distribution
+          <BarChart3 className="w-3.5 h-3.5" /> {t("herd.speciesDistribution")}
         </h3>
         <div className="flex gap-2 flex-wrap">
           {Object.entries(stats.speciesBreakdown).map(([species, count]) => (
@@ -242,7 +244,7 @@ export default function HerdManagement() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Search by tag number, name, breed, or village..."
+            placeholder={t("herd.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
@@ -253,41 +255,41 @@ export default function HerdManagement() {
           onChange={(e) => setSpeciesFilter(e.target.value)}
           className="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/80 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
         >
-          {SPECIES_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? 'All Species' : s}</option>)}
+          {SPECIES_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? t('herd.allSpecies') : t('data.species.' + s) || s}</option>)}
         </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/80 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
         >
-          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? 'All Status' : s}</option>)}
+          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? t('herd.allStatus') : t('data.status.' + s) || s}</option>)}
         </select>
         <select
           value={vaccFilter}
           onChange={(e) => setVaccFilter(e.target.value)}
           className="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/80 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
         >
-          {VACC_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? 'Vaccination Status' : s}</option>)}
+          {VACC_OPTIONS.map(s => <option key={s} value={s}>{s === 'All' ? t('herd.vaccStatus') : t('data.status.' + s) || s}</option>)}
         </select>
         <div className="flex rounded-xl overflow-hidden border border-slate-700">
           <button
             onClick={() => setView('grid')}
             className={`px-3 py-2 text-xs font-bold ${view === 'grid' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400'}`}
           >
-            Grid
+            {t("herd.grid")}
           </button>
           <button
             onClick={() => setView('table')}
             className={`px-3 py-2 text-xs font-bold ${view === 'table' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400'}`}
           >
-            Table
+            {t("herd.table")}
           </button>
         </div>
       </div>
 
       {/* Results count */}
       <p className="text-xs text-slate-500">
-        Showing <span className="text-emerald-400 font-bold">{filteredAnimals.length}</span> of {enrichedAnimals.length} registered livestock
+        {t('herd.showing').replace('{count}', filteredAnimals.length).replace('{total}', enrichedAnimals.length)}
       </p>
 
       {/* Loading */}
@@ -309,7 +311,7 @@ export default function HerdManagement() {
               {/* Species & Tag */}
               <div className="flex items-center justify-between mb-3">
                 <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${SPECIES_COLORS[animal.species] || 'bg-slate-800 text-slate-300 border-slate-700'}`}>
-                  {animal.species}
+                  {t('data.species.' + animal.species) || animal.species}
                 </span>
                 <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
                   <Tag className="w-3 h-3" />
@@ -339,21 +341,21 @@ export default function HerdManagement() {
                 </div>
                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
                   <Syringe className="w-3 h-3" />
-                  <span>{animal.vacc_count} doses</span>
+                  <span>{t('herd.doses').replace('{count}', animal.vacc_count)}</span>
                 </div>
               </div>
 
               {/* Status Badges */}
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800">
                 <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${HEALTH_COLORS[animal.health_status] || 'bg-slate-800 text-slate-300'}`}>
-                  {animal.health_status}
+                  {t('data.status.' + animal.health_status) || animal.health_status}
                 </span>
                 <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
                   animal.vacc_status === 'Fully Vaccinated' ? 'bg-green-500/20 text-green-300'
                     : animal.vacc_status === 'Partially Vaccinated' ? 'bg-amber-500/20 text-amber-300'
                     : 'bg-red-500/20 text-red-300'
                 }`}>
-                  {animal.vacc_status}
+                  {t('data.status.' + animal.vacc_status) || animal.vacc_status}
                 </span>
               </div>
             </Link>
@@ -368,15 +370,15 @@ export default function HerdManagement() {
             <thead>
               <tr className="bg-slate-900/90 border-b border-slate-800">
                 {[
-                  { key: 'tag_number', label: 'Tag #' },
-                  { key: 'name', label: 'Name' },
-                  { key: 'species', label: 'Species' },
-                  { key: 'breed', label: 'Breed' },
-                  { key: 'age_display', label: 'Age' },
-                  { key: 'village', label: 'Village' },
-                  { key: 'health_status', label: 'Health' },
-                  { key: 'vacc_status', label: 'Vaccination' },
-                  { key: 'lactation_yield', label: 'Yield' },
+                  { key: 'tag_number', label: t('herd.tagNumber') },
+                  { key: 'name', label: t('herd.name') },
+                  { key: 'species', label: t('herd.species') },
+                  { key: 'breed', label: t('herd.breed') },
+                  { key: 'age_display', label: t('herd.age') },
+                  { key: 'village', label: t('herd.village') },
+                  { key: 'health_status', label: t('herd.health') },
+                  { key: 'vacc_status', label: t('herd.vaccination') },
+                  { key: 'lactation_yield', label: t('herd.yield') },
                 ].map(col => (
                   <th
                     key={col.key}
@@ -399,7 +401,7 @@ export default function HerdManagement() {
                   <td className="px-4 py-3 text-xs font-bold text-white">{animal.name || '-'}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${SPECIES_COLORS[animal.species] || 'bg-slate-800 text-slate-300 border-slate-700'}`}>
-                      {animal.species}
+                      {t('data.species.' + animal.species) || animal.species}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400">{animal.breed || '-'}</td>
@@ -410,7 +412,7 @@ export default function HerdManagement() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${HEALTH_COLORS[animal.health_status] || 'bg-slate-800 text-slate-300'}`}>
-                      {animal.health_status}
+                      {t('data.status.' + animal.health_status) || animal.health_status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -419,7 +421,7 @@ export default function HerdManagement() {
                         : animal.vacc_status === 'Partially Vaccinated' ? 'bg-amber-500/20 text-amber-300'
                         : 'bg-red-500/20 text-red-300'
                     }`}>
-                      {animal.vacc_status}
+                      {t('data.status.' + animal.vacc_status) || animal.vacc_status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400">{animal.lactation_yield}</td>
@@ -442,13 +444,13 @@ export default function HerdManagement() {
       {!loading && filteredAnimals.length === 0 && (
         <div className="text-center py-16">
           <PawPrint className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-slate-400">No livestock found</h3>
-          <p className="text-sm text-slate-500 mt-1">Adjust your filters or register new animals</p>
+          <h3 className="text-lg font-bold text-slate-400">{t("herd.noLivestock")}</h3>
+          <p className="text-sm text-slate-500 mt-1">{t("herd.adjustFilters")}</p>
           <Link
             to="/farmer/animals/add"
             className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition"
           >
-            <PawPrint className="w-4 h-4" /> Register First Animal
+            <PawPrint className="w-4 h-4" /> {t("herd.registerFirst")}
           </Link>
         </div>
       )}

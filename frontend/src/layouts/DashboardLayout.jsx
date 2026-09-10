@@ -35,9 +35,11 @@ import MaharashtraHeader from '../components/common/MaharashtraHeader'
 import AIAssistant from '../components/common/AIAssistant'
 import BackendStatusBanner from '../components/common/BackendStatusBanner'
 import apiClient from '../services/api'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function DashboardLayout({ user, onLogout }) {
   const location = useLocation()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [alertCenterOpen, setAlertCenterOpen] = useState(false)
@@ -66,42 +68,42 @@ export default function DashboardLayout({ user, onLogout }) {
     switch (role) {
       case USER_ROLES.FARMER:
         return [
-          { name: 'Dashboard', path: '/farmer/dashboard', icon: Home },
-          { name: 'Report Symptoms', path: '/farmer/report', icon: FilePlus2 },
-          { name: 'My Animals', path: '/farmer/herd', icon: PawPrint },
-          { name: 'Feed & Nutrition', path: '/farmer/nutrition', icon: Wheat },
-          { name: 'Breed Info', path: '/farmer/breeds', icon: Dna },
-          { name: 'Disease Guide', path: '/farmer/knowledge', icon: BookOpen },
-          { name: 'Vaccinations', path: '/farmer/vaccinations', icon: Syringe },
+          { name: t('nav.farmer.dashboard'), path: '/farmer/dashboard', icon: Home },
+          { name: t('nav.farmer.report'), path: '/farmer/report', icon: FilePlus2 },
+          { name: t('nav.farmer.herd'), path: '/farmer/herd', icon: PawPrint },
+          { name: t('nav.farmer.nutrition'), path: '/farmer/nutrition', icon: Wheat },
+          { name: t('nav.farmer.breeds'), path: '/farmer/breeds', icon: Dna },
+          { name: t('nav.farmer.knowledge'), path: '/farmer/knowledge', icon: BookOpen },
+          { name: t('nav.farmer.vaccinations'), path: '/farmer/vaccinations', icon: Syringe },
         ]
       case USER_ROLES.FIELD_WORKER:
         return [
-          { name: 'Field Hub', path: '/field-worker/dashboard', icon: Activity },
-          { name: 'Report', path: '/field-worker/report-on-behalf', icon: FilePlus2 },
-          { name: 'Census', path: '/field-worker/households', icon: Home },
+          { name: t('nav.fieldWorker.dashboard'), path: '/field-worker/dashboard', icon: Activity },
+          { name: t('nav.fieldWorker.report'), path: '/field-worker/report-on-behalf', icon: FilePlus2 },
+          { name: t('nav.fieldWorker.census'), path: '/field-worker/households', icon: Home },
         ]
       case USER_ROLES.VETERINARIAN:
         return [
-          { name: 'Clinical Desk', path: '/vet/dashboard', icon: Stethoscope },
-          { name: 'Triage Cases', path: '/vet/dashboard', icon: FilePlus2 },
-          { name: 'AMR & Residue', path: '/vet/amr', icon: Microscope },
+          { name: t('nav.vet.dashboard'), path: '/vet/dashboard', icon: Stethoscope },
+          { name: t('nav.vet.cases'), path: '/vet/cases/rep-101', icon: FilePlus2 },
+          { name: t('nav.vet.amr'), path: '/vet/amr', icon: Microscope },
         ]
       case USER_ROLES.LABORATORY:
         return [
-          { name: 'Lab Dashboard', path: '/lab/dashboard', icon: Microscope },
+          { name: t('nav.lab.dashboard'), path: '/lab/dashboard', icon: Microscope },
         ]
       case USER_ROLES.AUTHORITY:
         return [
-          { name: 'Command Center', path: '/authority/dashboard', icon: Building2 },
-          { name: 'Cold Chain', path: '/authority/cold-chain', icon: Shield },
-          { name: '1962 MVU Fleet', path: '/authority/mvu-fleet', icon: Truck },
-          { name: 'Market Security', path: '/authority/market-biosecurity', icon: Building2 },
-          { name: 'Analytics', path: '/analytics', icon: TrendingUp },
+          { name: t('nav.authority.commandCenter'), path: '/authority/dashboard', icon: Building2 },
+          { name: t('nav.authority.coldChain'), path: '/authority/cold-chain', icon: Shield },
+          { name: t('nav.authority.mvuFleet'), path: '/authority/mvu-fleet', icon: Truck },
+          { name: t('nav.authority.marketSecurity'), path: '/authority/market-biosecurity', icon: Building2 },
+          { name: t('nav.authority.analytics'), path: '/analytics', icon: TrendingUp },
         ]
       case USER_ROLES.ADMIN:
         return [
-          { name: 'Admin', path: '/admin/dashboard', icon: Shield },
-          { name: 'Analytics', path: '/analytics', icon: TrendingUp },
+          { name: t('nav.admin.admin'), path: '/admin/dashboard', icon: Shield },
+          { name: t('nav.admin.analytics'), path: '/analytics', icon: TrendingUp },
         ]
       default:
         return []
@@ -138,7 +140,7 @@ export default function DashboardLayout({ user, onLogout }) {
                   PASHURAKSHA <span className="text-sky-600">AI</span>
                 </span>
                 <span className="text-[10px] font-medium text-slate-500 block truncate max-w-[200px] sm:max-w-none">
-                  Prototype developed for SIH Problem Statement SIH26128
+                  {t('common.prototypeNotice')}
                 </span>
               </div>
             </Link>
@@ -147,12 +149,12 @@ export default function DashboardLayout({ user, onLogout }) {
           {/* Center: Portal Switcher (Desktop) */}
           <div className="hidden lg:flex items-center space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
             {[
-              { label: 'Farmer', path: '/farmer/dashboard', r: USER_ROLES.FARMER },
-              { label: 'Field', path: '/field-worker/dashboard', r: USER_ROLES.FIELD_WORKER },
-              { label: 'Vet', path: '/vet/dashboard', r: USER_ROLES.VETERINARIAN },
-              { label: 'Lab', path: '/lab/dashboard', r: USER_ROLES.LABORATORY },
-              { label: 'Authority', path: '/authority/dashboard', r: USER_ROLES.AUTHORITY },
-              { label: 'Analytics', path: '/analytics', r: null },
+              { label: t('roles.farmer'), path: '/farmer/dashboard', r: USER_ROLES.FARMER },
+              { label: t('roles.fieldWorker'), path: '/field-worker/dashboard', r: USER_ROLES.FIELD_WORKER },
+              { label: t('roles.vetDoctor'), path: '/vet/dashboard', r: USER_ROLES.VETERINARIAN },
+              { label: t('roles.lab'), path: '/lab/dashboard', r: USER_ROLES.LABORATORY },
+              { label: t('roles.authority'), path: '/authority/dashboard', r: USER_ROLES.AUTHORITY },
+              { label: t('nav.authority.analytics'), path: '/analytics', r: null },
             ].map((p) => (
               <Link
                 key={p.path}
@@ -182,7 +184,7 @@ export default function DashboardLayout({ user, onLogout }) {
             <Link to="/presentation" className="hidden sm:flex">
               <button className="px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-colors duration-200 flex items-center space-x-1">
                 <Presentation className="w-3.5 h-3.5" />
-                <span>Jury</span>
+                <span>{t('nav.jury')}</span>
               </button>
             </Link>
 
@@ -217,7 +219,7 @@ export default function DashboardLayout({ user, onLogout }) {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white p-4 space-y-3 shadow-lg">
             <span className="text-xs font-bold text-sky-700 block px-1">
-              {role?.replace('_', ' ')} MENU
+              {t('nav.menuLabel', { role: t('roles.' + (role === USER_ROLES.FIELD_WORKER ? 'fieldWorker' : role === USER_ROLES.VETERINARIAN ? 'vetDoctor' : role === USER_ROLES.LABORATORY ? 'lab' : role === 'admin' ? 'admin' : role)) })}
             </span>
             <div className="grid grid-cols-2 gap-2">
               {navItems.map((item) => {
@@ -242,15 +244,15 @@ export default function DashboardLayout({ user, onLogout }) {
             </div>
 
             <div className="pt-2 border-t border-slate-100">
-              <span className="text-xs font-bold text-slate-500 block px-1 mb-1">SWITCH PORTAL</span>
+              <span className="text-xs font-bold text-slate-500 block px-1 mb-1">{t('nav.switchPortal')}</span>
               <div className="grid grid-cols-3 gap-1.5 text-xs">
                 {[
-                  { label: 'Farmer', path: '/farmer/dashboard' },
-                  { label: 'Vet', path: '/vet/dashboard' },
-                  { label: 'Authority', path: '/authority/dashboard' },
-                  { label: 'Lab', path: '/lab/dashboard' },
-                  { label: 'Analytics', path: '/analytics' },
-                  { label: 'Jury', path: '/presentation' },
+                  { label: t('roles.farmer'), path: '/farmer/dashboard' },
+                  { label: t('roles.vetDoctor'), path: '/vet/dashboard' },
+                  { label: t('roles.authority'), path: '/authority/dashboard' },
+                  { label: t('roles.lab'), path: '/lab/dashboard' },
+                  { label: t('nav.authority.analytics'), path: '/analytics' },
+                  { label: t('nav.jury'), path: '/presentation' },
                 ].map((p) => (
                   <Link
                     key={p.path}
@@ -273,7 +275,7 @@ export default function DashboardLayout({ user, onLogout }) {
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex flex-col w-52 space-y-1 flex-shrink-0">
           <span className="text-xs font-bold text-sky-700 px-3 py-1.5">
-            {role?.replace('_', ' ')} MENU
+            {t('nav.menuLabel', { role: t('roles.' + (role === USER_ROLES.FIELD_WORKER ? 'fieldWorker' : role === USER_ROLES.VETERINARIAN ? 'vetDoctor' : role === USER_ROLES.LABORATORY ? 'lab' : role === 'admin' ? 'admin' : role)) })}
           </span>
           {navItems.map((item) => {
             const Icon = item.icon

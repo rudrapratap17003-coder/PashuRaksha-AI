@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import {
   Wheat,
@@ -17,6 +18,8 @@ import Card from '../../components/common/Card'
 import apiClient from '../../services/api'
 
 export default function NutritionAdvisorPage() {
+  const { t } = useLanguage()
+
   const [breed, setBreed] = useState('Khillar')
   const [lactation, setLactation] = useState(8)
   const [healthPhase, setHealthPhase] = useState('Recovery')
