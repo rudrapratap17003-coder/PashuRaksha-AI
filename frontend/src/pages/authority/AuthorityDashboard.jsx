@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { 
   Building2, 
   MapPin, 
@@ -45,6 +45,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
 
 export default function AuthorityDashboard() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { currentScenario } = useScenario()
   const [runningDetection, setRunningDetection] = useState(false)
@@ -453,25 +454,23 @@ export default function AuthorityDashboard() {
             </div>
 
             <div className="space-y-2.5">
-              <Link to="/authority/mvu-fleet" className="block">
-                <Button
-                  variant="primary"
-                  icon={Truck}
-                  className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs py-3 rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  <span>Dispatch 1962 MVU Fleet</span>
-                </Button>
-              </Link>
+              <button
+                type="button"
+                onClick={() => navigate('/authority/mvu-fleet')}
+                className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer transition active:scale-[0.98]"
+              >
+                <Truck className="w-4 h-4 flex-shrink-0" />
+                <span>Dispatch 1962 MVU Fleet</span>
+              </button>
 
-              <Link to="/authority/market-biosecurity" className="block">
-                <Button
-                  variant="outline"
-                  icon={Building2}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 hover:border-slate-600 font-bold text-xs py-3 rounded-2xl flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  <span>APMC Market Biosecurity Gate</span>
-                </Button>
-              </Link>
+              <button
+                type="button"
+                onClick={() => navigate('/authority/market-biosecurity')}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 hover:border-slate-600 font-bold text-xs py-3 px-4 rounded-2xl flex items-center justify-center space-x-2 cursor-pointer transition active:scale-[0.98]"
+              >
+                <Building2 className="w-4 h-4 flex-shrink-0" />
+                <span>APMC Market Biosecurity Gate</span>
+              </button>
             </div>
           </div>
 

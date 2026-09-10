@@ -115,11 +115,17 @@ export default function AdminDashboard() {
     fetchAdminData(false)
   }, [])
 
-  const filteredUsers = users.filter(u => 
-    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.village?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const [selectedRole, setSelectedRole] = useState('all')
+
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = !searchTerm.trim() ||
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.village?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.district?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesRole = selectedRole === 'all' || u.role?.toLowerCase() === selectedRole.toLowerCase()
+    return matchesSearch && matchesRole
+  })
 
   return (
     <div className="space-y-6 pb-12">
@@ -128,10 +134,10 @@ export default function AdminDashboard() {
         <div>
           <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Shield className="w-4 h-4" />
-            <span>State Platform Operations & Identity Governance</span>
+            <span>State Platform Operations &amp; Identity Governance</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            System Administration & Policy Console
+            System Administration &amp; Policy Console
           </h1>
           <p className="text-slate-400 text-sm mt-1 max-w-3xl leading-relaxed">
             Configure explainable AI risk scoring parameters, manage RBAC identities across 5 stakeholder tiers, and audit Maharashtra cluster detection jobs.
@@ -171,28 +177,28 @@ export default function AdminDashboard() {
           value={stats?.user_count || 28}
           subtitle="Across 5 RBAC roles"
           icon={Users}
-          iconBg="bg-amber-500/10 text-amber-400 border border-amber-500/20"
+          iconBg="bg-amber-500/10 text-amber-600 border border-amber-500/20"
         />
         <StatCard
           title="Digital Passports"
           value={stats?.animal_count?.toLocaleString() || '1,247'}
           subtitle="Monitored livestock tags"
           icon={Database}
-          iconBg="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+          iconBg="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
         />
         <StatCard
           title="Village Nodes"
           value={stats?.villages_covered || 15}
           subtitle="Western Maharashtra network"
           icon={MapPin}
-          iconBg="bg-teal-500/10 text-teal-400 border border-teal-500/20"
+          iconBg="bg-teal-500/10 text-teal-600 border border-teal-500/20"
         />
         <StatCard
           title="AI Scoring Engine"
           value="Online (42ms)"
           subtitle="Explainable rule parser v1.0"
           icon={Cpu}
-          iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
+          iconBg="bg-sky-500/10 text-sky-600 border border-sky-500/20"
         />
       </div>
 
@@ -211,8 +217,8 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200'
+                  ? 'bg-amber-100 text-amber-950 border border-amber-300 shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 font-semibold'
               }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-amber-800' : 'text-slate-500'}`} />
@@ -226,56 +232,79 @@ export default function AdminDashboard() {
       {activeTab === 'users' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search users by name, role or village..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-lg w-full">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name, role, or village..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white"
+                />
+              </div>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+              >
+                <option value="all">All Roles</option>
+                <option value="farmer">Farmer</option>
+                <option value="veterinarian">Veterinarian</option>
+                <option value="authority">Authority</option>
+                <option value="laboratory">Laboratory</option>
+                <option value="field_worker">Field Worker</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
-            <span className="text-xs text-slate-500 font-bold">{filteredUsers.length} Users Listed</span>
+            <span className="text-xs text-slate-600 font-bold">{filteredUsers.length} Users Listed</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-white font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-                <tr>
-                  <th className="py-3 px-4">User ID</th>
-                  <th className="py-3 px-4">Full Name</th>
-                  <th className="py-3 px-4">Role Tier</th>
-                  <th className="py-3 px-4">Jurisdiction / Village</th>
-                  <th className="py-3 px-4">Contact Phone</th>
-                  <th className="py-3 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-amber-600">{u.id}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900">{u.name || 'Unnamed User'}</td>
-                    <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-900 border border-slate-800 text-white inline-block">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">
-                      {u.village ? `${u.village}${u.district ? `, ${u.district}` : ''}` : u.district || 'Maharashtra'}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-600">{u.phone || '—'}</td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-emerald-700 font-bold flex items-center space-x-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Active</span>
-                      </span>
-                    </td>
+          {filteredUsers.length === 0 ? (
+            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600">
+              <Users className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+              <p className="font-bold text-slate-800">No users found matching active criteria</p>
+              <p className="text-xs text-slate-500 mt-0.5">Try searching with a different name or clearing the role filter.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-950 text-white font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+                  <tr>
+                    <th className="py-3 px-4">User ID</th>
+                    <th className="py-3 px-4">Full Name</th>
+                    <th className="py-3 px-4">Role Tier</th>
+                    <th className="py-3 px-4">Jurisdiction / Village</th>
+                    <th className="py-3 px-4">Contact Phone</th>
+                    <th className="py-3 px-4">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-amber-700">{u.id}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900">{u.name || 'Unnamed User'}</td>
+                      <td className="py-3.5 px-4">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-900 border border-slate-800 text-white inline-block">
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-700 font-medium">
+                        {u.village ? `${u.village}${u.district ? `, ${u.district}` : ''}` : u.district || 'Maharashtra'}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-slate-700 font-semibold">{u.phone || '—'}</td>
+                      <td className="py-3.5 px-4">
+                        <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Active</span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

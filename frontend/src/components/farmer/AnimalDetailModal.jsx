@@ -97,7 +97,7 @@ export default function AnimalDetailModal({ animal, onClose }) {
               <MapPin className="w-3.5 h-3.5" />
               <span>Registered Location</span>
             </span>
-            <p className="font-bold text-slate-800">{animal.village || 'Rampur'}, {animal.district || 'Jaipur Rural'}</p>
+            <p className="font-bold text-slate-800">{animal.village || 'Baramati'}, {animal.district || 'Pune'}</p>
           </div>
         </div>
 

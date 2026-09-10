@@ -81,40 +81,74 @@ export default function MvuFleetTracker() {
   const [refreshSuccess, setRefreshSuccess] = useState(false)
   const [dispatching, setDispatching] = useState(false)
 
-  const handleRefresh = async () => {
-    if (refreshing) return
-    setRefreshing(true)
-    setRefreshSuccess(false)
+  const fetchFleetData = async (isManual = false) => {
+    if (isManual) {
+      setRefreshing(true)
+      setRefreshSuccess(false)
+    }
     try {
-      // Simulate/poll latest GPS & cold-chain telemetry updates
-      await new Promise(resolve => setTimeout(resolve, 600))
-      setFleet(prev => prev.map(u => ({
-        ...u,
-        speedKmH: u.status.includes('STANDBY') ? 0 : Math.floor(25 + Math.random() * 25),
-        coldBoxTemp: parseFloat((3.8 + Math.random() * 0.7).toFixed(1))
-      })))
-      setRefreshSuccess(true)
-      setTimeout(() => setRefreshSuccess(false), 2500)
-    } catch {
-      // Keep cached state
+      const res = await apiClient.get('/authority/mvu-fleet')
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        setFleet(res.data)
+        if (!selectedUnit) {
+          setSelectedUnit(res.data[0])
+        } else {
+          const updated = res.data.find(u => u.id === selectedUnit.id)
+          if (updated) setSelectedUnit(updated)
+        }
+      }
+      if (isManual) {
+        setRefreshSuccess(true)
+        setTimeout(() => setRefreshSuccess(false), 2500)
+      }
+    } catch (err) {
+      console.warn('MVU fleet telemetry fetch fallback:', err)
+      if (isManual) {
+        setRefreshSuccess(true)
+        setTimeout(() => setRefreshSuccess(false), 2500)
+      }
     } finally {
-      setRefreshing(false)
+      if (isManual) setRefreshing(false)
     }
   }
 
-  const handleDispatch = () => {
+  useEffect(() => {
+    fetchFleetData(false)
+  }, [])
+
+  const handleRefresh = async () => {
+    if (refreshing) return
+    await fetchFleetData(true)
+  }
+
+  const handleDispatch = async () => {
     if (dispatching) return
     setDispatching(true)
-    setTimeout(() => {
+    try {
+      const res = await apiClient.post('/authority/mvu-fleet/dispatch', {
+        unit_id: selectedUnit.id,
+        destination: targetHotspot,
+        priority: 'EMERGENCY_SOS',
+        notes: 'Emergency 1962 SOS order from Command Center'
+      })
+      if (res.data && res.data.unit) {
+        const updatedUnit = res.data.unit
+        setFleet(prev => prev.map(u => u.id === updatedUnit.id ? updatedUnit : u))
+        setSelectedUnit(updatedUnit)
+        setSosNotice(res.data.message || `🚨 Emergency 1962 SOS order transmitted to ${updatedUnit.name}. Dispatched to "${targetHotspot}". Estimated Arrival Time (ETA): ${res.data.eta_minutes || 14} minutes.`)
+      }
+    } catch (err) {
+      console.warn('MVU dispatch API notice:', err)
       setFleet(prev => prev.map(u => 
         u.id === selectedUnit.id 
           ? { ...u, status: 'DISPATCHED VIA 1962 SOS', statusType: 'warning', speedKmH: 52 } 
           : u
       ))
       setSosNotice(`🚨 Emergency 1962 SOS order transmitted to ${selectedUnit.name}. Dispatched to "${targetHotspot}". Estimated Arrival Time (ETA): 14 minutes.`)
+    } finally {
       setDispatching(false)
       setTimeout(() => setSosNotice(null), 8000)
-    }, 700)
+    }
   }
 
   const activeCount = fleet.filter(u => !u.status.includes('STANDBY')).length

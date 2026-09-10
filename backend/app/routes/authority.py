@@ -4,7 +4,18 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import require_authority
 from app.models.user import User
-from app.schemas.authority import AuthorityDashboardSummary, MapPoint, TrendPoint, AuthorityActionCreate
+from app.schemas.authority import (
+    AuthorityDashboardSummary, 
+    MapPoint, 
+    TrendPoint, 
+    AuthorityActionCreate,
+    MvuUnit,
+    MvuDispatchRequest,
+    MvuDispatchResponse,
+    MarketBiosecurityOverview,
+    PermitVerificationRequest,
+    PermitVerificationResponse
+)
 from app.services.authority_service import AuthorityService
 from app.services.case_service import CaseService, CaseStatus
 from app.models.health_report import HealthReport
@@ -35,6 +46,43 @@ def get_epidemic_trends(
     current_user: User = Depends(require_authority)
 ):
     return AuthorityService.get_trends(db)
+
+@router.get("/mvu-fleet", response_model=List[MvuUnit])
+def get_mvu_fleet(
+    current_user: User = Depends(require_authority)
+):
+    """Returns real-time GPS and cold-chain telemetry for 1962 MVU fleet."""
+    return AuthorityService.get_mvu_fleet()
+
+@router.post("/mvu-fleet/dispatch", response_model=MvuDispatchResponse)
+def dispatch_mvu_unit(
+    dispatch_in: MvuDispatchRequest,
+    current_user: User = Depends(require_authority)
+):
+    """Emergency 1962 SOS dispatch to outbreak hotspot or containment cordon."""
+    return AuthorityService.dispatch_mvu(
+        unit_id=dispatch_in.unit_id,
+        destination=dispatch_in.destination,
+        priority=dispatch_in.priority or "EMERGENCY_SOS",
+        notes=dispatch_in.notes
+    )
+
+@router.get("/market-biosecurity", response_model=MarketBiosecurityOverview)
+def get_market_biosecurity(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_authority)
+):
+    """APMC market biosecurity status, active embargoes, and transit inspection logs."""
+    return AuthorityService.get_market_biosecurity(db)
+
+@router.post("/market-biosecurity/verify-permit", response_model=PermitVerificationResponse)
+def verify_transit_permit(
+    verify_in: PermitVerificationRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_authority)
+):
+    """Gatekeeper inspection check against active outbreak containment zones."""
+    return AuthorityService.verify_permit(db, verify_in.permit_id_or_code)
 
 @router.post("/cases/{case_id}/review")
 def review_case(

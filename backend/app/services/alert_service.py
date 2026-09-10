@@ -28,6 +28,44 @@ class AlertService:
         ]
 
     @staticmethod
+    def create_alert(
+        db: Session,
+        title: str,
+        message: str,
+        target_role: str = "farmer",
+        alert_type: str = "broadcast",
+        risk_level: str = "CRITICAL",
+        village: Optional[str] = "Baramati",
+        related_cluster_id: Optional[str] = None
+    ) -> AlertResponse:
+        alert = Alert(
+            title=title,
+            message=message,
+            target_role=target_role,
+            alert_type=alert_type,
+            risk_level=risk_level,
+            village=village,
+            related_cluster_id=related_cluster_id,
+            is_read=False
+        )
+        db.add(alert)
+        db.commit()
+        db.refresh(alert)
+        return AlertResponse(
+            id=alert.id,
+            user_id=alert.user_id,
+            target_role=alert.target_role,
+            alert_type=alert.alert_type,
+            title=alert.title,
+            message=alert.message,
+            risk_level=alert.risk_level,
+            related_cluster_id=alert.related_cluster_id,
+            village=alert.village,
+            is_read=alert.is_read,
+            created_at=alert.created_at
+        )
+
+    @staticmethod
     def mark_as_read(db: Session, alert_id: str) -> bool:
         alert = db.query(Alert).filter(Alert.id == alert_id).first()
         if not alert:

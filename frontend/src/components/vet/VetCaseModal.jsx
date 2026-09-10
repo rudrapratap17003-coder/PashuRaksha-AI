@@ -21,13 +21,14 @@ import RiskBadge from '../common/RiskBadge'
 import Badge from '../common/Badge'
 import apiClient from '../../services/api'
 
-export default function VetCaseModal({ caseItem, onClose, onActionSuccess }) {
-  if (!caseItem) return null
+export default function VetCaseModal({ caseItem, caseData, onClose, onActionSuccess, onSuccess }) {
+  const item = caseItem || caseData
+  if (!item) return null
 
   const [actionType, setActionType] = useState('Investigated & Advised')
-  const [notes, setNotes] = useState(caseItem.veterinary_notes || '')
-  const [labReferral, setLabReferral] = useState(caseItem.lab_referral || false)
-  const [status, setStatus] = useState(caseItem.status || 'investigated')
+  const [notes, setNotes] = useState(item.veterinary_notes || '')
+  const [labReferral, setLabReferral] = useState(item.lab_referral || false)
+  const [status, setStatus] = useState(item.status || 'investigated')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
@@ -37,7 +38,7 @@ export default function VetCaseModal({ caseItem, onClose, onActionSuccess }) {
     setSubmitting(true)
     setError(null)
     try {
-      await apiClient.post(`/vet/cases/${caseItem.id}/action`, {
+      await apiClient.post(`/vet/cases/${item.id}/action`, {
         action: actionType,
         notes,
         lab_referral: labReferral,
@@ -46,6 +47,7 @@ export default function VetCaseModal({ caseItem, onClose, onActionSuccess }) {
       setSuccess(true)
       setTimeout(() => {
         if (onActionSuccess) onActionSuccess()
+        if (onSuccess) onSuccess()
         onClose()
       }, 1000)
     } catch (err) {
@@ -67,10 +69,10 @@ export default function VetCaseModal({ caseItem, onClose, onActionSuccess }) {
             </div>
             <div>
               <span className="text-xs font-mono font-bold text-slate-400">
-                CASE ID: {caseItem.id}
+                CASE ID: {item.id}
               </span>
               <h3 className="text-xl font-black text-slate-900">
-                {caseItem.animal_id} — {caseItem.species} ({caseItem.breed || 'Indigenous'})
+                {item.animal_id} — {item.species} ({item.breed || 'Indigenous'})
               </h3>
             </div>
           </div>

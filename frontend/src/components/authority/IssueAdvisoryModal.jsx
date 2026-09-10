@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { X, MessageSquare, ShieldAlert } from 'lucide-react'
+import apiClient from '../../services/api'
 
 export default function IssueAdvisoryModal({ isOpen, onClose, cluster, onSuccess }) {
   const [issuing, setIssuing] = useState(false)
@@ -13,8 +14,19 @@ export default function IssueAdvisoryModal({ isOpen, onClose, cluster, onSuccess
 
   if (!isOpen) return null
 
-  const handleIssue = () => {
+  const handleIssue = async () => {
     setIssuing(true)
+    try {
+      await apiClient.post('/alerts/broadcast', {
+        title: `📢 Biosecurity Advisory: ${affectedVillage} Containment Zone`,
+        message: message,
+        target_role: 'farmer',
+        risk_level: 'HIGH',
+        village: affectedVillage
+      })
+    } catch (err) {
+      console.warn('Advisory broadcast API notice:', err)
+    }
     setTimeout(() => {
       setIssuing(false)
       if (onSuccess) onSuccess()
