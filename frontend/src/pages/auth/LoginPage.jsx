@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   Lock,
   Mail,
@@ -18,6 +18,8 @@ import PashuLogo from '../../components/common/PashuLogo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname
   const { login, loading } = useAuth()
   const { t } = useLanguage()
   const [role, setRole] = useState(USER_ROLES.FARMER)
@@ -45,6 +47,16 @@ export default function LoginPage() {
     try {
       const user = await login(email, password)
       const userRole = user?.role || role
+
+      // If user came from a deep link they are authorized for, send them there
+      if (from && from !== '/login') {
+        const isAuthRoute = from.startsWith('/authority')
+        if (!isAuthRoute || userRole === USER_ROLES.AUTHORITY || userRole === USER_ROLES.ADMIN) {
+          navigate(from, { replace: true })
+          return
+        }
+      }
+
       if (userRole === USER_ROLES.FARMER) navigate('/farmer/dashboard')
       else if (userRole === USER_ROLES.FIELD_WORKER) navigate('/field-worker/dashboard')
       else if (userRole === USER_ROLES.VETERINARIAN) navigate('/vet/dashboard')

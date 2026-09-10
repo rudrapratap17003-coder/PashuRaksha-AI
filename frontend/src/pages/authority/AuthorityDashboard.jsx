@@ -441,6 +441,41 @@ export default function AuthorityDashboard() {
 
         {/* Right 4 Cols: Early Warning Action Dispatch Desk */}
         <div className="lg:col-span-4 space-y-5">
+          {/* Emergency Response Actions */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <div>
+              <div className="flex items-center space-x-2 text-sky-600 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                <Radio className="w-3.5 h-3.5 animate-pulse" />
+                <span>State Mobility & Cordon Protocols</span>
+              </div>
+              <h3 className="text-sm font-black text-slate-900">Emergency Response Actions</h3>
+              <p className="text-xs text-slate-500">Rapid 1962 veterinary dispatch and APMC market biosecurity controls</p>
+            </div>
+
+            <div className="space-y-2.5">
+              <Link to="/authority/mvu-fleet" className="block">
+                <Button
+                  variant="primary"
+                  icon={Truck}
+                  className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs py-3 rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer"
+                >
+                  <span>Dispatch 1962 MVU Fleet</span>
+                </Button>
+              </Link>
+
+              <Link to="/authority/market-biosecurity" className="block">
+                <Button
+                  variant="outline"
+                  icon={Building2}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 hover:border-slate-600 font-bold text-xs py-3 rounded-2xl flex items-center justify-center space-x-2 cursor-pointer"
+                >
+                  <span>APMC Market Biosecurity Gate</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Outbreak Containment Protocol Actions */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
             <div>
               <h3 className="text-sm font-black text-slate-900">Command Response Actions</h3>
