@@ -112,7 +112,7 @@ export default function ColdChainLogisticsPage() {
   const [requestSent, setRequestSent] = useState(false)
 
   return (
-    <div className="space-y-6 pb-12 text-slate-100">
+    <div className="space-y-6 pb-12 text-slate-800">
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -152,8 +152,8 @@ export default function ColdChainLogisticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 6 Cols: Ring Vaccination Campaigns */}
         <div className="lg:col-span-6 space-y-4">
-          <h2 className="text-sm font-black text-white flex items-center gap-2">
-            <Radio className="w-4 h-4 text-emerald-400" />
+          <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+            <Radio className="w-4 h-4 text-emerald-600" />
             <span>Active Ring Vaccination Campaigns (Micro-Plans)</span>
           </h2>
 
@@ -202,8 +202,8 @@ export default function ColdChainLogisticsPage() {
 
         {/* Right 6 Cols: IoT Cold Chain Telemetry Nodes */}
         <div className="lg:col-span-6 space-y-4">
-          <h2 className="text-sm font-black text-white flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-sky-400" />
+          <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+            <Thermometer className="w-4 h-4 text-sky-600" />
             <span>IoT Cold Storage Telematics (2°C – 8°C Safe Zone)</span>
           </h2>
 
