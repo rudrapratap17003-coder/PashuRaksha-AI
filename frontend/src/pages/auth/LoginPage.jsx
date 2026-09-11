@@ -69,14 +69,21 @@ export default function LoginPage() {
       else if (userRole === USER_ROLES.ADMIN) navigate('/admin/dashboard')
       else navigate('/farmer/dashboard')
     } catch (err) {
-      // Distinguish between backend unreachable and auth failure
-      const msg = err.message || 'Authentication failed'
-      if (msg === 'Network Error' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Unable to connect')) {
-        setError(t("networkError"))
-      } else if (msg.includes('Invalid credentials') || msg.includes('Incorrect password') || msg.includes('not found')) {
-        setError(t("invalidCredentials"))
+      // Distinguish between backend unavailable, 404, 401 invalid credentials, timeout, etc.
+      const status = err?.status
+      const code = err?.code
+      const msg = err?.message || 'Authentication failed'
+
+      if (status === 401 || msg.includes('Invalid credentials') || msg.includes('Incorrect password') || msg.includes('user not found')) {
+        setError(t("auth.invalidCredentials"))
+      } else if (status === 404 || msg.includes('404')) {
+        setError(t("auth.endpointNotFound"))
+      } else if (code === 'ECONNABORTED' || msg.includes('timeout') || msg.includes('timed out')) {
+        setError(t("auth.requestTimeout"))
+      } else if (msg === 'Network Error' || code === 'ERR_NETWORK' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Unable to connect')) {
+        setError(t("auth.backendUnavailable"))
       } else {
-        setError(msg || t("authFailed"))
+        setError(msg || t("auth.authFailed"))
       }
     }
   }

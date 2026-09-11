@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "concurrently -k -p \"[{name}]\" -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"npm run dev:backend:unix\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173",
-    "dev:backend": "backend\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
+    "dev:backend": "python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
     "dev:backend:unix": "./backend/.venv/bin/uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
+    "dev:backend:win": "backend\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload",
     "build": "npm --prefix frontend run build",
     "install:all": "npm install && npm --prefix frontend install --legacy-peer-deps",
-    "test": "backend\\.venv\\Scripts\\pytest.exe backend/tests/test_api.py -v",
+    "test": "python -m pytest backend/tests/test_api.py -v",
     "test:unix": "./backend/.venv/bin/pytest backend/tests/test_api.py -v"
   },
   "devDependencies": {

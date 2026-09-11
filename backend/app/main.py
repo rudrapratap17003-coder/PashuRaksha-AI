@@ -208,6 +208,7 @@ def read_root():
         }
     }
 
+@app.get("/health", tags=["Core & Health"])
 @app.get(f"{settings.API_V1_STR}/health", tags=["Core & Health"])
 def health_check():
     return {

@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.alert import Alert
 from app.models.case_timeline import CaseTimelineEvent
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
+from app.services.ml_prediction_service import MLPredictionService
 from app.ai.risk_engine import ExplainableRiskEngine
 from app.ai.disease_model import DiseasePatternModel
 from app.utils import get_logger
@@ -45,7 +46,18 @@ class HealthReportService:
                 salivation=r.salivation,
                 lesions=r.lesions,
                 swelling=r.swelling,
-                other_symptoms=r.other_symptoms,
+                                other_symptoms=r.other_symptoms,
+
+                # ML Clinical Assessment Features
+                rectal_temperature=r.rectal_temperature,
+                girth=r.girth,
+                famacha_score_left=r.famacha_score_left,
+                famacha_score_right=r.famacha_score_right,
+                elasticity=r.elasticity,
+                consistency_of_faeces=r.consistency_of_faeces,
+                suckling=r.suckling,
+                grazing=r.grazing,
+
                 severity=r.severity,
                 duration_days=r.duration_days,
                 number_of_animals_affected=r.number_of_animals_affected,
@@ -85,8 +97,19 @@ class HealthReportService:
             salivation=r.salivation,
             lesions=r.lesions,
             swelling=r.swelling,
-            other_symptoms=r.other_symptoms,
-            severity=r.severity,
+                            other_symptoms=r.other_symptoms,
+
+                # ML Clinical Assessment Features
+                rectal_temperature=r.rectal_temperature,
+                girth=r.girth,
+                famacha_score_left=r.famacha_score_left,
+                famacha_score_right=r.famacha_score_right,
+                elasticity=r.elasticity,
+                consistency_of_faeces=r.consistency_of_faeces,
+                suckling=r.suckling,
+                grazing=r.grazing,
+
+                severity=r.severity,
             duration_days=r.duration_days,
             number_of_animals_affected=r.number_of_animals_affected,
             latitude=r.latitude,
@@ -157,9 +180,10 @@ class HealthReportService:
                 difficulty_breathing=report_in.difficulty_breathing,
                 salivation=report_in.salivation,
                 lesions=report_in.lesions,
-                swelling=report_in.swelling,
-                species=species,
-                severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
+                            swelling=report_in.swelling,
+            other_symptoms=report_in.other_symptoms,
+
+            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
                 number_of_animals_affected=report_in.number_of_animals_affected,
             )
         except Exception as e:
@@ -170,13 +194,30 @@ class HealthReportService:
                 "differential_matches": []
             }
 
-        score = eval_result["risk_score"]
-        level = eval_result["risk_level"]
+                    # 3. Execute trained ML clinical-episode prediction
+        try:
+            ml_result = MLPredictionService.predict(
+                animal=animal,
+                report=report_in,
+            )
+
+            ml_probability = ml_result["clinical_probability"]
+            ml_level = ml_result["risk_level"]
+
+        except Exception as e:
+            logger.error(f"[ML_PREDICTION_ERROR] ML prediction failed: {e}")
+
+            # Safe fallback to the existing explainable risk engine.
+            ml_probability = eval_result["risk_score"]
+            ml_level = eval_result["risk_level"]
+
+        # ML model is the primary risk signal.
+        score = ml_probability
+        level = ml_level
         rec = eval_result["recommendation"]
+
         primary_disease = diff_result["primary_disease_match"]
         factors = eval_result["contributing_factors"]
-
-        # Append top differential info into factors
         if diff_result.get("differential_matches"):
             top_diff = diff_result["differential_matches"][0]
             factors.append({
@@ -208,6 +249,17 @@ class HealthReportService:
             lesions=report_in.lesions,
             swelling=report_in.swelling,
             other_symptoms=report_in.other_symptoms,
+
+            # ML Clinical Assessment Features
+            rectal_temperature=report_in.rectal_temperature,
+            girth=report_in.girth,
+            famacha_score_left=report_in.famacha_score_left,
+            famacha_score_right=report_in.famacha_score_right,
+            elasticity=report_in.elasticity,
+            consistency_of_faeces=report_in.consistency_of_faeces,
+            suckling=report_in.suckling,
+            grazing=report_in.grazing,
+
             severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
             duration_days=report_in.duration_days,
             number_of_animals_affected=report_in.number_of_animals_affected,
@@ -339,7 +391,18 @@ class HealthReportService:
             salivation=rep.salivation,
             lesions=rep.lesions,
             swelling=rep.swelling,
-            other_symptoms=report_in.other_symptoms,
+                        other_symptoms=rep.other_symptoms,
+
+            # ML Clinical Assessment Features
+            rectal_temperature=rep.rectal_temperature,
+            girth=rep.girth,
+            famacha_score_left=rep.famacha_score_left,
+            famacha_score_right=rep.famacha_score_right,
+            elasticity=rep.elasticity,
+            consistency_of_faeces=rep.consistency_of_faeces,
+            suckling=rep.suckling,
+            grazing=rep.grazing,
+
             severity=rep.severity,
             duration_days=rep.duration_days,
             number_of_animals_affected=rep.number_of_animals_affected,

@@ -24,6 +24,36 @@ class HealthReportBase(BaseModel):
     lesions: bool = Field(False, description="Blisters or sores on mouth/tongue/feet")
     swelling: bool = Field(False, description="Swelling in throat, jaw, or limbs")
     other_symptoms: Optional[str] = Field(None, max_length=1000)
+
+    # ML Clinical Assessment Features
+    rectal_temperature: Optional[float] = Field(
+        None,
+        ge=30.0,
+        le=45.0,
+        description="Observed rectal temperature in Celsius"
+    )
+    girth: Optional[float] = Field(
+        None,
+        ge=1.0,
+        le=200.0,
+        description="Animal girth measurement"
+    )
+    famacha_score_left: Optional[float] = Field(
+        None,
+        ge=1.0,
+        le=5.0,
+        description="FAMACHA score for left eye"
+    )
+    famacha_score_right: Optional[float] = Field(
+        None,
+        ge=1.0,
+        le=5.0,
+        description="FAMACHA score for right eye"
+    )
+    elasticity: Optional[str] = Field(None, max_length=50)
+    consistency_of_faeces: Optional[str] = Field(None, max_length=50)
+    suckling: Optional[str] = Field(None, max_length=20)
+    grazing: Optional[str] = Field(None, max_length=20)
     
     # Severity and Epidemiology Context
     severity: SeverityEnum = Field(default=SeverityEnum.MODERATE)

@@ -190,9 +190,9 @@ Analyze this data and return the structured JSON assessment with score (0-100), 
                     assessment = GeminiRiskEvaluation(**parsed_json)
                     assessment.ai_provider = "Google Gemini"
                     assessment.ai_model = model_name
-                    
+
                     logger.info(f"[GEMINI_RISK_SUCCESS] Animal: {animal_id} | Score: {assessment.risk_score} | Level: {assessment.risk_level} | Concern: {assessment.possible_disease_concern}")
-                    
+
                     # Convert to dictionary matching application contract
                     return {
                         "risk_score": float(assessment.risk_score),

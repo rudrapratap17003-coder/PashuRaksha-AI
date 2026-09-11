@@ -3,22 +3,31 @@
   "installCommand": "npm run install:all",
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
+  "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "source": "/health",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/health"
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/api/v1/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/api/:path*"
     },
     {
       "source": "/docs",
-      "destination": "/api/index.py"
+      "destination": "https://pashuraksha-ai-backend.onrender.com/docs"
     },
     {
       "source": "/redoc",
-      "destination": "/api/index.py"
+      "destination": "https://pashuraksha-ai-backend.onrender.com/redoc"
     },
     {
       "source": "/openapi.json",
-      "destination": "/api/index.py"
+      "destination": "https://pashuraksha-ai-backend.onrender.com/openapi.json"
     },
     {
       "source": "/(.*)",
