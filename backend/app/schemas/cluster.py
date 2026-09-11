@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 class ClusterStatusEnum(str, Enum):
@@ -10,28 +10,28 @@ class ClusterStatusEnum(str, Enum):
     RESOLVED = "resolved"
 
 class ClusterResponse(BaseModel):
-    id: str = Field(..., example="clust-101")
-    cluster_name: str = Field(..., example="Rampur Village Outbreak Cluster #1")
-    disease_concern: str = Field(..., example="Possible Respiratory Disease Cluster")
-    latitude: float = Field(..., example=26.9124)
-    longitude: float = Field(..., example=75.7873)
-    radius_km: float = Field(..., example=1.5)
-    case_count: int = Field(..., example=4)
-    affected_animals_count: int = Field(..., example=7)
-    cluster_score: float = Field(..., example=82.0)
-    risk_level: str = Field(..., example="CRITICAL")
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str = Field(...)
+    cluster_name: str = Field(...)
+    disease_concern: str = Field(...)
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    radius_km: float = Field(..., ge=0)
+    case_count: int = Field(..., ge=0)
+    affected_animals_count: int = Field(..., ge=0)
+    cluster_score: float = Field(..., ge=0, le=100.0)
+    risk_level: str = Field(...)
     dominant_symptoms: List[str] = Field(default_factory=lambda: ["Fever", "Cough", "Reduced Appetite"])
     affected_villages: List[str] = Field(default_factory=lambda: ["Rampur"])
     case_ids: List[str] = Field(default_factory=list)
-    explanation: Optional[str] = Field(None, example="Cluster detected because 5 similar cases were reported within 8 km during the last 14 days.")
-    temporal_window_days: int = Field(default=14, example=14)
-    vaccination_coverage: float = Field(default=78.5, example=78.5)
+    explanation: Optional[str] = Field(None)
+    temporal_window_days: int = Field(default=14, ge=1, le=365)
+    vaccination_coverage: float = Field(default=78.5, ge=0, le=100.0)
     contributing_factors: List[dict] = Field(default_factory=list)
     status: ClusterStatusEnum = Field(default=ClusterStatusEnum.ACTIVE)
-    detected_at: datetime = Field(default_factory=datetime.utcnow)
+    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     recommended_action: str = Field(
         default="Immediate on-site veterinary investigation recommended. Initiate ring vaccination check."
     )
 
-    class Config:
-        from_attributes = True

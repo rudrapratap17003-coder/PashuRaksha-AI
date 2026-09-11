@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 class RiskLevelEnum(str, Enum):
@@ -10,31 +10,31 @@ class RiskLevelEnum(str, Enum):
     CRITICAL = "CRITICAL"
 
 class RiskFactor(BaseModel):
-    factor: str = Field(..., example="Fever & respiratory distress reported")
-    weight_contribution: float = Field(..., example=25.0)
-    category: str = Field(..., example="Clinical Symptoms")
+    factor: str = Field(...)
+    weight_contribution: float = Field(...)
+    category: str = Field(...)
 
 class RiskAssessmentResponse(BaseModel):
-    id: str = Field(..., example="risk-101")
-    report_id: str = Field(..., example="rep-101")
-    animal_id: str = Field(..., example="COW-101")
-    risk_score: float = Field(..., ge=0, le=100, example=74.0, description="Normalized risk score (0-100)")
-    risk_level: RiskLevelEnum = Field(..., example=RiskLevelEnum.HIGH)
-    possible_disease_concern: str = Field(..., example="Possible Respiratory / Viral Complex (Elevated Risk)")
-    disease_risk_score: float = Field(..., example=72.5)
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str = Field(...)
+    report_id: str = Field(...)
+    animal_id: str = Field(...)
+    risk_score: float = Field(..., ge=0, le=100, description="Normalized risk score (0-100)")
+    risk_level: RiskLevelEnum = Field(...)
+    possible_disease_concern: str = Field(...)
+    disease_risk_score: float = Field(...)
     
     # Explainable AI factors
     contributing_factors: List[RiskFactor] = Field(default_factory=list)
-    recommendation: str = Field(..., example="Veterinary assessment recommended. Isolate animal and monitor water intake.")
+    recommendation: str = Field(...)
     
-    cluster_detected: bool = Field(False, example=True)
-    cluster_name: Optional[str] = Field(None, example="Rampur Respiratory Cluster #1")
+    cluster_detected: bool = Field(False)
+    cluster_name: Optional[str] = Field(None)
     
     # Non-diagnostic disclaimer
     disclaimer: str = Field(
         default="PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment."
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    class Config:
-        from_attributes = True

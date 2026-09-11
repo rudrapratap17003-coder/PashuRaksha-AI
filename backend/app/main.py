@@ -1,9 +1,15 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+import uuid
+import logging
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, HTTPException, status
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.config import settings
-from app.database import init_db
+from app.database import init_db, SessionLocal
+from app.utils import get_logger, get_utc_now
 
 # Import modular routers
 from app.routes import (
@@ -29,10 +35,15 @@ from app.routes import (
     demo_router,
 )
 
+logger = get_logger("main")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info(f"[APPLICATION_START] Initializing {settings.PROJECT_NAME} (Environment: {settings.ENVIRONMENT}, Demo Mode: {settings.DEMO_MODE})")
     init_db()
+    logger.info(f"[APPLICATION_START] Database initialized and routes loaded.")
     yield
+    logger.info(f"[APPLICATION_STOP] Shutting down {settings.PROJECT_NAME} cleanly.")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -78,10 +89,71 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.all_cors_origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Centralized Global Exception Handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for err in exc.errors():
+        loc = " -> ".join([str(l) for l in err.get("loc", [])])
+        errors.append({"field": loc, "message": err.get("msg", "Validation error")})
+    logger.warning(f"[API_VALIDATION_ERROR] Path: {request.url.path} | Errors: {errors}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": "Request validation failed", "errors": errors, "code": "VALIDATION_ERROR"}
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.info(f"[HTTP_EXCEPTION] Path: {request.url.path} | Status: {exc.status_code} | Detail: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "status_code": exc.status_code}
+    )
+
+@app.exception_handler(IntegrityError)
+async def integrity_exception_handler(request: Request, exc: IntegrityError):
+    trace_id = str(uuid.uuid4())[:8]
+    logger.error(f"[DATABASE_INTEGRITY_ERROR] Trace: {trace_id} | Path: {request.url.path} | Error: {str(exc.orig) if hasattr(exc, 'orig') else str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={
+            "detail": "Data conflict or unique constraint violation. Please verify input identifiers.",
+            "code": "DB_INTEGRITY_CONFLICT",
+            "trace_id": trace_id
+        }
+    )
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+    trace_id = str(uuid.uuid4())[:8]
+    logger.error(f"[DATABASE_ERROR] Trace: {trace_id} | Path: {request.url.path} | Error: {str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "A database operation error occurred. Transaction was rolled back safely.",
+            "code": "DATABASE_ERROR",
+            "trace_id": trace_id
+        }
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    trace_id = str(uuid.uuid4())[:8]
+    logger.exception(f"[UNHANDLED_EXCEPTION] Trace: {trace_id} | Path: {request.url.path} | Error: {str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "An internal server error occurred. Please contact system administrator.",
+            "code": "INTERNAL_SERVER_ERROR",
+            "trace_id": trace_id
+        }
+    )
 
 # Mount all routers under API_V1_STR (/api/v1)
 api_v1 = settings.API_V1_STR
@@ -140,7 +212,7 @@ def read_root():
 def health_check():
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": settings.PROJECT_NAME,
         "version": "0.5.0",
         "environment": settings.ENVIRONMENT,
@@ -148,3 +220,4 @@ def health_check():
         "total_endpoints": 17,
         "disclaimer": "PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment."
     }
+

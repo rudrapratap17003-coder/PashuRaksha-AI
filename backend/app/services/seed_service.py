@@ -3,7 +3,7 @@ Database seeder service — Maharashtra livestock surveillance demo data.
 Populates tables with realistic synthetic demonstration data for SIH 2026.
 IMPORTANT: All data is synthetic and clearly labeled as prototype demonstration data.
 """
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import random
 from sqlalchemy.orm import Session
 from app.models.user import User
@@ -381,7 +381,7 @@ def seed_database(db: Session, force_reseed: bool = False):
             possible_disease_concern=combo["concern"],
             recommendation="Veterinary assessment recommended. Isolate affected animals." if risk_level in ("HIGH", "CRITICAL") else "Monitor and report if symptoms worsen.",
             status="RISK_ASSESSED",
-            reported_at=datetime.utcnow() - timedelta(days=days_ago),
+            reported_at=datetime.now(timezone.utc) - timedelta(days=days_ago),
         )
         reports.append(report)
     db.add_all(reports)
@@ -457,7 +457,7 @@ def seed_database(db: Session, force_reseed: bool = False):
                     priority="high", veterinarian_id="usr-vet-1", veterinarian_name="Dr. Priya Sharma",
                     village="Baramati", district="Pune", status="completed", result="positive",
                     result_notes="BVD virus RNA detected. Recommend isolation and supportive treatment.",
-                    result_date=datetime.utcnow() - timedelta(days=2)),
+                    result_date=datetime.now(timezone.utc) - timedelta(days=2)),
         LabReferral(id="lab-002", case_id="rep-102", report_id="rep-102", animal_id="BUF-102",
                     sample_type="Epithelial Swab", test_requested="FMD Virus Typing (ELISA + RT-PCR)",
                     priority="urgent", veterinarian_id="usr-vet-1", veterinarian_name="Dr. Priya Sharma",
@@ -471,13 +471,13 @@ def seed_database(db: Session, force_reseed: bool = False):
                     priority="normal", veterinarian_id="usr-vet-1", veterinarian_name="Dr. Priya Sharma",
                     village="Sinnar", district="Nashik", status="completed", result="positive",
                     result_notes="Staphylococcus aureus isolated. Antibiotic sensitivity: Ceftriaxone sensitive.",
-                    result_date=datetime.utcnow() - timedelta(days=5)),
+                    result_date=datetime.now(timezone.utc) - timedelta(days=5)),
         LabReferral(id="lab-005", case_id="rep-108", report_id="rep-108", animal_id="SHP-108",
                     sample_type="Fecal Sample", test_requested="Parasitology (Flotation + Sedimentation)",
                     priority="normal", veterinarian_id="usr-vet-3", veterinarian_name="Dr. Meena Kulkarni",
                     village="Shrigonda", district="Ahmednagar", status="completed", result="negative",
                     result_notes="No significant parasitic load detected.",
-                    result_date=datetime.utcnow() - timedelta(days=3)),
+                    result_date=datetime.now(timezone.utc) - timedelta(days=3)),
         LabReferral(id="lab-006", case_id="rep-113", report_id="rep-113", animal_id="BUF-113",
                     sample_type="Blood (Serum)", test_requested="Brucella Serology (RBPT + ELISA)",
                     priority="high", veterinarian_id="usr-vet-1", veterinarian_name="Dr. Priya Sharma",
@@ -500,48 +500,48 @@ def seed_database(db: Session, force_reseed: bool = False):
         CaseTimelineEvent(case_id="rep-103", event_type="report_created", title="Health Report Filed",
                           description="Farmer Suresh Jadhav reported fever, cough, reduced appetite for COW-103.",
                           actor_name="Suresh Jadhav", actor_role="farmer",
-                          created_at=datetime.utcnow() - timedelta(days=7)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=7)),
         CaseTimelineEvent(case_id="rep-103", event_type="ai_triage", title="AI Risk Assessment: HIGH (72/100)",
                           description="Risk engine detected respiratory symptom pattern. Possible BRD.",
                           actor_name="PASHURAKSHA AI", actor_role="system",
-                          created_at=datetime.utcnow() - timedelta(days=7, hours=-1)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=7, hours=-1)),
         CaseTimelineEvent(case_id="rep-103", event_type="risk_identified", title="High Risk Alert Generated",
                           description="Alert dispatched to veterinarian and authority.",
                           actor_name="Alert Engine", actor_role="system",
-                          created_at=datetime.utcnow() - timedelta(days=7, hours=-2)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=7, hours=-2)),
         CaseTimelineEvent(case_id="rep-103", event_type="vet_assigned", title="Veterinarian Assigned",
                           description="Dr. Priya Sharma assigned to investigate case.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
-                          created_at=datetime.utcnow() - timedelta(days=6)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=6)),
         CaseTimelineEvent(case_id="rep-103", event_type="field_visit", title="Field Visit Conducted",
                           description="Physical examination confirmed respiratory distress. Temperature: 104.2°F.",
                           actor_name="Ankita Jadhav", actor_role="field_worker",
-                          created_at=datetime.utcnow() - timedelta(days=5)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=5)),
         CaseTimelineEvent(case_id="rep-103", event_type="sample_collected", title="Sample Collected & Sent to Lab",
                           description="Nasal swab collected for RT-PCR testing. Priority: HIGH.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
-                          created_at=datetime.utcnow() - timedelta(days=5, hours=-2)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=5, hours=-2)),
         CaseTimelineEvent(case_id="rep-103", event_type="lab_result", title="Lab Result: POSITIVE (BVD)",
                           description="BVD virus RNA detected by RT-PCR. Isolation and supportive treatment recommended.",
                           actor_name="Dr. Suhas Kulkarni", actor_role="laboratory",
-                          created_at=datetime.utcnow() - timedelta(days=2)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=2)),
         CaseTimelineEvent(case_id="rep-103", event_type="treatment", title="Treatment Initiated",
                           description="Antipyretic + antibiotic therapy started. Animal isolated from herd.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
-                          created_at=datetime.utcnow() - timedelta(days=2, hours=-4)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=2, hours=-4)),
         # Case rep-102 partial timeline
         CaseTimelineEvent(case_id="rep-102", event_type="report_created", title="Health Report Filed",
                           description="Lesions and salivation reported in buffalo. Possible FMD.",
                           actor_name="Suresh Jadhav", actor_role="farmer",
-                          created_at=datetime.utcnow() - timedelta(days=4)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=4)),
         CaseTimelineEvent(case_id="rep-102", event_type="ai_triage", title="AI Risk Assessment: CRITICAL (88/100)",
                           description="Vesicular triad detected. FMD pattern match. URGENT veterinary action needed.",
                           actor_name="PASHURAKSHA AI", actor_role="system",
-                          created_at=datetime.utcnow() - timedelta(days=4, hours=-1)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=4, hours=-1)),
         CaseTimelineEvent(case_id="rep-102", event_type="sample_collected", title="Epithelial Sample Collected",
                           description="Epithelial swab sent for FMD virus typing.",
                           actor_name="Dr. Priya Sharma", actor_role="veterinarian",
-                          created_at=datetime.utcnow() - timedelta(days=3)),
+                          created_at=datetime.now(timezone.utc) - timedelta(days=3)),
     ]
     db.add_all(timeline_events)
     db.commit()

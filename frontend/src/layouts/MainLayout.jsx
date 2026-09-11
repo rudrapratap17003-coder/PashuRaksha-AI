@@ -54,7 +54,14 @@ export default function MainLayout({ user, onLogout }) {
 
             {user ? (
               <div className="flex items-center space-x-3">
-                <Link to="/farmer/dashboard">
+                <Link to={
+                  user.role === 'veterinarian' ? '/vet/dashboard' :
+                  user.role === 'field_worker' ? '/field-worker/dashboard' :
+                  user.role === 'laboratory' ? '/lab/dashboard' :
+                  user.role === 'authority' ? '/authority/dashboard' :
+                  user.role === 'admin' ? '/admin/dashboard' :
+                  '/farmer/dashboard'
+                }>
                   <Button size="sm" className="font-bold bg-sky-600 hover:bg-sky-500 text-white">
                     Dashboard
                   </Button>
@@ -100,6 +107,7 @@ export default function MainLayout({ user, onLogout }) {
           </div>
           <div className="flex items-center space-x-4 text-xs font-bold text-slate-900">
             <Link to="/presentation" className="hover:underline">SIH Jury Stage</Link>
+            <Link to="/analytics" className="hover:underline">State Analytics</Link>
             <Link to="/farmer/dashboard" className="hover:underline">Farmer Shed</Link>
             <Link to="/vet/dashboard" className="hover:underline">Vet Clinic</Link>
           </div>

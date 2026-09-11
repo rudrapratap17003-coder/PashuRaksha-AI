@@ -1,6 +1,6 @@
 import math
 from typing import List, Dict, Any, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 class OutbreakClusterEngine:
     """
@@ -63,7 +63,7 @@ class OutbreakClusterEngine:
         if not reports or len(reports) < min_cases:
             return []
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         cutoff_date = now - timedelta(days=time_window_days)
 
         # 1. Discard reports older than 14 days & discard reports with invalid coordinates
@@ -85,13 +85,16 @@ class OutbreakClusterEngine:
             if reported_at:
                 if isinstance(reported_at, str):
                     try:
-                        rep_dt = datetime.fromisoformat(reported_at.replace("Z", ""))
+                        rep_dt = datetime.fromisoformat(reported_at.replace("Z", "+00:00"))
                     except Exception:
                         rep_dt = now
                 elif isinstance(reported_at, datetime):
                     rep_dt = reported_at
                 else:
                     rep_dt = now
+
+                if rep_dt.tzinfo is None:
+                    rep_dt = rep_dt.replace(tzinfo=timezone.utc)
 
                 # Discard if older than temporal window (strict 14-day cutoff)
                 if rep_dt < cutoff_date:

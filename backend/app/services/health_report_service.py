@@ -1,6 +1,6 @@
 import uuid
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.health_report import HealthReport
 from app.models.risk_assessment import RiskAssessment
@@ -11,14 +11,22 @@ from app.models.case_timeline import CaseTimelineEvent
 from app.schemas.health_report import HealthReportCreate, HealthReportResponse
 from app.ai.risk_engine import ExplainableRiskEngine
 from app.ai.disease_model import DiseasePatternModel
+from app.utils import get_logger
+
+logger = get_logger("health_report_service")
 
 class HealthReportService:
     @staticmethod
-    def get_all(db: Session, animal_id: Optional[str] = None) -> List[HealthReportResponse]:
+    def get_all(
+        db: Session,
+        animal_id: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[HealthReportResponse]:
         query = db.query(HealthReport)
         if animal_id:
             query = query.filter(HealthReport.animal_id == animal_id)
-        reports = query.order_by(HealthReport.reported_at.desc()).all()
+        reports = query.order_by(HealthReport.reported_at.desc()).offset(offset).limit(limit).all()
         return [
             HealthReportResponse(
                 id=r.id,
@@ -105,45 +113,62 @@ class HealthReportService:
         species = animal.species if animal else "Cattle (Cow)"
         vaccination_status = animal.vaccination_status if animal else "Up to date"
 
-        # 1. Execute Explainable Risk Evaluation
-        eval_result = ExplainableRiskEngine.evaluate(
-            fever=report_in.fever,
-            cough=report_in.cough,
-            nasal_discharge=report_in.nasal_discharge,
-            reduced_appetite=report_in.reduced_appetite,
-            diarrhea=report_in.diarrhea,
-            lethargy=report_in.lethargy,
-            reduced_milk=report_in.reduced_milk,
-            difficulty_breathing=report_in.difficulty_breathing,
-            salivation=report_in.salivation,
-            lesions=report_in.lesions,
-            swelling=report_in.swelling,
-            other_symptoms=report_in.other_symptoms,
-            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
-            duration_days=report_in.duration_days,
-            number_of_animals_affected=report_in.number_of_animals_affected,
-            vaccination_status=vaccination_status,
-            species=species,
-            previous_diseases=animal.previous_diseases if animal else None,
-        )
+        # 1. Execute Explainable Risk Evaluation with safe fallback
+        try:
+            eval_result = ExplainableRiskEngine.evaluate(
+                fever=report_in.fever,
+                cough=report_in.cough,
+                nasal_discharge=report_in.nasal_discharge,
+                reduced_appetite=report_in.reduced_appetite,
+                diarrhea=report_in.diarrhea,
+                lethargy=report_in.lethargy,
+                reduced_milk=report_in.reduced_milk,
+                difficulty_breathing=report_in.difficulty_breathing,
+                salivation=report_in.salivation,
+                lesions=report_in.lesions,
+                swelling=report_in.swelling,
+                other_symptoms=report_in.other_symptoms,
+                severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
+                duration_days=report_in.duration_days,
+                number_of_animals_affected=report_in.number_of_animals_affected,
+                vaccination_status=vaccination_status,
+                species=species,
+                previous_diseases=animal.previous_diseases if animal else None,
+            )
+        except Exception as e:
+            logger.error(f"[RISK_EVAL_ERROR] Fallback to default score. Error: {e}")
+            eval_result = {
+                "risk_score": 45.0,
+                "risk_level": "MODERATE",
+                "recommendation": "Veterinary clinical observation recommended.",
+                "contributing_factors": [{"factor": "Clinical observation intake", "weight_contribution": 45.0, "category": "General"}]
+            }
 
-        # 2. Execute Disease Differential Pattern Match
-        diff_result = DiseasePatternModel.evaluate_differentials(
-            fever=report_in.fever,
-            cough=report_in.cough,
-            nasal_discharge=report_in.nasal_discharge,
-            reduced_appetite=report_in.reduced_appetite,
-            diarrhea=report_in.diarrhea,
-            lethargy=report_in.lethargy,
-            reduced_milk=report_in.reduced_milk,
-            difficulty_breathing=report_in.difficulty_breathing,
-            salivation=report_in.salivation,
-            lesions=report_in.lesions,
-            swelling=report_in.swelling,
-            species=species,
-            severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
-            number_of_animals_affected=report_in.number_of_animals_affected,
-        )
+        # 2. Execute Disease Differential Pattern Match with safe fallback
+        try:
+            diff_result = DiseasePatternModel.evaluate_differentials(
+                fever=report_in.fever,
+                cough=report_in.cough,
+                nasal_discharge=report_in.nasal_discharge,
+                reduced_appetite=report_in.reduced_appetite,
+                diarrhea=report_in.diarrhea,
+                lethargy=report_in.lethargy,
+                reduced_milk=report_in.reduced_milk,
+                difficulty_breathing=report_in.difficulty_breathing,
+                salivation=report_in.salivation,
+                lesions=report_in.lesions,
+                swelling=report_in.swelling,
+                species=species,
+                severity=report_in.severity.value if hasattr(report_in.severity, 'value') else report_in.severity,
+                number_of_animals_affected=report_in.number_of_animals_affected,
+            )
+        except Exception as e:
+            logger.error(f"[DISEASE_DIFF_ERROR] Fallback to standard differential. Error: {e}")
+            diff_result = {
+                "primary_disease_match": "General Bovine Health Concern",
+                "primary_confidence": 50.0,
+                "differential_matches": []
+            }
 
         score = eval_result["risk_score"]
         level = eval_result["risk_level"]
@@ -195,102 +220,107 @@ class HealthReportService:
             possible_disease_concern=primary_disease,
             recommendation=rec,
         )
-        db.add(rep)
-        db.commit()
-        db.refresh(rep)
 
-        # Store linked risk assessment
-        risk = RiskAssessment(
-            id=f"risk-{str(uuid.uuid4())[:8]}",
-            report_id=rep.id,
-            animal_id=rep.animal_id,
-            risk_score=score,
-            risk_level=level,
-            possible_disease_concern=primary_disease,
-            disease_risk_score=diff_result["primary_confidence"],
-            contributing_factors=factors,
-            recommendation=rec,
-            cluster_detected=report_in.number_of_animals_affected > 1,
-            cluster_name="Baramati Outbreak Watch" if report_in.number_of_animals_affected > 1 else None,
-        )
-        db.add(risk)
+        try:
+            db.add(rep)
+            db.flush()
 
-        # Initialize Case Timeline Events for unified downstream lifecycle
-        tl_event1 = CaseTimelineEvent(
-            case_id=rep.id,
-            event_type="report_created",
-            title="Health Report Filed",
-            description=f"Farmer {reporter_name} filed symptom report for {animal.animal_id if animal else rep.animal_id} ({rep.village}, {rep.district}). Severity: {rep.severity}.",
-            actor_name=reporter_name,
-            actor_role="farmer",
-            created_at=rep.reported_at
-        )
-        db.add(tl_event1)
-
-        tl_event2 = CaseTimelineEvent(
-            case_id=rep.id,
-            event_type="ai_triage",
-            title=f"Explainable Risk Score: {level} ({score}/100)",
-            description=f"Explainable health risk engine evaluated clinical indicators: {primary_disease} differential alignment. Recommendation: {rec}",
-            actor_name="PASHURAKSHA AI",
-            actor_role="system",
-            created_at=rep.reported_at
-        )
-        db.add(tl_event2)
-
-        # Update animal's current risk score
-        if animal:
-            animal.current_risk_score = score
-            animal.current_risk_level = level
-
-        # If high/critical risk, create alerts and timeline event
-        if score >= 60.0:
-            # Vet Alert
-            alert_vet = Alert(
-                id=f"alt-{str(uuid.uuid4())[:8]}",
-                user_id=reported_by,
-                target_role="veterinarian",
-                alert_type="vet_triage",
-                title=f"High Risk Case: {animal.animal_id if animal else rep.animal_id} ({rep.village})",
-                message=f"{species} reported with risk score {score}/100 ({primary_disease}). Prompt veterinary review recommended.",
+            # Store linked risk assessment
+            risk = RiskAssessment(
+                id=f"risk-{str(uuid.uuid4())[:8]}",
+                report_id=rep.id,
+                animal_id=rep.animal_id,
+                risk_score=score,
                 risk_level=level,
-                village=rep.village,
+                possible_disease_concern=primary_disease,
+                disease_risk_score=diff_result.get("primary_confidence", 50.0),
+                contributing_factors=factors,
+                recommendation=rec,
+                cluster_detected=report_in.number_of_animals_affected > 1,
+                cluster_name="Baramati Outbreak Watch" if report_in.number_of_animals_affected > 1 else None,
             )
-            db.add(alert_vet)
+            db.add(risk)
 
-            # Authority Early Warning Alert
-            alert_auth = Alert(
-                id=f"alt-auth-{str(uuid.uuid4())[:6]}",
-                user_id=reported_by,
-                target_role="authority",
-                alert_type="surveillance_warning",
-                title=f"Elevated Health Risk ({level}): {rep.village}",
-                message=f"Clinical report filed for {species} ({animal.animal_id if animal else rep.animal_id}) with risk score {score}/100. Differential: {primary_disease}.",
-                risk_level=level,
-                village=rep.village,
-            )
-            db.add(alert_auth)
-
-            tl_event3 = CaseTimelineEvent(
+            # Initialize Case Timeline Events
+            tl_event1 = CaseTimelineEvent(
                 case_id=rep.id,
-                event_type="risk_identified",
-                title=f"High Risk Alert Generated for {rep.village}",
-                description=f"Priority alert dispatched to area veterinary polyclinic and authority surveillance desk for {animal.animal_id if animal else rep.animal_id}.",
-                actor_name="Alert Engine",
+                event_type="report_created",
+                title="Health Report Filed",
+                description=f"Farmer {reporter_name} filed symptom report for {animal.animal_id if animal else rep.animal_id} ({rep.village}, {rep.district}). Severity: {rep.severity}.",
+                actor_name=reporter_name,
+                actor_role="farmer",
+                created_at=rep.reported_at
+            )
+            db.add(tl_event1)
+
+            tl_event2 = CaseTimelineEvent(
+                case_id=rep.id,
+                event_type="ai_triage",
+                title=f"Explainable Risk Score: {level} ({score}/100)",
+                description=f"Explainable health risk engine evaluated clinical indicators: {primary_disease} differential alignment. Recommendation: {rec}",
+                actor_name="PASHURAKSHA AI",
                 actor_role="system",
                 created_at=rep.reported_at
             )
-            db.add(tl_event3)
+            db.add(tl_event2)
 
-        db.commit()
+            # Update animal's current risk score
+            if animal:
+                animal.current_risk_score = score
+                animal.current_risk_level = level
 
-        # Trigger cluster detection if multiple animals affected or high risk
+            # If high/critical risk, create alerts and timeline event
+            if score >= 60.0:
+                alert_vet = Alert(
+                    id=f"alt-{str(uuid.uuid4())[:8]}",
+                    user_id=reported_by,
+                    target_role="veterinarian",
+                    alert_type="vet_triage",
+                    title=f"High Risk Case: {animal.animal_id if animal else rep.animal_id} ({rep.village})",
+                    message=f"{species} reported with risk score {score}/100 ({primary_disease}). Prompt veterinary review recommended.",
+                    risk_level=level,
+                    village=rep.village,
+                )
+                db.add(alert_vet)
+
+                alert_auth = Alert(
+                    id=f"alt-auth-{str(uuid.uuid4())[:6]}",
+                    user_id=reported_by,
+                    target_role="authority",
+                    alert_type="surveillance_warning",
+                    title=f"Elevated Health Risk ({level}): {rep.village}",
+                    message=f"Clinical report filed for {species} ({animal.animal_id if animal else rep.animal_id}) with risk score {score}/100. Differential: {primary_disease}.",
+                    risk_level=level,
+                    village=rep.village,
+                )
+                db.add(alert_auth)
+
+                tl_event3 = CaseTimelineEvent(
+                    case_id=rep.id,
+                    event_type="risk_identified",
+                    title=f"High Risk Alert Generated for {rep.village}",
+                    description=f"Priority alert dispatched to area veterinary polyclinic and authority surveillance desk for {animal.animal_id if animal else rep.animal_id}.",
+                    actor_name="Alert Engine",
+                    actor_role="system",
+                    created_at=rep.reported_at
+                )
+                db.add(tl_event3)
+
+            db.commit()
+            db.refresh(rep)
+            logger.info(f"[HEALTH_REPORT_CREATED] ID: {rep.id} | Animal: {rep.animal_id} | Score: {score}/100 ({level}) | Village: {rep.village}")
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[HEALTH_REPORT_CREATE_FAILED] Animal: {report_in.animal_id} | Error: {e}")
+            raise
+
+        # Trigger cluster detection asynchronously/inline safely
         if score >= 60.0 or report_in.number_of_animals_affected > 1:
             try:
                 from app.services.cluster_service import ClusterService
                 ClusterService.run_detection(db, window_days=14)
             except Exception as e:
-                pass
+                logger.warning(f"[CLUSTER_TRIGGER_NOTICE] Background cluster check: {e}")
 
         return HealthReportResponse(
             id=rep.id,
@@ -325,3 +355,4 @@ class HealthReportService:
             status=getattr(rep, "status", "RISK_ASSESSED") or "RISK_ASSESSED",
             contributing_factors=factors
         )
+

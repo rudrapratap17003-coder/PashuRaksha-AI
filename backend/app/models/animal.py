@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Float, DateTime, ForeignKey, Index
 from app.database import Base
 
 class Animal(Base):
@@ -10,7 +10,7 @@ class Animal(Base):
     animal_id = Column(String(50), unique=True, nullable=False, index=True)
     owner_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
     owner_name = Column(String(255), nullable=True)
-    species = Column(String(100), nullable=False)
+    species = Column(String(100), nullable=False, index=True)
     breed = Column(String(100), nullable=False)
     age = Column(Float, nullable=False)
     gender = Column(String(20), nullable=False)
@@ -18,8 +18,9 @@ class Animal(Base):
     vaccination_status = Column(String(50), default="Up to date")
     previous_diseases = Column(String(500), default="None")
     milk_production = Column(Float, nullable=True)
-    village = Column(String(255), nullable=True)
-    district = Column(String(255), nullable=True)
+    village = Column(String(255), nullable=True, index=True)
+    district = Column(String(255), nullable=True, index=True)
     current_risk_score = Column(Float, default=0.0)
-    current_risk_level = Column(String(20), default="LOW")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    current_risk_level = Column(String(20), default="LOW", index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+

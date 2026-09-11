@@ -13,6 +13,8 @@ router = APIRouter(prefix="/vaccinations", tags=["Vaccinations"])
 @router.get("", response_model=List[VaccinationResponse])
 def list_vaccinations(
     animal_id: Optional[str] = Query(None, description="Filter by animal ID"),
+    limit: int = Query(100, ge=1, le=500, description="Max vaccinations to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -25,9 +27,9 @@ def list_vaccinations(
         farmer_animal_ids = {a[0] for a in farmer_animals}
         if animal_id and animal_id not in farmer_animal_ids:
             return []
-        all_vacs = VaccinationService.get_all(db, animal_id=animal_id)
+        all_vacs = VaccinationService.get_all(db, animal_id=animal_id, limit=limit, offset=offset)
         return [v for v in all_vacs if v.animal_id in farmer_animal_ids]
-    return VaccinationService.get_all(db, animal_id=animal_id)
+    return VaccinationService.get_all(db, animal_id=animal_id, limit=limit, offset=offset)
 
 @router.post("", response_model=VaccinationResponse, status_code=status.HTTP_201_CREATED)
 def add_vaccination(

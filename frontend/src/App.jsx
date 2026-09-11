@@ -78,6 +78,7 @@ function AppRoutes() {
         <Route path="/farmer/knowledge" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><DiseaseKnowledgeBase /></ProtectedRoute>} />
         <Route path="/farmer/nutrition" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><NutritionAdvisorPage /></ProtectedRoute>} />
         <Route path="/farmer/breeds" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><BreedRegistryPage /></ProtectedRoute>} />
+        <Route path="/farmer/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.FARMER, USER_ROLES.ADMIN]}><FarmerDashboard /></ProtectedRoute>} />
 
         {/* 2. Field Worker / Pashu Sakhi Portal */}
         <Route path="/field-worker" element={<ProtectedRoute allowedRoles={[USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN]}><FieldWorkerDashboard /></ProtectedRoute>} />

@@ -43,8 +43,19 @@ export default function LoginPage() {
 
       // If user came from a deep link they are authorized for, send them there
       if (from && from !== '/login') {
-        const isAuthRoute = from.startsWith('/authority')
-        if (!isAuthRoute || userRole === USER_ROLES.AUTHORITY || userRole === USER_ROLES.ADMIN) {
+        const rolePermissions = {
+          '/farmer': [USER_ROLES.FARMER, USER_ROLES.ADMIN],
+          '/field-worker': [USER_ROLES.FIELD_WORKER, USER_ROLES.ADMIN],
+          '/vet': [USER_ROLES.VETERINARIAN, USER_ROLES.ADMIN],
+          '/lab': [USER_ROLES.LABORATORY, USER_ROLES.ADMIN],
+          '/authority': [USER_ROLES.AUTHORITY, USER_ROLES.ADMIN],
+          '/admin': [USER_ROLES.ADMIN],
+          '/analytics': [USER_ROLES.FARMER, USER_ROLES.FIELD_WORKER, USER_ROLES.VETERINARIAN, USER_ROLES.LABORATORY, USER_ROLES.AUTHORITY, USER_ROLES.ADMIN],
+          '/presentation': [USER_ROLES.FARMER, USER_ROLES.FIELD_WORKER, USER_ROLES.VETERINARIAN, USER_ROLES.LABORATORY, USER_ROLES.AUTHORITY, USER_ROLES.ADMIN],
+          '/pitch': [USER_ROLES.FARMER, USER_ROLES.FIELD_WORKER, USER_ROLES.VETERINARIAN, USER_ROLES.LABORATORY, USER_ROLES.AUTHORITY, USER_ROLES.ADMIN],
+        }
+        const matchedPrefix = Object.keys(rolePermissions).find(prefix => from.startsWith(prefix))
+        if (!matchedPrefix || rolePermissions[matchedPrefix].includes(userRole)) {
           navigate(from, { replace: true })
           return
         }

@@ -1,51 +1,32 @@
 {
-  "services": {
-    "frontend": {
-      "root": "frontend/",
-      "framework": "vite"
-    },
-    "backend": {
-      "root": "backend/",
-      "entrypoint": "app.main:app"
-    }
-  },
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": {
-        "service": "backend"
-      }
+      "source": "/api/v1/:path*",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/api/v1/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/api/:path*"
     },
     {
       "source": "/docs",
-      "destination": {
-        "service": "backend"
-      }
+      "destination": "https://pashuraksha-ai-backend.onrender.com/docs"
     },
     {
       "source": "/redoc",
-      "destination": {
-        "service": "backend"
-      }
+      "destination": "https://pashuraksha-ai-backend.onrender.com/redoc"
     },
     {
       "source": "/openapi.json",
-      "destination": {
-        "service": "backend"
-      }
-    },
-    {
-      "source": "/(assets/.*|.*\\.[\\w]+)",
-      "destination": {
-        "service": "frontend"
-      }
+      "destination": "https://pashuraksha-ai-backend.onrender.com/openapi.json"
     },
     {
       "source": "/(.*)",
-      "destination": {
-        "service": "frontend",
-        "path": "/index.html"
-      }
+      "destination": "/index.html"
     }
   ]
 }

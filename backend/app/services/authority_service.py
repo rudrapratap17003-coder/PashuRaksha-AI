@@ -1,10 +1,14 @@
 from typing import List
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models.health_report import HealthReport
 from app.models.animal import Animal
 from app.models.cluster import OutbreakCluster
 from app.models.alert import Alert
 from app.schemas.authority import AuthorityDashboardSummary, VillageRiskSummary, MapPoint, TrendPoint
+from app.utils import get_logger, get_utc_now
+
+logger = get_logger(__name__)
 
 class AuthorityService:
     @staticmethod

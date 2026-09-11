@@ -1,13 +1,22 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api/v1' : 'http://127.0.0.1:8000/api/v1')
+// Determine API base URL dynamically based on environment configuration
+let rawBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL
+if (rawBaseUrl) {
+  rawBaseUrl = rawBaseUrl.trim().replace(/\/+$/, '')
+  if (!rawBaseUrl.endsWith('/api/v1') && !rawBaseUrl.endsWith('/api')) {
+    rawBaseUrl = `${rawBaseUrl}/api/v1`
+  }
+}
+
+const API_BASE_URL = rawBaseUrl || (import.meta.env.PROD ? '/api/v1' : 'http://127.0.0.1:8000/api/v1')
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 15000,
 })
 
 // Request Interceptor: Attach JWT token if available

@@ -12,6 +12,8 @@ router = APIRouter(prefix="/animals", tags=["Animals & Digital Records"])
 @router.get("", response_model=List[AnimalResponse])
 def list_animals(
     owner_id: Optional[str] = Query(None, description="Filter by owner user ID"),
+    limit: int = Query(100, ge=1, le=500, description="Max records to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -21,8 +23,8 @@ def list_animals(
     Other roles (vet, field worker, authority, admin) can view all or filter by owner.
     """
     if (current_user.role or "").lower() == "farmer":
-        return AnimalService.get_all(db, owner_id=current_user.id)
-    return AnimalService.get_all(db, owner_id=owner_id)
+        return AnimalService.get_all(db, owner_id=current_user.id, limit=limit, offset=offset)
+    return AnimalService.get_all(db, owner_id=owner_id, limit=limit, offset=offset)
 
 @router.post("", response_model=AnimalResponse, status_code=status.HTTP_201_CREATED)
 def create_animal(

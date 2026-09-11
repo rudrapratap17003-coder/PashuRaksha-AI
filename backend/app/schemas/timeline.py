@@ -1,15 +1,17 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 class TimelineEventCreate(BaseModel):
-    event_type: str = Field(..., example="field_visit")
-    title: str = Field(..., example="Field Visit Completed")
-    description: Optional[str] = Field(None, example="Dr. Sharma visited the farm")
+    event_type: str = Field(...)
+    title: str = Field(...)
+    description: Optional[str] = Field(None)
     actor_name: Optional[str] = None
     actor_role: Optional[str] = None
 
 class TimelineEventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     case_id: str
     event_type: str
@@ -18,6 +20,3 @@ class TimelineEventResponse(BaseModel):
     actor_name: Optional[str] = None
     actor_role: Optional[str] = None
     created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True

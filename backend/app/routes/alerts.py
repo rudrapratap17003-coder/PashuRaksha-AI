@@ -12,11 +12,13 @@ router = APIRouter(prefix="/alerts", tags=["Alerts & Notifications"])
 @router.get("", response_model=List[AlertResponse])
 def list_alerts(
     role: Optional[str] = Query(None, description="Filter alerts by target role (farmer/veterinarian/authority)"),
+    limit: int = Query(100, ge=1, le=500, description="Max alerts to return"),
+    offset: int = Query(0, ge=0, description="Alerts to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     target_role = role or (current_user.role or "").lower()
-    alerts = AlertService.get_all(db, target_role=target_role)
+    alerts = AlertService.get_all(db, target_role=target_role, limit=limit, offset=offset)
     if (current_user.role or "").lower() == "farmer":
         alerts = [a for a in alerts if a.target_role in ("farmer", "all") or a.user_id == current_user.id]
     return alerts

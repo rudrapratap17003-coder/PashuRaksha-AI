@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -10,6 +10,8 @@ class CaseTimelineEventCreate(BaseModel):
     actor_role: Optional[str] = None
 
 class CaseTimelineEventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     case_id: str
     event_type: str
@@ -18,5 +20,3 @@ class CaseTimelineEventResponse(BaseModel):
     actor_name: Optional[str]
     actor_role: Optional[str]
     created_at: datetime
-    class Config:
-        from_attributes = True

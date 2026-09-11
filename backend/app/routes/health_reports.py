@@ -12,6 +12,8 @@ router = APIRouter(prefix="/health-reports", tags=["Health Reports & Symptom Ing
 @router.get("", response_model=List[HealthReportResponse])
 def list_health_reports(
     animal_id: Optional[str] = Query(None, description="Filter by animal ID"),
+    limit: int = Query(100, ge=1, le=500, description="Max records to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -20,7 +22,7 @@ def list_health_reports(
     Authenticated: Farmers only see reports from their own farm.
     Vets, field workers, authorities, and admins see all district reports.
     """
-    reports = HealthReportService.get_all(db, animal_id=animal_id)
+    reports = HealthReportService.get_all(db, animal_id=animal_id, limit=limit, offset=offset)
     if (current_user.role or "").lower() == "farmer":
         reports = [r for r in reports if r.reported_by == current_user.id]
     return reports
