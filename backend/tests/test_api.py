@@ -873,4 +873,76 @@ def test_phase3_disease_risk_outbreak_alert_pipeline(farmer_headers, vet_headers
     assert len(auth_dash["villages"]) >= 1
 
 
+def test_phase4_authority_mvu_biosecurity_suite(authority_headers):
+    """
+    Phase 4: Verify Authority KPIs, 1962 MVU Fleet Dispatch, and APMC Market Biosecurity.
+    """
+    # 1. Authority Dashboard KPIs
+    dash_res = client.get("/api/v1/authority/dashboard", headers=authority_headers)
+    assert dash_res.status_code == 200
+    dash = dash_res.json()
+    assert dash["total_monitored_animals"] > 0
+    assert dash["total_health_reports"] > 0
+    assert dash["high_risk_villages_count"] >= 1
+    assert len(dash["villages"]) >= 4
+
+    # 2. Surveillance Map points
+    map_res = client.get("/api/v1/authority/map-data", headers=authority_headers)
+    assert map_res.status_code == 200
+    points = map_res.json()
+    assert len(points) >= 1
+    assert any(p["risk_level"] in ("HIGH", "CRITICAL") for p in points)
+
+    # 3. MVU Fleet Telemetry Query
+    fleet_res = client.get("/api/v1/authority/mvu-fleet", headers=authority_headers)
+    assert fleet_res.status_code == 200
+    fleet = fleet_res.json()
+    assert len(fleet) >= 3
+    unit = fleet[0]
+    assert "id" in unit
+    assert "currentLocation" in unit
+    assert unit["coldBoxTemp"] > 0
+
+    # 4. MVU Emergency 1962 SOS Dispatch
+    dispatch_payload = {
+        "unit_id": unit["id"],
+        "destination": "Baramati Outbreak Hotspot (Contagion Core)",
+        "priority": "EMERGENCY_SOS",
+        "notes": "Containment protocol activation for suspected FMD cluster."
+    }
+    dispatch_res = client.post("/api/v1/authority/mvu-fleet/dispatch", json=dispatch_payload, headers=authority_headers)
+    assert dispatch_res.status_code == 200
+    dispatch_data = dispatch_res.json()
+    assert dispatch_data["success"] is True
+    assert "1962 SOS" in dispatch_data["message"]
+    assert dispatch_data["unit"]["status"] == "DISPATCHED VIA 1962 SOS"
+    assert dispatch_data["eta_minutes"] > 0
+
+    # 5. Market Biosecurity Overview Query
+    bio_res = client.get("/api/v1/authority/market-biosecurity", headers=authority_headers)
+    assert bio_res.status_code == 200
+    bio_data = bio_res.json()
+    assert bio_data["total_monitored_bazaars"] >= 3
+    assert bio_data["active_cordons"] >= 1
+    assert len(bio_data["markets"]) >= 3
+    assert len(bio_data["permits"]) >= 4
+
+    # 6. Transit Permit Gatekeeper Verification: Block High-Risk Hotspot Transit
+    block_req = {"permit_id_or_code": "MH-TRANSIT-2026-9401"}
+    block_res = client.post("/api/v1/authority/market-biosecurity/verify-permit", json=block_req, headers=authority_headers)
+    assert block_res.status_code == 200
+    block_data = block_res.json()
+    assert block_data["allowed"] is False
+    assert "DENIED" in block_data["message"] or "Quarantined" in block_data["message"]
+
+    # 7. Transit Permit Gatekeeper Verification: Clear Vaccinated Livestock Transit
+    clear_req = {"permit_id_or_code": "MH-TRANSIT-2026-8812"}
+    clear_res = client.post("/api/v1/authority/market-biosecurity/verify-permit", json=clear_req, headers=authority_headers)
+    assert clear_res.status_code == 200
+    clear_data = clear_res.json()
+    assert clear_data["allowed"] is True
+    assert "CLEARED" in clear_data["message"] or "VALID" in clear_data["message"]
+
+
+
 
