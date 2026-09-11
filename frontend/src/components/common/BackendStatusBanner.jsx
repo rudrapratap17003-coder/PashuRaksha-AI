@@ -1,8 +1,10 @@
 ﻿import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { AlertCircle, RefreshCw, CheckCircle2, WifiOff } from 'lucide-react'
 import { checkHealth } from '../../services/api'
 
 export default function BackendStatusBanner() {
+  const { t } = useLanguage()
   const [status, setStatus] = useState('checking') // 'healthy' | 'offline' | 'checking'
   const [retrying, setRetrying] = useState(false)
   const [dismissed, setDismissed] = useState(false)

@@ -1,10 +1,12 @@
 import React from 'react'
+import { useLanguage } from '../context/LanguageContext'
 import { Link } from 'react-router-dom'
 import { AlertCircle, Home } from 'lucide-react'
 import Button from '../components/common/Button'
 import Card from '../components/common/Card'
 
 export default function NotFoundPage() {
+  const { t } = useLanguage()
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
       <Card className="text-center max-w-md space-y-4 p-8">

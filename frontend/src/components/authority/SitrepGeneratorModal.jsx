@@ -1,19 +1,9 @@
 import React from 'react'
-import {
-  FileText,
-  Printer,
-  X,
-  Building2,
-  ShieldCheck,
-  AlertTriangle,
-  Radio,
-  CheckCircle2,
-  Download,
-  Calendar,
-  MapPin
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { FileText, Printer, X, Building2, ShieldCheck, AlertTriangle, Radio, CheckCircle2, Download, Calendar, MapPin } from 'lucide-react'
 
 export default function SitrepGeneratorModal({ isOpen, onClose }) {
+  const { t } = useLanguage()
   if (!isOpen) return null
 
   const handlePrint = () => {
@@ -87,9 +77,9 @@ export default function SitrepGeneratorModal({ isOpen, onClose }) {
                 <span className="text-[10px] text-emerald-700 block uppercase font-bold">Ring Vaccination</span>
                 <strong className="text-lg font-black text-emerald-700">71.0% Covered</strong>
               </div>
-              <div className="p-3 bg-purple-50 rounded-xl border border-purple-200">
-                <span className="text-[10px] text-purple-700 block uppercase font-bold">Case Fatality (CFR)</span>
-                <strong className="text-lg font-black text-purple-700">0.0% (Zero Mortality)</strong>
+              <div className="p-3 bg-purple-50 rounded-xl border border-slate-800">
+                <span className="text-[10px] text-slate-900 block uppercase font-bold">Case Fatality (CFR)</span>
+                <strong className="text-lg font-black text-slate-900">0.0% (Zero Mortality)</strong>
               </div>
             </div>
 

@@ -1,24 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  PawPrint,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Syringe,
-  ShieldCheck,
-  AlertTriangle,
-  ChevronRight,
-  Milk,
-  Calendar,
-  MapPin,
-  Tag,
-  Layers,
-  BarChart3,
-  Download,
-  RefreshCw
-} from 'lucide-react'
+import { PawPrint, Search, Filter, SortAsc, SortDesc, Syringe, ShieldCheck, AlertTriangle, ChevronRight, Milk, Calendar, MapPin, Tag, Layers, BarChart3, Download, RefreshCw } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
 import RiskBadge from '../../components/common/RiskBadge'
@@ -32,17 +14,17 @@ const VACC_OPTIONS = ['All', 'Fully Vaccinated', 'Partially Vaccinated', 'Not Va
 
 const SPECIES_COLORS = {
   Cattle: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  Buffalo: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  Buffalo: 'bg-slate-50 border border-slate-200 text-slate-300 border-slate-800',
   Goat: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   Sheep: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  Poultry: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+  Poultry: 'bg-slate-50 border border-slate-200 text-slate-300 border-slate-800',
 }
 
 const HEALTH_COLORS = {
   Healthy: 'bg-emerald-500/20 text-emerald-300',
   'Under Observation': 'bg-amber-500/20 text-amber-300',
   Sick: 'bg-red-500/20 text-red-300',
-  Quarantined: 'bg-purple-500/20 text-purple-300',
+  Quarantined: 'bg-slate-50 border border-slate-200 text-slate-300',
 }
 
 function getAge(dob) {
@@ -191,7 +173,7 @@ export default function HerdManagement() {
           </button>
           <Link
             to="/farmer/animals/add"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-900/30 transition shadow-xs"
+            className="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-slate-900/20 transition shadow-xs"
           >
             <PawPrint className="w-4 h-4" /> {t("herd.registerAnimal")}
           </Link>
@@ -306,7 +288,7 @@ export default function HerdManagement() {
             <Link
               key={animal.id}
               to={`/farmer/animals/${animal.id}`}
-              className="group p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-emerald-500/40 transition-all hover:shadow-lg hover:shadow-emerald-950/20"
+              className="group p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-emerald-500/40 transition-all hover:shadow-lg hover:shadow-slate-900/20"
             >
               {/* Species & Tag */}
               <div className="flex items-center justify-between mb-3">

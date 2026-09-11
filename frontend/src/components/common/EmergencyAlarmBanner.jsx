@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import { 
-  BellRing, 
-  Volume2, 
-  VolumeX, 
-  ChevronRight,
-  Truck,
-  X
-} from 'lucide-react'
+import { BellRing, Volume2, VolumeX, ChevronRight, Truck, X } from 'lucide-react'
 import { useScenario } from '../../context/ScenarioContext'
 import { playEmergencySiren, stopEmergencySiren } from '../../utils/audioAlarm'
 
 export default function EmergencyAlarmBanner() {
+  const { t } = useLanguage()
   const { currentScenario, scenarios } = useScenario()
   const [dismissed, setDismissed] = useState(false)
   const [sirenActive, setSirenActive] = useState(false)
@@ -51,7 +46,7 @@ export default function EmergencyAlarmBanner() {
   if (!isOutbreak || dismissed) return null
 
   return (
-    <div className="sticky top-0 z-50 bg-gradient-to-r from-rose-950 via-red-950 to-slate-950 border-b-2 border-rose-500 shadow-2xl shadow-rose-950/80 text-white px-4 py-3 animate-in slide-in-from-top duration-300">
+    <div className="sticky top-0 z-50 bg-slate-900 border-b-2 border-rose-500 shadow-2xl shadow-slate-900/20 text-white px-4 py-3 animate-in slide-in-from-top duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         
         {/* Left Siren Warning */}
@@ -86,14 +81,14 @@ export default function EmergencyAlarmBanner() {
             aria-label={sirenActive ? 'Mute emergency siren' : 'Activate emergency siren'}
             className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center space-x-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-400 cursor-pointer ${
               sirenActive
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/50 animate-pulse border border-rose-400'
+                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-slate-900/20 animate-pulse border border-rose-400'
                 : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500'
             }`}
           >
             {sirenActive ? (
               <>
                 <VolumeX className="w-3.5 h-3.5 text-white" />
-                <span>🔇 Mute Siren</span>
+                <span>Mute Siren</span>
               </>
             ) : (
               <>
@@ -105,7 +100,7 @@ export default function EmergencyAlarmBanner() {
 
           <Link
             to="/authority/mvu-fleet"
-            className="px-3 py-1.5 rounded-xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white shadow-md transition flex items-center space-x-1"
+            className="px-3 py-1.5 rounded-xl font-bold hover:bg-slate-800 text-white shadow-md transition flex items-center space-x-1"
           >
             <Truck className="w-3.5 h-3.5" />
             <span>Dispatch RRU Van</span>

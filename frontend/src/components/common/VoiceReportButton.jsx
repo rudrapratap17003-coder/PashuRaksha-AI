@@ -14,6 +14,7 @@ export default function VoiceReportButton({
   showLivePreview = true,
   disabled = false
 }) {
+  const { t } = useLanguage()
   const { language: contextLang } = useLanguage()
   const activeLang = overrideLang || contextLang || 'mr'
 
@@ -102,7 +103,7 @@ export default function VoiceReportButton({
             ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse border-2 border-rose-400 ring-2 ring-rose-500/40'
             : variant === 'secondary'
             ? 'bg-slate-900 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950'
-            : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black'
+            : 'bg-slate-900 hover:bg-slate-800 text-slate-950 font-black'
         } ${sizeClasses[size]} ${className}`}
       >
         {isListening ? (

@@ -1,21 +1,11 @@
 import React, { useState } from 'react'
-import {
-  IndianRupee,
-  TrendingDown,
-  FileCheck,
-  ShieldAlert,
-  AlertTriangle,
-  Sparkles,
-  CheckCircle2,
-  Download,
-  Building2,
-  X,
-  HelpCircle
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { IndianRupee, TrendingDown, FileCheck, ShieldAlert, AlertTriangle, Sparkles, CheckCircle2, Download, Building2, X, HelpCircle } from 'lucide-react'
 import Card from '../common/Card'
 import Button from '../common/Button'
 
 export default function EconomicLossCalculator({ isOpen, onClose }) {
+  const { t } = useLanguage()
   const [affectedCattle, setAffectedCattle] = useState(4)
   const [avgMilkPerCow, setAvgMilkPerCow] = useState(12) // L/day
   const [milkRate, setMilkRate] = useState(38) // Rs/L (Maharashtra standard buffalo/cow average)
@@ -73,7 +63,7 @@ export default function EconomicLossCalculator({ isOpen, onClose }) {
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {claimSubmitted ? (
             <div className="p-8 text-center space-y-4 bg-slate-950 rounded-3xl border border-emerald-500/40">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-950">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-slate-900/20">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-1">
@@ -185,7 +175,7 @@ export default function EconomicLossCalculator({ isOpen, onClose }) {
               </div>
 
               {/* Government Relief Subsidy Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/40 flex items-center justify-between gap-4">
+              <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/40 flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-black uppercase text-emerald-400 flex items-center gap-1">
                     <ShieldAlert className="w-3.5 h-3.5" />
@@ -200,7 +190,7 @@ export default function EconomicLossCalculator({ isOpen, onClose }) {
                 </div>
                 <button
                   onClick={handleSubmitClaim}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-950 flex items-center gap-1.5 flex-shrink-0 transition"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-lg shadow-slate-900/20 flex items-center gap-1.5 flex-shrink-0 transition"
                 >
                   <FileCheck className="w-4 h-4" />
                   <span>Apply For Relief</span>

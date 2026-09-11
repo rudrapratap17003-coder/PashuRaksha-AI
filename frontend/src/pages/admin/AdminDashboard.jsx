@@ -1,24 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  Shield, 
-  Users, 
-  Sliders, 
-  Database, 
-  Activity, 
-  MapPin, 
-  CheckCircle2, 
-  Lock, 
-  Server, 
-  Cpu, 
-  Search, 
-  Sparkles,
-  RefreshCw,
-  AlertCircle
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { Shield, Users, Sliders, Database, HeartPulse, MapPin, CheckCircle2, Lock, Server, Cpu, Search, Sparkles, RefreshCw, AlertCircle } from 'lucide-react'
 import StatCard from '../../components/common/StatCard'
 import apiClient from '../../services/api'
 
 export default function AdminDashboard() {
+  const { t } = useLanguage()
   const [users, setUsers] = useState([])
   const [stats, setStats] = useState(null)
   const [riskRules, setRiskRules] = useState(null)
@@ -130,7 +117,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-zinc-900 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Shield className="w-4 h-4" />
@@ -191,14 +178,14 @@ export default function AdminDashboard() {
           value={stats?.villages_covered || 15}
           subtitle="Western Maharashtra network"
           icon={MapPin}
-          iconBg="bg-teal-500/10 text-teal-600 border border-teal-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
         <StatCard
           title="AI Scoring Engine"
           value="Online (42ms)"
           subtitle="Explainable rule parser v1.0"
           icon={Cpu}
-          iconBg="bg-sky-500/10 text-sky-600 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
       </div>
 
@@ -357,7 +344,7 @@ export default function AdminDashboard() {
                 <p className="text-slate-500">{v.taluka} Taluka • {v.district} District</p>
                 <div className="flex justify-between pt-2 border-t border-slate-200 text-[11px] text-slate-600">
                   <span>{v.farms || 3} Registered Farms</span>
-                  <span className="font-bold text-teal-700">{v.animals || 100} Animals Monitored</span>
+                  <span className="font-bold text-slate-900">{v.animals || 100} Animals Monitored</span>
                 </div>
               </div>
             ))}

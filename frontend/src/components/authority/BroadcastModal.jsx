@@ -1,17 +1,6 @@
 import React, { useState } from 'react'
-import {
-  Send,
-  X,
-  Radio,
-  CheckCircle2,
-  AlertTriangle,
-  Smartphone,
-  MessageSquare,
-  Sparkles,
-  Users,
-  MapPin,
-  RefreshCw
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { Send, X, Radio, CheckCircle2, AlertTriangle, Smartphone, MessageSquare, Sparkles, Users, MapPin, RefreshCw } from 'lucide-react'
 import apiClient from '../../services/api'
 
 const BROADCAST_TEMPLATES = {
@@ -33,6 +22,7 @@ const BROADCAST_TEMPLATES = {
 }
 
 export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useLanguage()
   const [lang, setLang] = useState('mr')
   const [templateType, setTemplateType] = useState('outbreak')
   const [channel, setChannel] = useState('both') // whatsapp | sms | both
@@ -77,17 +67,17 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-purple-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-100">
+      <div className="relative w-full max-w-4xl bg-slate-900  rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-100">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400">
+            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200  text-slate-300">
               <Radio className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-base font-black text-white flex items-center gap-2">
                 Emergency Multilingual Broadcast Dispatcher
-                <span className="px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                <span className="px-2 py-0.5 rounded-full bg-purple-950 text-slate-300 text-[10px] font-bold ">
                   SMS / WhatsApp Gateway
                 </span>
               </h2>
@@ -179,7 +169,7 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
                         onClick={() => handleTemplateChange(t.id)}
                         className={`p-2.5 rounded-xl border text-xs font-bold text-left transition ${
                           templateType === t.id
-                            ? 'bg-purple-950/80 border-purple-400 text-white'
+                            ? 'bg-purple-950/80 border-slate-800 text-white'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                       >
@@ -204,7 +194,7 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
               {/* Mobile Preview */}
               <div className="md:col-span-5 bg-slate-950 p-4 rounded-3xl border border-slate-800 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+                  <Smartphone className="w-3.5 h-3.5 text-slate-300" />
                   <span>Farmer Phone Mockup (WhatsApp)</span>
                 </span>
 
@@ -216,7 +206,7 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
                       <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[10px] text-white font-bold">
                         MH
                       </div>
-                      <span>Maha-Pashuraksha AI 🟢</span>
+                      <span>Maha-Pashuraksha AI</span>
                     </div>
                     <span className="text-[9px] text-slate-400">Verified</span>
                   </div>
@@ -229,7 +219,7 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
                 </div>
 
                 {/* Target Audience Summary */}
-                <div className="p-3 bg-purple-950/40 border border-purple-500/20 rounded-2xl text-[11px] text-purple-200 space-y-1">
+                <div className="p-3 bg-slate-800 border border-slate-700  rounded-2xl text-[11px] text-slate-300 space-y-1">
                   <div className="flex justify-between">
                     <span>Estimated Reach:</span>
                     <strong className="text-white">~4,850 Farmers</strong>
@@ -257,7 +247,7 @@ export default function BroadcastModal({ isOpen, onClose, onSuccess }) {
               <button
                 onClick={handleDispatch}
                 disabled={sending}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-950"
+                className="px-5 py-2 rounded-xl hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-slate-900/20"
               >
                 {sending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 <span>Send Emergency Broadcast</span>

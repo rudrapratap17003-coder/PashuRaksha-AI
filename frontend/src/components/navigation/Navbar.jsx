@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { 
-  Activity, 
-  RefreshCw, 
-  LogOut, 
-  User, 
-  Menu, 
-  X,
-  Bell,
-  Sparkles
-} from 'lucide-react'
+import { HeartPulse, RefreshCw, LogOut, User, Menu, X, Bell, Sparkles } from 'lucide-react'
 import { checkHealth } from '../../services/api'
 import { USER_ROLES } from '../../utils/constants'
 
 export default function Navbar({ user, onLogout, toggleSidebar, isSidebarOpen }) {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const [apiOnline, setApiOnline] = useState(null)
@@ -40,9 +33,9 @@ export default function Navbar({ user, onLogout, toggleSidebar, isSidebarOpen })
       case USER_ROLES.FARMER:
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Farmer</span>
       case USER_ROLES.VETERINARIAN:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800">Veterinarian</span>
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-slate-900">Veterinarian</span>
       case USER_ROLES.AUTHORITY:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">Authority</span>
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-slate-900">Authority</span>
       default:
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">Demo User</span>
     }
@@ -64,8 +57,8 @@ export default function Navbar({ user, onLogout, toggleSidebar, isSidebarOpen })
           )}
 
           <Link to="/" className="flex items-center space-x-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-200">
-              <Activity className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-slate-900/20">
+              <HeartPulse className="w-6 h-6" />
             </div>
             <div>
               <span className="text-xl font-black tracking-tight text-slate-900">
@@ -136,7 +129,7 @@ export default function Navbar({ user, onLogout, toggleSidebar, isSidebarOpen })
               </Link>
               <Link
                 to="/register"
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-200 transition"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-slate-900/20 transition"
               >
                 Register
               </Link>

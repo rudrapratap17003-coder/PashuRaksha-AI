@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import {
-  Truck,
-  MapPin,
-  Phone,
-  Radio,
-  Clock,
-  ShieldCheck,
-  AlertTriangle,
-  Send,
-  CheckCircle2,
-  Navigation,
-  Fuel,
-  Thermometer,
-  Stethoscope,
-  ArrowLeft,
-  RefreshCw,
-  AlertCircle,
-  Activity,
-  Check
-} from 'lucide-react'
+import { Truck, MapPin, Phone, Radio, Clock, ShieldCheck, AlertTriangle, Send, CheckCircle2, Navigation, Fuel, Thermometer, Stethoscope, ArrowLeft, RefreshCw, AlertCircle, HeartPulse, Check } from 'lucide-react'
 import StatCard from '../../components/common/StatCard'
 import Button from '../../components/common/Button'
 import apiClient from '../../services/api'
@@ -73,6 +55,7 @@ const INITIAL_MVU_FLEET = [
 ]
 
 export default function MvuFleetTracker() {
+  const { t } = useLanguage()
   const [fleet, setFleet] = useState(INITIAL_MVU_FLEET)
   const [selectedUnit, setSelectedUnit] = useState(INITIAL_MVU_FLEET[0])
   const [sosNotice, setSosNotice] = useState(null)
@@ -171,10 +154,10 @@ export default function MvuFleetTracker() {
       </div>
 
       {/* Main Header Banner */}
-      <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-indigo-950 border border-sky-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="  rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Radio className="w-4 h-4 text-sky-400 animate-pulse" />
+          <div className="flex items-center space-x-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
+            <Radio className="w-4 h-4 text-slate-300 animate-pulse" />
             <span>1962 Pashu Sanjeevani • Mobile Veterinary Ambulance Fleet</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -191,13 +174,13 @@ export default function MvuFleetTracker() {
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md cursor-pointer ${
               refreshSuccess
                 ? 'bg-emerald-600 text-white border border-emerald-500'
-                : 'bg-slate-900 hover:bg-slate-800 text-white border border-sky-500/30 hover:border-sky-400/50'
+                : 'bg-slate-900 hover:bg-slate-800 text-white  hover:border-slate-800'
             } disabled:opacity-70`}
           >
             {refreshSuccess ? (
               <CheckCircle2 className="w-4 h-4 text-white" />
             ) : (
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-sky-400' : 'text-sky-300'}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-slate-300' : 'text-slate-300'}`} />
             )}
             <span>{refreshing ? 'Refreshing...' : refreshSuccess ? '✓ Refreshed' : 'Refresh Telemetry'}</span>
           </button>
@@ -227,7 +210,7 @@ export default function MvuFleetTracker() {
           value={`${fleet.length} Units`}
           subtitle="Pune & neighbouring talukas"
           icon={Truck}
-          iconBg="bg-sky-500/10 text-sky-600 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
         <StatCard
           title="Active Dispatches"
@@ -248,7 +231,7 @@ export default function MvuFleetTracker() {
           value="4.1°C"
           subtitle="Safe 2°C – 8°C vaccine range"
           icon={Thermometer}
-          iconBg="bg-teal-500/10 text-teal-600 border border-teal-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
       </div>
 
@@ -270,21 +253,21 @@ export default function MvuFleetTracker() {
                   onClick={() => setSelectedUnit(u)}
                   className={`w-full p-4 rounded-2xl text-left border transition-all cursor-pointer flex items-center justify-between ${
                     isSelected
-                      ? 'bg-sky-50/80 border-sky-500 shadow-md ring-2 ring-sky-500/20'
+                      ? 'bg-sky-50/80 border-slate-800 shadow-md ring-2 ring-sky-500/20'
                       : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
                   }`}
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center space-x-2">
-                      <span className="text-[11px] font-mono font-bold text-sky-700">{u.id}</span>
+                      <span className="text-[11px] font-mono font-bold text-slate-900">{u.id}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
                         u.status.includes('STANDBY')
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : u.status.includes('EN-ROUTE')
-                          ? 'bg-sky-100 text-sky-800 border border-sky-300'
+                          ? 'bg-sky-100 text-slate-900 border border-slate-800'
                           : 'bg-amber-100 text-amber-800 border border-amber-300'
                       }`}>
-                        {u.status}
+                        {t(`data.status.${u.status}`, {}, u.status)}
                       </span>
                     </div>
                     <h4 className="text-sm font-bold text-slate-900 leading-snug">{u.name}</h4>
@@ -293,7 +276,7 @@ export default function MvuFleetTracker() {
                       <span>{u.currentLocation}</span>
                     </p>
                   </div>
-                  <Navigation className={`w-5 h-5 flex-shrink-0 ml-2 ${isSelected ? 'text-sky-600' : 'text-slate-300'}`} />
+                  <Navigation className={`w-5 h-5 flex-shrink-0 ml-2 ${isSelected ? 'text-slate-900' : 'text-slate-300'}`} />
                 </button>
               )
             })}
@@ -308,14 +291,14 @@ export default function MvuFleetTracker() {
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-4">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-[10px] font-mono text-sky-700 font-bold uppercase bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                    <span className="text-[10px] font-mono text-slate-900 font-bold uppercase bg-sky-50 px-2 py-0.5 rounded border border-slate-800">
                       {selectedUnit.district} Division Node
                     </span>
                     <span className="text-[10px] font-mono font-bold text-slate-500">{selectedUnit.id}</span>
                   </div>
                   <h3 className="text-xl font-black text-slate-900 mt-1">{selectedUnit.name}</h3>
                   <p className="text-xs text-slate-600 mt-1 flex items-center gap-1.5">
-                    <Stethoscope className="w-4 h-4 text-sky-600" />
+                    <Stethoscope className="w-4 h-4 text-slate-900" />
                     <span>Officer on Duty: <strong className="text-slate-900">{selectedUnit.dutyVet}</strong></span>
                   </p>
                 </div>
@@ -328,7 +311,7 @@ export default function MvuFleetTracker() {
               <div className="grid grid-cols-3 gap-3 text-center bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-slate-500 uppercase font-bold flex items-center justify-center gap-1">
-                    <Thermometer className="w-3.5 h-3.5 text-sky-600" /> Vaccine Cold-Box
+                    <Thermometer className="w-3.5 h-3.5 text-slate-900" /> Vaccine Cold-Box
                   </span>
                   <strong className="text-lg font-black text-slate-900">{selectedUnit.coldBoxTemp}°C</strong>
                   <span className="text-[10px] font-bold text-emerald-700 block">✓ Safe 2-8°C Range</span>
@@ -344,9 +327,9 @@ export default function MvuFleetTracker() {
 
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-slate-500 uppercase font-bold flex items-center justify-center gap-1">
-                    <Navigation className="w-3.5 h-3.5 text-teal-600" /> GPS Speed
+                    <Navigation className="w-3.5 h-3.5 text-slate-900" /> GPS Speed
                   </span>
-                  <strong className="text-lg font-black text-teal-700">{selectedUnit.speedKmH} km/h</strong>
+                  <strong className="text-lg font-black text-slate-900">{selectedUnit.speedKmH} km/h</strong>
                   <span className="text-[10px] text-slate-500 block">Live Telematics</span>
                 </div>
               </div>
@@ -390,7 +373,7 @@ export default function MvuFleetTracker() {
                     <select
                       value={targetHotspot}
                       onChange={(e) => setTargetHotspot(e.target.value)}
-                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
+                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-slate-800"
                     >
                       <option value="Baramati Outbreak Hotspot (Contagion Core)">Baramati Outbreak Hotspot (Contagion Core)</option>
                       <option value="Shirur Buffer Containment Ring">Shirur Buffer Containment Ring</option>
@@ -400,7 +383,7 @@ export default function MvuFleetTracker() {
                     <button
                       onClick={handleDispatch}
                       disabled={dispatching}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-md flex items-center justify-center space-x-2 transition disabled:opacity-60 cursor-pointer flex-shrink-0"
+                      className="px-5 py-2.5 rounded-xl hover:bg-slate-800 text-white font-bold text-xs shadow-md flex items-center justify-center space-x-2 transition disabled:opacity-60 cursor-pointer flex-shrink-0"
                     >
                       <Send className={`w-3.5 h-3.5 ${dispatching ? 'animate-spin' : ''}`} />
                       <span>{dispatching ? 'Transmitting...' : 'Dispatch SOS Ambulance'}</span>

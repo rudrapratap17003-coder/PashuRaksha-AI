@@ -1,17 +1,7 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  Activity, 
-  AlertCircle, 
-  User, 
-  Phone, 
-  Mail, 
-  Lock, 
-  MapPin, 
-  Building2, 
-  ArrowRight,
-  ShieldCheck
-} from 'lucide-react'
+import { HeartPulse, AlertCircle, User, Phone, Mail, Lock, MapPin, Building2, ArrowRight, ShieldCheck } from 'lucide-react'
 import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
 import SurveillanceBackground from '../../components/background/SurveillanceBackground'
@@ -21,6 +11,7 @@ import { USER_ROLES } from '../../utils/constants'
 import PashuLogo from '../../components/common/PashuLogo'
 
 export default function RegisterPage() {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const { register, loading } = useAuth()
   const [role, setRole] = useState(USER_ROLES.FARMER)
@@ -59,13 +50,13 @@ export default function RegisterPage() {
 
       {/* Centered White & Sky Blue Card */}
       <div className="relative z-10 w-full max-w-xl animate-in fade-in zoom-in duration-300">
-        <Card className="w-full space-y-6 shadow-xl shadow-sky-950/5 bg-white border border-sky-100 text-slate-900 rounded-3xl p-6 sm:p-8">
+        <Card className="w-full space-y-6 shadow-xl shadow-slate-900/20 bg-white border border-slate-800 text-slate-900 rounded-3xl p-6 sm:p-8">
           
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-sky-100 pb-4">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-[10px] font-mono font-black text-sky-700 uppercase tracking-widest bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                <span className="text-[10px] font-mono font-black text-slate-900 uppercase tracking-widest bg-sky-50 px-2.5 py-0.5 rounded-full border border-slate-800">
                   STATE LIVESTOCK REGISTRY
                 </span>
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
@@ -92,7 +83,7 @@ export default function RegisterPage() {
                 onClick={() => setRole(USER_ROLES.FARMER)}
                 className={`p-2.5 rounded-xl border text-xs font-bold text-center transition ${
                   role === USER_ROLES.FARMER
-                    ? 'border-sky-600 bg-sky-50 text-sky-800 ring-2 ring-sky-500/30'
+                    ? 'border-slate-800 bg-sky-50 text-slate-900 ring-2 ring-sky-500/30'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
                 }`}
               >
@@ -103,18 +94,17 @@ export default function RegisterPage() {
                 onClick={() => setRole(USER_ROLES.VETERINARIAN)}
                 className={`p-2.5 rounded-xl border text-xs font-bold text-center transition ${
                   role === USER_ROLES.VETERINARIAN
-                    ? 'border-sky-600 bg-sky-50 text-sky-800 ring-2 ring-sky-500/30'
+                    ? 'border-slate-800 bg-sky-50 text-slate-900 ring-2 ring-sky-500/30'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
                 }`}
-              >
-                🩺 Veterinarian
+              >Veterinarian
               </button>
               <button
                 type="button"
                 onClick={() => setRole(USER_ROLES.AUTHORITY)}
                 className={`p-2.5 rounded-xl border text-xs font-bold text-center transition ${
                   role === USER_ROLES.AUTHORITY
-                    ? 'border-sky-600 bg-sky-50 text-sky-800 ring-2 ring-sky-500/30'
+                    ? 'border-slate-800 bg-sky-50 text-slate-900 ring-2 ring-sky-500/30'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
                 }`}
               >
@@ -143,7 +133,7 @@ export default function RegisterPage() {
                     placeholder="e.g. Ramesh Shinde"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
                   />
                 </div>
               </div>
@@ -159,7 +149,7 @@ export default function RegisterPage() {
                     placeholder="10-digit mobile"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
                   />
                 </div>
               </div>
@@ -177,7 +167,7 @@ export default function RegisterPage() {
                     placeholder="farmer@domain.com"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
                   />
                 </div>
               </div>
@@ -193,7 +183,7 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-9 pr-3 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 font-medium"
                   />
                 </div>
               </div>
@@ -210,7 +200,7 @@ export default function RegisterPage() {
                   placeholder="e.g. Baramati"
                   value={formData.village}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white font-medium"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white font-medium"
                 />
               </div>
 
@@ -220,7 +210,7 @@ export default function RegisterPage() {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-2 py-2 text-xs rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white font-medium"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-2 py-2 text-xs rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white font-medium"
                 >
                   <option value="Pune">Pune</option>
                   <option value="Nashik">Nashik</option>
@@ -248,7 +238,7 @@ export default function RegisterPage() {
               size="lg" 
               loading={loading}
               icon={ArrowRight}
-              className="w-full font-bold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white border-0 shadow-lg shadow-sky-600/20 py-3.5 text-xs uppercase tracking-wider transition"
+              className="w-full font-bold hover:bg-slate-800 text-white border-0 shadow-lg shadow-slate-900/20 py-3.5 text-xs uppercase tracking-wider transition"
             >
               Create Registered Profile →
             </Button>
@@ -257,7 +247,7 @@ export default function RegisterPage() {
           {/* Footer */}
           <div className="text-center text-xs text-slate-500 pt-3 border-t border-slate-100 flex items-center justify-between">
             <span>Already registered?</span>
-            <Link to="/login" className="text-sky-600 font-bold hover:underline">
+            <Link to="/login" className="text-slate-900 font-bold hover:underline">
               Sign in to existing account →
             </Link>
           </div>

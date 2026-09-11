@@ -1,8 +1,10 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 export default function ProtectedRoute({ children, allowedRoles = [] }) {
+  const { t } = useLanguage()
   const { user, isAuthenticated, loading } = useAuth()
   const location = useLocation()
 

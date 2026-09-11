@@ -1,13 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import {
-  Lock,
-  Mail,
-  AlertCircle,
-  ArrowRight,
-  Eye,
-  EyeOff
-} from 'lucide-react'
+import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import Button from '../../components/common/Button'
 import SurveillanceBackground from '../../components/background/SurveillanceBackground'
 import LanguageSelector from '../../components/common/LanguageSelector'
@@ -110,7 +103,7 @@ export default function LoginPage() {
               <PashuLogo size="md" />
               <div className="text-left">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
-                  PASHURAKSHA <span className="text-sky-600">AI</span>
+                  PASHURAKSHA <span className="text-slate-900">AI</span>
                 </h2>
                 <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-1">
                   {t("prototypeNotice")}
@@ -163,7 +156,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target("value"))}
-                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-4 py-3 text-sm rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-4 py-3 text-sm rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
                   autoComplete="username"
                 />
               </div>
@@ -178,7 +171,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target("value"))}
-                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-10 py-3 text-sm rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 pl-10 pr-10 py-3 text-sm rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-colors"
                   autoComplete="current-password"
                 />
                 <button
@@ -186,7 +179,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                   title={showPassword ? t("hidePassword") : t("showPassword")}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none focus:text-sky-600 transition-colors p-0.5 rounded cursor-pointer"
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none focus:text-slate-900 transition-colors p-0.5 rounded cursor-pointer"
                   tabIndex={0}
                 >
                   {showPassword ? (
@@ -211,7 +204,7 @@ export default function LoginPage() {
 
           <div className="text-center text-sm text-slate-500 pt-3 border-t border-slate-200">
             <span>{t("newUser")} </span>
-            <Link to="/register" className="text-sky-600 font-semibold hover:underline">
+            <Link to="/register" className="text-slate-900 font-semibold hover:underline">
               {t("register")}
             </Link>
           </div>

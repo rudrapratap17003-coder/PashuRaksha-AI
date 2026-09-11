@@ -1,8 +1,10 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, PawPrint, PlusCircle, Syringe, Bell } from 'lucide-react'
 
 export default function MobileNav() {
+  const { t } = useLanguage()
   const items = [
     { to: '/farmer/dashboard', label: 'Home', icon: LayoutDashboard },
     { to: '/farmer/animals', label: 'Animals', icon: PawPrint },
@@ -31,7 +33,7 @@ export default function MobileNav() {
               }
             >
               {item.highlight ? (
-                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center -mt-3 shadow-md shadow-emerald-200">
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center -mt-3 shadow-md shadow-slate-900/20">
                   <Icon className="w-5 h-5" />
                 </div>
               ) : (

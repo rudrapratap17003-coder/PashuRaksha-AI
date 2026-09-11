@@ -1,19 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  PawPrint, 
-  Sparkles, 
-  ArrowLeft, 
-  CheckCircle2, 
-  AlertCircle, 
-  Droplet, 
-  Scale, 
-  Calendar, 
-  MapPin, 
-  FileText,
-  Syringe,
-  Layers
-} from 'lucide-react'
+import { PawPrint, Sparkles, ArrowLeft, CheckCircle2, AlertCircle, Droplet, Scale, Calendar, MapPin, FileText, Syringe, Layers } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import { SPECIES_BREEDS_MAP } from '../../utils/speciesBreeds'
@@ -191,7 +178,7 @@ export default function AddAnimalPage() {
                 </label>
                 <select
                   name="species"
-                  value={formData.species}
+                  value={t(`data.species.${formData.species}`, {}, formData.species)}
                   onChange={handleSpeciesChange}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 bg-white font-medium"
                 >
@@ -279,7 +266,7 @@ export default function AddAnimalPage() {
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 flex items-center space-x-1">
                   <span>Milk Yield (L/day)</span>
-                  {isDairySpecies && <Droplet className="w-3 h-3 text-sky-500" />}
+                  {isDairySpecies && <Droplet className="w-3 h-3 text-slate-900" />}
                 </label>
                 <input
                   type="number"
@@ -365,7 +352,7 @@ export default function AddAnimalPage() {
               type="submit"
               size="lg"
               loading={loading}
-              className="flex-1 font-bold shadow-md shadow-emerald-200"
+              className="flex-1 font-bold shadow-md shadow-slate-900/20"
             >
               Save Digital Passport
             </Button>

@@ -1,17 +1,6 @@
 import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
-import { 
-  Syringe, 
-  Plus, 
-  Calendar, 
-  CheckCircle2, 
-  AlertCircle, 
-  RefreshCw,
-  ShieldCheck,
-  Clock,
-  Check,
-  X
-} from 'lucide-react'
+import { Syringe, Plus, Calendar, CheckCircle2, AlertCircle, RefreshCw, ShieldCheck, Clock, Check, X } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
@@ -108,7 +97,7 @@ export default function FarmerVaccinationsPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-slate-900 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Syringe className="w-4 h-4" />
@@ -148,7 +137,7 @@ export default function FarmerVaccinationsPage() {
           value={t("vaccination.protected")}
           subtitle={t("vaccination.boosterValid")}
           icon={ShieldCheck}
-          iconBg="bg-teal-500/10 text-teal-400 border border-teal-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
         />
         <StatCard
           title={t("vaccination.upcomingDue")}
@@ -162,7 +151,7 @@ export default function FarmerVaccinationsPage() {
           value="78.5%"
           subtitle={t("vaccination.target90")}
           icon={Syringe}
-          iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
         />
       </div>
 
@@ -189,7 +178,7 @@ export default function FarmerVaccinationsPage() {
               {vaccinations.map((v) => (
                 <tr key={v.id} className="hover:bg-slate-800/40 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-white">{v.animal_id}</td>
-                  <td className="py-3.5 px-4 font-bold text-teal-300">{t("data.vaccine." + v.vaccine_name) || v.vaccine_name}</td>
+                  <td className="py-3.5 px-4 font-bold text-slate-300">{t("data.vaccine." + v.vaccine_name) || v.vaccine_name}</td>
                   <td className="py-3.5 px-4 text-slate-400">{v.vaccination_date}</td>
                   <td className="py-3.5 px-4 font-bold text-amber-300">{v.next_due_date}</td>
                   <td className="py-3.5 px-4 text-slate-400">{t('data.authority.' + v.notes) || v.notes || t('vaccination.vetTeam')}</td>

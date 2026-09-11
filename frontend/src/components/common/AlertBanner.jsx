@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { ShieldAlert, Info, AlertTriangle, AlertCircle, X } from 'lucide-react'
 import { LEGAL_DISCLAIMER } from '../../utils/constants'
 
@@ -13,10 +14,10 @@ const TYPES = {
   },
   info: {
     bg: 'bg-sky-50',
-    border: 'border-sky-200',
-    text: 'text-sky-900',
+    border: 'border-slate-800',
+    text: 'text-slate-900',
     icon: Info,
-    iconColor: 'text-sky-600',
+    iconColor: 'text-slate-900',
     title: 'Notice',
   },
   warning: {
@@ -44,6 +45,7 @@ export default function AlertBanner({
   onClose,
   className = '',
 }) {
+  const { t } = useLanguage()
   const config = TYPES[type] || TYPES.disclaimer
   const Icon = config.icon
 

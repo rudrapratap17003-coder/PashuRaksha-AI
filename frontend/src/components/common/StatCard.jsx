@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import Card from './Card'
 
 export default function StatCard({
@@ -10,6 +11,7 @@ export default function StatCard({
   trend,
   className = '',
 }) {
+  const { t } = useLanguage()
   return (
     <Card className={`relative flex flex-col h-full min-w-0 p-5 ${className}`} padding="">
       {/* Icon - absolute positioned to never clip or break layouts */}

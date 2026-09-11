@@ -73,7 +73,7 @@ export default function FarmerAlertsPage() {
                 </div>
               </div>
               <Badge variant={alt.risk_level === 'CRITICAL' ? 'danger' : 'warning'}>
-                {alt.risk_level}
+                {t(`data.risk.${alt.risk_level}`, {}, alt.risk_level)}
               </Badge>
             </div>
 

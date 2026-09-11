@@ -11,6 +11,7 @@ router = APIRouter(prefix="/ai", tags=["AI Assistant"])
 class AIQuery(BaseModel):
     query: str
     role: str = "farmer"
+    language: str = "en"
     context: dict = None
 
 @router.post("/ask")
@@ -24,4 +25,4 @@ def ask_ai(
     Authenticated users only.
     """
     effective_role = current_user.role or data.role
-    return AIAssistantService.process_query(db, data.query, effective_role, data.context)
+    return AIAssistantService.process_query(db, data.query, effective_role, data.language, data.context)

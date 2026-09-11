@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  X, 
-  Bell, 
-  AlertTriangle, 
-  CheckCircle2, 
-  ShieldAlert, 
-  MapPin, 
-  Clock, 
-  Check,
-  RefreshCw,
-  Syringe,
-  Microscope,
-  Radio,
-  Layers,
-  Sparkles
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { X, Bell, AlertTriangle, CheckCircle2, ShieldAlert, MapPin, Clock, Check, RefreshCw, Syringe, FlaskConical, Radio, Layers, Sparkles } from 'lucide-react'
 import Card from './Card'
 import Button from './Button'
 import Badge from './Badge'
@@ -23,6 +9,7 @@ import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 
 export default function AlertCenterModal({ isOpen, onClose, onAlertRead = null }) {
+  const { t } = useLanguage()
   if (!isOpen) return null
 
   const { user } = useAuth()

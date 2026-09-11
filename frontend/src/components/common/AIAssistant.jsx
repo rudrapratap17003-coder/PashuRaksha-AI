@@ -1,32 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { 
-  Bot, 
-  Send, 
-  X, 
-  Sparkles, 
-  ShieldAlert, 
-  MessageSquare, 
-  ChevronDown, 
-  Maximize2, 
-  Minimize2,
-  RefreshCw,
-  Volume2,
-  VolumeX
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { Bot, Send, X, Sparkles, ShieldAlert, MessageSquare, ChevronDown, Maximize2, Minimize2, RefreshCw, Volume2, VolumeX } from 'lucide-react'
 import apiClient from '../../services/api'
 
 export default function AIAssistant({ role = 'farmer' }) {
+  const { t, language } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [messages, setMessages] = useState([
-    {
-      sender: 'ai',
-      text: 'Namaste! I am the Pashuraksha AI Assistant. How can I assist you with livestock symptoms, vaccination alerts, or outbreak intelligence in Maharashtra?',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ])
+  const [messages, setMessages] = useState([])
+
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 0) {
+        return [{
+          sender: 'ai',
+          text: t('copilot.welcome'),
+          isWelcome: true,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }]
+      }
+      
+      // Update only the first message if it is a welcome message, preserving history
+      if (prev[0]?.isWelcome) {
+        const newMessages = [...prev]
+        newMessages[0] = {
+          ...newMessages[0],
+          text: t('copilot.welcome')
+        }
+        return newMessages
+      }
+      
+      return prev
+    })
+  }, [language, t])
   const [isSpeaking, setIsSpeaking] = useState(false)
   const messagesEndRef = useRef(null)
 
@@ -59,12 +67,8 @@ export default function AIAssistant({ role = 'farmer' }) {
     }
   }, [messages, isOpen])
 
-  const quickPrompts = [
-    'What are early symptoms of FMD in cattle?',
-    'Show high risk villages in Pune district',
-    'What should I collect during a field visit?',
-    'Explain how AI calculates the risk score'
-  ]
+  const promptsTranslation = t('copilot.prompts')
+  const quickPrompts = Array.isArray(promptsTranslation) ? promptsTranslation : []
 
   const handleSend = async (textToSend) => {
     const query = textToSend || input
@@ -82,7 +86,8 @@ export default function AIAssistant({ role = 'farmer' }) {
     try {
       const res = await apiClient.post('/ai/ask', {
         query: query,
-        role: role
+        role: role,
+        language: language
       })
       const aiMsg = {
         sender: 'ai',
@@ -95,7 +100,7 @@ export default function AIAssistant({ role = 'farmer' }) {
     } catch {
       // Local fallback intelligence
       setTimeout(() => {
-        let fallbackText = "Based on Maharashtra epidemiological surveillance data: If fever, oral lesions, and salivation are observed, isolate the animal immediately and notify the nearest Taluka Veterinary Dispensary."
+        let fallbackText = t('copilot.error') // "Based on Maharashtra epidemiological surveillance data: If fever, oral lesions, and salivation are observed, isolate the animal immediately and notify the nearest Taluka Veterinary Dispensary."
         if (query.toLowerCase().includes('risk')) {
           fallbackText = "Pashuraksha AI calculates risk (0-100) by analyzing multi-factor indicators: symptom combinations (e.g. FMD triad), herd spread density, overdue vaccinations, and spatial proximity to active outbreak clusters in Maharashtra."
         } else if (query.toLowerCase().includes('pune') || query.toLowerCase().includes('village')) {
@@ -122,13 +127,13 @@ export default function AIAssistant({ role = 'farmer' }) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center space-x-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-emerald-900/40 border border-emerald-400/30 transition-all transform hover:scale-105 active:scale-95"
+          className="group relative flex items-center space-x-2.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-full shadow-2xl shadow-slate-900/20 border border-emerald-400/30 transition-all transform hover:scale-105 active:scale-95"
         >
           <div className="relative">
             <Bot className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-emerald-900 animate-ping" />
           </div>
-          <span className="font-bold text-sm tracking-wide">Pashuraksha Copilot</span>
+          <span className="font-bold text-sm tracking-wide">{t('copilot.title')}</span>
         </button>
       )}
 
@@ -138,19 +143,19 @@ export default function AIAssistant({ role = 'farmer' }) {
           isExpanded ? 'w-[90vw] md:w-[600px] h-[80vh]' : 'w-[90vw] sm:w-[380px] h-[520px]'
         }`}>
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border-b border-slate-800 rounded-t-3xl flex items-center justify-between">
+          <div className="p-4 border-b border-slate-800 rounded-t-3xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
                 <Bot className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-sm font-black text-white">Pashuraksha AI Copilot</h3>
+                  <h3 className="text-sm font-black text-white">{t('copilot.title')}</h3>
                   <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    Active
+                    {t('copilot.active')}
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400">Maharashtra Livestock Intelligence</p>
+                <p className="text-[10px] text-slate-400">{t('copilot.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center space-x-1">
@@ -175,7 +180,7 @@ export default function AIAssistant({ role = 'farmer' }) {
               <div key={idx} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl p-3.5 text-xs ${
                   m.sender === 'user'
-                    ? 'bg-emerald-600 text-white rounded-br-none shadow-md shadow-emerald-950'
+                    ? 'bg-emerald-600 text-white rounded-br-none shadow-md shadow-slate-900/20'
                     : 'bg-slate-900/90 text-slate-200 border border-emerald-500/20 rounded-bl-none'
                 }`}>
                   <p className="leading-relaxed whitespace-pre-line">{m.text}</p>
@@ -192,7 +197,7 @@ export default function AIAssistant({ role = 'farmer' }) {
                         className="text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 font-bold"
                       >
                         {isSpeaking ? <VolumeX className="w-3 h-3 text-rose-400" /> : <Volume2 className="w-3 h-3" />}
-                        <span>{isSpeaking ? 'Stop' : 'Listen (ऐका)'}</span>
+                        <span>{isSpeaking ? t('copilot.stop') : t('copilot.listen')}</span>
                       </button>
                     ) : <span />}
                     <span>{m.time}</span>
@@ -204,7 +209,7 @@ export default function AIAssistant({ role = 'farmer' }) {
               <div className="flex justify-start">
                 <div className="bg-slate-900 border border-emerald-500/20 rounded-2xl p-3 text-xs text-emerald-400 flex items-center space-x-2">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Analyzing epidemiological records...</span>
+                  <span>{t('copilot.analyzing')}</span>
                 </div>
               </div>
             )}
@@ -233,7 +238,7 @@ export default function AIAssistant({ role = 'farmer' }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about symptoms, vaccines, or alerts..."
+              placeholder={t('copilot.placeholder')}
               className="flex-1 bg-slate-900 border border-slate-700 focus:border-emerald-500 focus:outline-none text-white text-xs px-3.5 py-2.5 rounded-xl placeholder-slate-500"
             />
             <button

@@ -1,4 +1,162 @@
 export default {
+  copilot: {
+    title: "Pashuraksha AI Copilot",
+    subtitle: "Maharashtra Livestock Intelligence",
+    welcome: "Namaste! I am the Pashuraksha AI Assistant. How can I assist you with livestock symptoms, vaccination alerts, or outbreak intelligence in Maharashtra?",
+    placeholder: "Ask about symptoms, vaccines, or alerts...",
+    active: "Active",
+    listen: "Listen",
+    stop: "Stop",
+    analyzing: "Analyzing epidemiological records...",
+    error: "Sorry, the Copilot is temporarily unavailable. Please try again.",
+    prompts: [
+      "What are early symptoms of FMD in cattle?",
+      "Show high risk villages...",
+      "How can I protect my cattle?",
+      "Explain how AI calculates the risk score"
+    ]
+  },
+  environment: {
+    risk: "Environmental Risk",
+    sensorMesh: "Maharashtra Agro-Climatic Sensor Mesh",
+    temp: "Temp",
+    humidity: "Humidity",
+    rainfall: "Rainfall",
+    moderateRisk: "Moderate Risk",
+    riskDescription: "Monitor weather forecasts, maintain dry bedding, and ensure vaccination schedules are up to date."
+  },
+  labModule: {
+    dashboardTitle: "Diagnostic Laboratory Console",
+    samples: "Samples",
+    pcr: "PCR / RT-PCR",
+    diagnostics: "Diagnostics",
+    results: "Results",
+    sampleStatus: "Sample Status",
+    priority: "Priority",
+    reports: "Reports",
+    forms: "Forms"
+  },
+  authorityModule: {
+    commandCenter: "Command Center",
+    coldChain: "Cold Chain",
+    mvuFleet: "1962 MVU Fleet",
+    marketSecurity: "Market Security",
+    analytics: "Analytics",
+    outbreakClusters: "Outbreak clusters",
+    clusterActions: "Cluster actions",
+    deployTeam: "Deploy Team",
+    issueAdvisory: "Issue Advisory",
+    requestLab: "Request Lab",
+    broadcastAlert: "Broadcast Alert",
+    gis: "GIS",
+    vaccination: "Vaccination"
+  },
+  analyticsModule: {
+    charts: "Charts",
+    statistics: "Statistics",
+    exportBtn: "Export",
+    villageRiskMatrix: "Village-Level Risk Stratification Matrix",
+    epidemiologicalCurve: "Epidemic Incidence & Intake Curve",
+    monitoredLivestock: "Monitored Livestock",
+    activeOutbreaks: "Active Disease Clusters"
+  },
+  modals: {
+    confirm: "Confirm",
+    cancel: "Cancel",
+    submit: "Submit",
+    close: "Close",
+    successLodge: "Health report successfully lodged on behalf of farmer.",
+    teamDeployed: "Team deployed successfully",
+    alertBroadcasted: "Alert broadcasted"
+  },
+  placeholders: {
+    searchTag: "Search by tag number...",
+    searchBreed: "Search indigenous breed...",
+    searchDisease: "Search by disease name...",
+    selectLivestock: "Select livestock...",
+    searchVillage: "Search village...",
+    searchFarm: "Search by farm name..."
+  },
+  commonActions: {
+    add: "Add",
+    addCattle: "Add Cattle",
+    search: "Search",
+    select: "Select",
+    total: "Total",
+    totalHerd: "Total Herd",
+    healthy: "Healthy",
+    risk: "Risk",
+    sick: "Sick",
+    pending: "Pending",
+    completed: "Completed",
+    due: "Due",
+    overdue: "Overdue",
+    upToDate: "Up to date",
+    details: "Details",
+    action: "Action",
+    owner: "Owner"
+  },
+  data: {
+    species: {
+      Cow: "Cow",
+      Cattle: "Cattle",
+      "Cattle (Cow)": "Cattle (Cow)",
+      Goat: "Goat",
+      Buffalo: "Buffalo",
+      Sheep: "Sheep",
+      Poultry: "Poultry"
+    },
+    symptom: {
+      Fever: "Fever",
+      Cough: "Cough",
+      Lesions: "Lesions",
+      Blisters: "Blisters/Lesions",
+      "Nasal Discharge": "Nasal Discharge",
+      Diarrhea: "Diarrhea",
+      Lethargy: "Lethargy",
+      Salivation: "Salivation",
+      Dyspnea: "Dyspnea / Panting",
+      "Loss of Appetite": "Loss of Appetite",
+      "Milk Yield Drop": "Milk Yield Drop"
+    },
+    disease: {
+      "Foot-and-Mouth Disease": "Foot-and-Mouth Disease",
+      "Foot and Mouth Disease (FMD)": "Foot and Mouth Disease (FMD)",
+      "Lumpy Skin Disease": "Lumpy Skin Disease",
+      "Hemorrhagic Septicemia": "Hemorrhagic Septicemia",
+      "Black Quarter": "Black Quarter",
+      "Mastitis": "Mastitis"
+    },
+    status: {
+      Healthy: "Healthy",
+      Risk: "Risk",
+      Sick: "Sick",
+      Pending: "Pending",
+      Due: "Due",
+      "Due soon": "Due soon",
+      Overdue: "Overdue",
+      Completed: "Completed",
+      "Up to date": "Up to date",
+      Investigating: "Investigating",
+      Investigated: "Investigated"
+    },
+    risk: {
+      Low: "Low",
+      Medium: "Medium",
+      High: "High",
+      Critical: "Critical"
+    },
+    events: {
+      "Case Registered": "Case Registered",
+      "Investigation Started": "Investigation Started",
+      "Lab Test Ordered": "Lab Test Ordered",
+      "Treatment Prescribed": "Treatment Prescribed",
+      "Case Resolved": "Case Resolved"
+    },
+    actions: {
+      "bookCamp": "Book Vaccination Camp"
+    }
+  },
 
   vetModule: {
     dashboardTitle: "Veterinary Clinical Triage Desk",
@@ -223,83 +381,7 @@ export default {
     epidemiologicalCurve: "Epidemiological Curve (30 Days)",
     speciesDistribution: "Cases by Species",
     villageRiskMatrix: "Village Risk Matrix"
-  }
-,
-  data: {
-    species: {
-      "Goat": "Goat",
-      "Cow": "Cow",
-      "Cattle": "Cattle",
-      "Cattle (Cow)": "Cattle (Cow)",
-      "Buffalo": "Buffalo",
-      "Sheep": "Sheep",
-      "Poultry": "Poultry"
-    },
-    status: {
-      "Due soon": "Due soon",
-      "Due Soon": "Due soon",
-      "Overdue": "Overdue",
-      "Up to date": "Up to date"
-    },
-    risk: {
-      "LOW": "LOW",
-      "MODERATE": "MODERATE",
-      "HIGH": "HIGH",
-      "CRITICAL": "CRITICAL",
-      "INFO": "INFO"
-    },
-    
-    vaccine: {
-      "FMD (Foot & Mouth Disease)": "FMD (Foot & Mouth Disease)",
-      "HS + BQ Combined Pre-Monsoon": "HS + BQ Combined Pre-Monsoon",
-      "PPR (Peste des Petits Ruminants)": "PPR (Peste des Petits Ruminants)",
-      "Brucellosis S19 (Calfhood)": "Brucellosis S19 (Calfhood)",
-      "Black Quarter (BQ)": "Black Quarter (BQ)",
-      "Anthrax Spore Vaccine": "Anthrax Spore Vaccine"
-    },
-    authority: {
-      "Bi-annual booster administered by Dr. Priya Sharma": "Bi-annual booster administered by Dr. Priya Sharma",
-      "Pre-monsoon prophylaxis against Hemorrhagic Septicemia": "Pre-monsoon prophylaxis against Hemorrhagic Septicemia",
-      "Annual immunity drive": "Annual immunity drive",
-      "One-time female calf vaccination": "One-time female calf vaccination"
-    },
-    
-    symptom: {
-      "Fever / High Temp": "Fever / High Temp",
-      "Cough / Wheezing": "Cough / Wheezing",
-      "Nasal Discharge": "Nasal Discharge",
-      "Loss of Appetite": "Loss of Appetite",
-      "Diarrhea": "Diarrhea",
-      "Lethargy / Weakness": "Lethargy / Weakness",
-      "Milk Drop": "Milk Drop",
-      "Dyspnea / Panting": "Dyspnea / Panting",
-      "Excess Salivation": "Excess Salivation",
-      "Blisters / Lesions": "Blisters / Lesions",
-      "Swelling / Lameness": "Swelling / Lameness",
-      "fever": "Fever",
-      "cough": "Cough",
-      "nasal_discharge": "Nasal Discharge",
-      "reduced_appetite": "Reduced Appetite",
-      "diarrhea": "Diarrhea",
-      "lethargy": "Lethargy",
-      "reduced_milk": "Reduced Milk Yield",
-      "difficulty_breathing": "Difficulty Breathing",
-      "salivation": "Salivation",
-      "lesions": "Lesions",
-      "swelling": "Swelling",
-      "Cough": "Cough",
-      "High Fever": "High Fever",
-      "Excessive Salivation": "Excessive Salivation",
-      "Lameness": "Lameness",
-      "Drop in Milk": "Drop in Milk"
-    },
-    actions: {
-      "bookCamp": "Book Camp",
-      "details": "Details",
-      "addCattle": "Add Cattle"
-    }
-  }
-,
+  },
   report: {
     subtitle: "Clinical Symptom Reporting",
     aiSupport: "AI Decision Support",
@@ -339,8 +421,7 @@ export default {
   },
   units: {
     yrs: "yrs"
-  }
-,
+  },
   herd: {
     title: "Herd Management — Digital Passport Registry",
     subtitle: "Farm-level livestock inventory with species, vaccination status, lactation yield & age breakdown",
@@ -535,45 +616,5 @@ export default {
     registerBtn: "Register",
     fieldOutreachBadge: "Field Outreach",
     outreachBadge: "Outreach Protocol"
-  },
-
-  nav: {
-    farmer: {
-      dashboard: "Farmer Shed",
-      report: "Report Sickness",
-      herd: "Herd Registry",
-      nutrition: "Nutrition & Feed",
-      breeds: "Indigenous Breeds",
-      knowledge: "Disease Guide",
-      vaccinations: "Vaccination Log",
-    },
-    fieldWorker: {
-      dashboard: "Field Ops Desk",
-      report: "Report on Behalf",
-      census: "Household Census",
-    },
-    vet: {
-      dashboard: "Clinical Triage",
-      cases: "Clinical Queue",
-      amr: "AMR Surveillance",
-    },
-    lab: {
-      dashboard: "Diagnostic Desk",
-    },
-    authority: {
-      commandCenter: "Command Center",
-      coldChain: "Cold Chain Ops",
-      mvuFleet: "MVU Rapid Fleet",
-      marketSecurity: "Market Biosecurity",
-      analytics: "State Analytics",
-    },
-    admin: {
-      admin: "Admin Governance",
-      analytics: "System Analytics",
-    },
-    jury: "Jury Console",
-    menuLabel: "{role} Menu",
-    switchPortal: "Switch Portal",
-    selectLanguage: "Select Language",
-  },
+  }
 }

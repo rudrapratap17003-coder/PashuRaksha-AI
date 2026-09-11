@@ -1,8 +1,10 @@
 import React from 'react'
-import { Activity, ShieldAlert, Radio, Syringe, Users, AlertTriangle } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { HeartPulse, ShieldAlert, Radio, Syringe, Users, AlertTriangle } from 'lucide-react'
 import { useScenario } from '../../context/ScenarioContext'
 
 export default function LiveSurveillanceStrip() {
+  const { t } = useLanguage()
   const { scenarioData, currentScenario } = useScenario()
 
   const isCritical = currentScenario === 'RAMPUR_OUTBREAK'
@@ -35,7 +37,7 @@ export default function LiveSurveillanceStrip() {
           </div>
 
           <div className="flex items-center space-x-1.5 text-slate-300">
-            <Activity className="w-3.5 h-3.5 text-sky-400" />
+            <HeartPulse className="w-3.5 h-3.5 text-slate-300" />
             <span>Reports:</span>
             <strong className="text-white font-bold">{scenarioData.activeReports14Days} / 14d</strong>
           </div>
@@ -55,7 +57,7 @@ export default function LiveSurveillanceStrip() {
           </div>
 
           <div className="flex items-center space-x-1.5 text-slate-300">
-            <Syringe className="w-3.5 h-3.5 text-teal-400" />
+            <Syringe className="w-3.5 h-3.5 text-slate-300" />
             <span>Vaccination:</span>
             <strong className="text-emerald-300 font-bold">{scenarioData.districtVaccinationRate}%</strong>
           </div>

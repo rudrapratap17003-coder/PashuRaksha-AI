@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useParams, Link } from 'react-router-dom'
-import { 
-  ArrowLeft, 
-  Activity, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  User, 
-  Phone, 
-  Stethoscope, 
-  TestTube2, 
-  AlertTriangle, 
-  CheckCircle2, 
-  ShieldAlert, 
-  Microscope,
-  Send,
-  Sparkles,
-  Plus
-} from 'lucide-react'
+import { ArrowLeft, HeartPulse, MapPin, Calendar, Clock, User, Phone, Stethoscope, TestTube2, AlertTriangle, CheckCircle2, ShieldAlert, FlaskConical, Send, Sparkles, Plus } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
@@ -190,7 +173,7 @@ export default function CaseDetailsPage() {
       </Link>
 
       {/* Case Header */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Stethoscope className="w-4 h-4" />
@@ -203,7 +186,7 @@ export default function CaseDetailsPage() {
             <RiskBadge level={caseData?.risk_level} score={caseData?.risk_score} />
           </div>
           <p className="text-slate-300 text-sm mt-1">
-            {t("vetModule.caseDetail.animalTag")}: <strong className="text-white">{caseData?.animal_id}</strong> ({t(`data.species.${caseData?.species}`) || caseData?.species}) • {t("vetModule.queue.owner")}: {caseData?.reporter_name}
+            {t("vetModule.caseDetail.animalTag")}: <strong className="text-white">{caseData?.animal_id}</strong> ({t(`data.species.${t(`data.species.${caseData?.species}`, {}, caseData?.species)}`) || caseData?.species}) • {t("vetModule.queue.owner")}: {caseData?.reporter_name}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -212,13 +195,13 @@ export default function CaseDetailsPage() {
             onClick={handleOrderLabTest}
             loading={orderingLab}
             icon={Microscope}
-            className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-950 flex items-center space-x-1.5"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-slate-900/20 flex items-center space-x-1.5"
           >
             {labOrdered ? '✓ {t("vetModule.caseDetail.labOrdered")}' : '🔬 {t("vetModule.caseDetail.orderLab")}'}
           </Button>
           <button
             onClick={() => setRxModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center space-x-2 transition"
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-lg shadow-slate-900/20 flex items-center space-x-2 transition"
           >
             <Stethoscope className="w-3.5 h-3.5" />
             <span>{t("vetModule.caseDetail.decisionSupport")}</span>
@@ -231,8 +214,8 @@ export default function CaseDetailsPage() {
       </div>
 
       {notice && (
-        <div className="p-3.5 rounded-2xl bg-purple-950/90 border border-purple-400 text-white text-xs font-bold flex items-center space-x-2 animate-in fade-in shadow-xl">
-          <CheckCircle2 className="w-4 h-4 text-purple-300 flex-shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-purple-950/90 border border-slate-800 text-white text-xs font-bold flex items-center space-x-2 animate-in fade-in shadow-xl">
+          <CheckCircle2 className="w-4 h-4 text-slate-300 flex-shrink-0" />
           <span>{notice}</span>
         </div>
       )}

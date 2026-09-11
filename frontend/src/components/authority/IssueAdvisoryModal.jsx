@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { X, MessageSquare, ShieldAlert } from 'lucide-react'
 import apiClient from '../../services/api'
 
 export default function IssueAdvisoryModal({ isOpen, onClose, cluster, onSuccess }) {
+  const { t } = useLanguage()
   const [issuing, setIssuing] = useState(false)
   
   const clusterName = cluster?.cluster_name || 'Karad Outbreak Cluster #901'
@@ -41,7 +43,7 @@ export default function IssueAdvisoryModal({ isOpen, onClose, cluster, onSuccess
         {/* Header */}
         <div className="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400">
+            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200  text-slate-300">
               <MessageSquare className="w-5 h-5" />
             </div>
             <div>
@@ -85,7 +87,7 @@ export default function IssueAdvisoryModal({ isOpen, onClose, cluster, onSuccess
           <button
             onClick={handleIssue}
             disabled={issuing}
-            className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-purple-900/50"
+            className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-slate-900/20"
           >
             {issuing ? 'Issuing...' : 'Issue Advisory'}
           </button>

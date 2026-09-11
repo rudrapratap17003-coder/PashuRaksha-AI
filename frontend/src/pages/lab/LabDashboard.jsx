@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  FlaskConical, 
-  TestTube2, 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle, 
-  Search, 
-  Filter, 
-  Sparkles, 
-  FileText, 
-  Microscope,
-  Send,
-  X,
-  RefreshCw,
-  MapPin,
-  Calendar,
-  ShieldAlert,
-  Radio
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { FlaskConical, TestTube2, CheckCircle2, Clock, AlertTriangle, Search, Filter, Sparkles, FileText, Send, X, RefreshCw, MapPin, Calendar, ShieldAlert, Radio } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
@@ -26,6 +9,7 @@ import { LoadingState, ErrorState, EmptyState } from '../../components/common/St
 import apiClient from '../../services/api'
 
 export default function LabDashboard() {
+  const { t } = useLanguage()
   const [referrals, setReferrals] = useState([])
   const [stats, setStats] = useState({ pending: 0, received: 0, processing: 0, completed: 0, high_priority: 0 })
   const [loading, setLoading] = useState(true)
@@ -98,12 +82,12 @@ export default function LabDashboard() {
   return (
     <div className="space-y-6 pb-32">
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
-              <Microscope className="w-4 h-4" />
+              <FlaskConical className="w-4 h-4" />
               <span>Maharashtra Disease Diagnostic Network • Pune Division</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -122,8 +106,8 @@ export default function LabDashboard() {
                 <span className="text-[10px] font-black text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-500/30">ONLINE</span>
              </div>
              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-300 flex items-center space-x-1.5"><FlaskConical className="w-3.5 h-3.5 text-sky-400" /> <span>PCR Thermal Cycler</span></span>
-                <span className="text-[10px] font-black text-sky-400 bg-sky-950 px-2 py-0.5 rounded-full border border-sky-500/30">ACTIVE</span>
+                <span className="text-xs text-slate-300 flex items-center space-x-1.5"><FlaskConical className="w-3.5 h-3.5 text-slate-300" /> <span>PCR Thermal Cycler</span></span>
+                <span className="text-[10px] font-black text-slate-300 bg-sky-950 px-2 py-0.5 rounded-full ">ACTIVE</span>
              </div>
              <Button 
                 onClick={fetchLabData} 
@@ -157,7 +141,7 @@ export default function LabDashboard() {
           value={stats.processing}
           subtitle="Active PCR/ELISA runs"
           icon={FlaskConical}
-          iconBg="bg-sky-500/10 text-sky-400 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
         />
         <StatCard
           title="Completed Results"
@@ -254,7 +238,7 @@ export default function LabDashboard() {
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-slate-100 block text-[13px]">{ref.sample_type}</span>
-                      <span className="text-[11px] text-teal-300 font-medium block">{ref.test_requested}</span>
+                      <span className="text-[11px] text-slate-300 font-medium block">{ref.test_requested}</span>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="text-slate-200 font-medium">{ref.veterinarian_name || 'Taluka Vet'}</span>
@@ -276,10 +260,10 @@ export default function LabDashboard() {
                           ref.status === 'completed' 
                             ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'
                             : ref.status === 'processing' 
-                            ? 'bg-sky-950 text-sky-300 border border-sky-500/30 animate-pulse'
+                            ? 'bg-sky-950 text-slate-300  animate-pulse'
                             : 'bg-amber-950 text-amber-300 border border-amber-500/30'
                         }`}>
-                          {ref.status}
+                          {t(`data.status.${ref.status}`, {}, ref.status)}
                         </span>
                         {ref.result !== 'pending' && (
                           <span className={`text-[10px] font-black px-1.5 py-0.5 rounded uppercase ${
@@ -329,7 +313,7 @@ export default function LabDashboard() {
 
             <div className="flex items-center space-x-3 mb-4">
               <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
-                <Microscope className="w-6 h-6" />
+                <FlaskConical className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-lg font-black text-white">Record Diagnostic Findings</h3>
@@ -348,7 +332,7 @@ export default function LabDashboard() {
                     result_notes: 'POSITIVE - FMD Serotype O. Aphthovirus RNA confirmed via TaqMan RT-PCR (Ct: 21.4). Validated by Dr. Suhas Kulkarni.'
                   })
                 }}
-                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black text-xs flex items-center justify-center space-x-1.5 shadow-md"
+                className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center space-x-1.5 shadow-md"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>⚡ Pre-Fill: POSITIVE - FMD Serotype O (Demo)</span>
@@ -361,14 +345,14 @@ export default function LabDashboard() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Sample Matrix:</span>
-                  <span className="font-bold text-teal-400">{selectedReferral.sample_type}</span>
+                  <span className="font-bold text-slate-300">{selectedReferral.sample_type}</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">Testing Pipeline Status</label>
                 <select
-                  value={resultForm.status}
+                  value={t(`data.status.${resultForm.status}`, {}, resultForm.status)}
                   onChange={(e) => setResultForm({ ...resultForm, status: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl p-2.5 text-xs text-white"
                 >
@@ -389,8 +373,8 @@ export default function LabDashboard() {
                       className={`p-2.5 rounded-xl border text-xs font-black capitalize transition ${
                         resultForm.result === res 
                           ? res === 'positive' 
-                            ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-950' 
-                            : 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-950'
+                            ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-slate-900/20' 
+                            : 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-slate-900/20'
                           : 'bg-slate-950 border-slate-800 text-slate-400'
                       }`}
                     >

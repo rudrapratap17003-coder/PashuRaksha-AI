@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function Card({
   children,
@@ -7,6 +8,7 @@ export default function Card({
   padding = 'p-5',
   ...props
 }) {
+  const { t } = useLanguage()
   const hasBg = className.includes('bg-')
   const hasBorderClass = className.includes('border-')
   const hasShadow = className.includes('shadow-')

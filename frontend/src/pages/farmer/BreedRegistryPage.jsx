@@ -1,18 +1,6 @@
 import { useLanguage } from '../../context/LanguageContext'
 import React, { useState } from 'react'
-import {
-  Award,
-  ShieldCheck,
-  Search,
-  Sparkles,
-  Dna,
-  MapPin,
-  Heart,
-  Layers,
-  ChevronRight,
-  Printer,
-  Info
-} from 'lucide-react'
+import { Award, ShieldCheck, Search, Sparkles, Dna, MapPin, Heart, Layers, ChevronRight, Printer, Info } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
 
@@ -101,7 +89,7 @@ export default function BreedRegistryPage() {
   return (
     <div className="space-y-6 pb-12 text-slate-100 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Dna className="w-4 h-4 text-emerald-400" />
@@ -137,7 +125,7 @@ export default function BreedRegistryPage() {
               onClick={() => setSelectedBreed(b)}
               className={`w-full p-4 rounded-2xl text-left border transition flex items-center justify-between ${
                 selectedBreed.id === b.id
-                  ? 'bg-slate-900 border-emerald-400 shadow-lg shadow-emerald-950'
+                  ? 'bg-slate-900 border-emerald-400 shadow-lg shadow-slate-900/20'
                   : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700 text-slate-300'
               }`}
             >
@@ -180,7 +168,7 @@ export default function BreedRegistryPage() {
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">{t("breeds.fmdVulnerability")}</span>
-                  <strong className="text-xs font-bold text-sky-300 block mt-1">{selectedBreed.fmdVulnerability}</strong>
+                  <strong className="text-xs font-bold text-slate-300 block mt-1">{selectedBreed.fmdVulnerability}</strong>
                 </div>
               </div>
 

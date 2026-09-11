@@ -1,19 +1,6 @@
 import React, { useState } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
-import {
-  ShieldAlert,
-  AlertTriangle,
-  CheckCircle2,
-  Activity,
-  Microscope,
-  FileSpreadsheet,
-  Search,
-  Sparkles,
-  PieChart,
-  Layers,
-  ArrowRight,
-  TrendingDown
-} from 'lucide-react'
+import { ShieldAlert, AlertTriangle, CheckCircle2, HeartPulse, FlaskConical, FileSpreadsheet, Search, Sparkles, PieChart, Layers, ArrowRight, TrendingDown } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
 
@@ -63,7 +50,7 @@ export default function AmrSurveillanceDesk() {
   return (
     <div className="space-y-6 pb-12 text-slate-100 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-rose-950 via-slate-900 to-indigo-950 border border-rose-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-slate-900 border border-rose-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-rose-400 text-xs font-bold uppercase tracking-wider mb-1">
             <ShieldAlert className="w-4 h-4" />

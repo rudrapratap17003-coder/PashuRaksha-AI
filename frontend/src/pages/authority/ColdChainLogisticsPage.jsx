@@ -1,23 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Thermometer,
-  Truck,
-  ShieldCheck,
-  AlertTriangle,
-  RefreshCw,
-  Syringe,
-  MapPin,
-  Clock,
-  Radio,
-  CheckCircle2,
-  Layers,
-  ArrowRight,
-  ArrowLeft,
-  Send,
-  Building2,
-  PackageCheck
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { Thermometer, Truck, ShieldCheck, AlertTriangle, RefreshCw, Syringe, MapPin, Clock, Radio, CheckCircle2, Layers, ArrowRight, Send, Building2, PackageCheck } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
 import Button from '../../components/common/Button'
@@ -109,6 +93,7 @@ const RING_CAMPAIGNS = [
 ]
 
 export default function ColdChainLogisticsPage() {
+  const { t } = useLanguage()
   const [nodes, setNodes] = useState(COLD_CHAIN_NODES)
   const [campaigns, setCampaigns] = useState(RING_CAMPAIGNS)
   const [requestSent, setRequestSent] = useState(false)
@@ -130,10 +115,10 @@ export default function ColdChainLogisticsPage() {
       </div>
 
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Thermometer className="w-4 h-4 text-sky-400" />
+            <Thermometer className="w-4 h-4 text-slate-300" />
             <span>State Livestock Health Mission • Maharashtra Cold Chain Grid</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -146,7 +131,7 @@ export default function ColdChainLogisticsPage() {
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setRequestSent(true)}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-950 flex items-center space-x-2 transition"
+            className="px-4 py-2 rounded-xl hover:bg-slate-800 text-white font-bold text-xs shadow-lg shadow-slate-900/20 flex items-center space-x-2 transition"
           >
             <PackageCheck className="w-4 h-4" />
             <span>Request Stock Requisition</span>
@@ -155,9 +140,9 @@ export default function ColdChainLogisticsPage() {
       </div>
 
       {requestSent && (
-        <div className="p-4 rounded-2xl bg-sky-950/80 border border-sky-500 text-sky-200 text-xs font-bold flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-sky-950/80 border border-slate-800 text-slate-300 text-xs font-bold flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-sky-400" />
+            <CheckCircle2 className="w-4 h-4 text-slate-300" />
             <span>Stock Requisition dispatched to Institute of Veterinary Biological Products (IVBP), Ganeshkhind, Pune.</span>
           </div>
           <button onClick={() => setRequestSent(false)} className="text-slate-400 hover:text-white text-xs">Dismiss</button>
@@ -195,7 +180,7 @@ export default function ColdChainLogisticsPage() {
                   </div>
                   <div className="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                      className="h-full rounded-full bg-slate-900"
                       style={{ width: `${camp.coveragePercent}%` }}
                     />
                   </div>
@@ -219,7 +204,7 @@ export default function ColdChainLogisticsPage() {
         {/* Right 6 Cols: IoT Cold Chain Telemetry Nodes */}
         <div className="lg:col-span-6 space-y-4">
           <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-sky-600" />
+            <Thermometer className="w-4 h-4 text-slate-900" />
             <span>IoT Cold Storage Telematics (2°C – 8°C Safe Zone)</span>
           </h2>
 
@@ -229,7 +214,7 @@ export default function ColdChainLogisticsPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-0.5">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-[10px] text-sky-400 font-bold">{node.id}</span>
+                      <span className="font-mono text-[10px] text-slate-300 font-bold">{node.id}</span>
                       <span className="text-[10px] text-slate-500">• {node.lastPing}</span>
                     </div>
                     <h4 className="text-xs sm:text-sm font-bold text-white">{node.location}</h4>
@@ -238,7 +223,7 @@ export default function ColdChainLogisticsPage() {
 
                   {/* Temperature Pill */}
                   <div className="text-right flex flex-col items-end">
-                    <div className="px-3 py-1 rounded-xl bg-sky-950/90 border border-sky-500/40 text-sky-300 font-mono text-sm font-black flex items-center space-x-1">
+                    <div className="px-3 py-1 rounded-xl bg-sky-950/90  text-slate-300 font-mono text-sm font-black flex items-center space-x-1">
                       <Thermometer className="w-3.5 h-3.5" />
                       <span>{node.temperature}°C</span>
                     </div>
@@ -262,7 +247,7 @@ export default function ColdChainLogisticsPage() {
                   </div>
                   <div className="p-1">
                     <span className="text-slate-500 block">LSD Vax</span>
-                    <strong className="text-sky-400 text-xs">{node.stock.lsd_goatpox_doses}</strong>
+                    <strong className="text-slate-300 text-xs">{node.stock.lsd_goatpox_doses}</strong>
                   </div>
                 </div>
 

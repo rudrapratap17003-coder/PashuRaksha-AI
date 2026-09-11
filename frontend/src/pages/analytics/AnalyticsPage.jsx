@@ -1,24 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  TrendingUp, 
-  BarChart3, 
-  PieChart as PieIcon, 
-  Activity, 
-  ShieldAlert, 
-  Calendar, 
-  Download, 
-  Layers, 
-  MapPin,
-  Syringe,
-  Clock,
-  Sparkles,
-  RefreshCw,
-  CheckCircle2,
-  AlertCircle,
-  Filter,
-  Search,
-  FileSpreadsheet
-} from 'lucide-react'
+import { TrendingUp, BarChart3, PieChart as PieIcon, HeartPulse, ShieldAlert, Calendar, Download, Layers, MapPin, Syringe, Clock, Sparkles, RefreshCw, CheckCircle2, AlertCircle, Filter, Search, FileSpreadsheet } from 'lucide-react'
 import { 
   AreaChart, 
   Area, 
@@ -129,7 +110,7 @@ export default function AnalyticsPage() {
       v.affected_animals,
       v.mortality,
       v.risk_score,
-      `"${v.risk_level}"`
+      `"${t(`data.risk.${v.risk_level}`, {}, v.risk_level)}"`
     ])
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n')
     const encodedUri = encodeURI(csvContent)
@@ -160,9 +141,9 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/20 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="  rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-purple-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center space-x-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
             <BarChart3 className="w-4 h-4" />
             <span>Epidemiological Intelligence &amp; Surveillance Analytics</span>
           </div>
@@ -178,7 +159,7 @@ export default function AnalyticsPage() {
             onClick={handleExportCSV}
             className="flex items-center space-x-2 px-3.5 py-2.5 rounded-2xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 shadow-md cursor-pointer transition"
           >
-            <Download className="w-3.5 h-3.5 text-purple-400" />
+            <Download className="w-3.5 h-3.5 text-slate-300" />
             <span>Export CSV</span>
           </button>
           <button
@@ -187,13 +168,13 @@ export default function AnalyticsPage() {
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md cursor-pointer ${
               refreshSuccess
                 ? 'bg-emerald-600 text-white border border-emerald-500'
-                : 'bg-slate-900 hover:bg-slate-800 text-white border border-purple-500/30 hover:border-purple-400/50'
+                : 'bg-slate-900 hover:bg-slate-800 text-white  hover:border-slate-800'
             } disabled:opacity-70`}
           >
             {refreshSuccess ? (
               <CheckCircle2 className="w-4 h-4 text-white" />
             ) : (
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-purple-400' : 'text-purple-300'}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-slate-300' : 'text-slate-300'}`} />
             )}
             <span>{refreshing ? t('common.loading') : refreshSuccess ? '✓ Refreshed' : t('analytics.refreshData')}</span>
           </button>
@@ -204,12 +185,12 @@ export default function AnalyticsPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* District Selector */}
         <div className="flex items-center space-x-2">
-          <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
+          <MapPin className="w-4 h-4 text-slate-900 flex-shrink-0" />
           <span className="text-xs font-bold text-slate-700">District:</span>
           <select
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-purple-500"
+            className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-slate-800"
           >
             {DISTRICT_OPTIONS.map(d => (
               <option key={d} value={d}>{d}</option>
@@ -257,14 +238,14 @@ export default function AnalyticsPage() {
           value={`${overview?.vaccination_coverage ?? 78.4}%`}
           subtitle="Target: 90% herd immunity"
           icon={Syringe}
-          iconBg="bg-sky-500/10 text-sky-600 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
         <StatCard
           title="Average Vet Response"
           value="4.2 Hrs"
           subtitle="Triage to farm inspection"
           icon={Clock}
-          iconBg="bg-purple-500/10 text-purple-600 border border-purple-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
       </div>
 
@@ -278,7 +259,7 @@ export default function AnalyticsPage() {
                 <h3 className="text-base font-black text-slate-900">{t('analytics.epidemiologicalCurve')}</h3>
                 <p className="text-xs text-slate-500">{selectedDays}-day syndromic intake telemetry ({selectedDistrict})</p>
               </div>
-              <span className="text-xs bg-purple-50 text-purple-800 border border-purple-200 px-3 py-1 rounded-full font-bold">
+              <span className="text-xs bg-purple-50 text-slate-900 border border-slate-800 px-3 py-1 rounded-full font-bold">
                 Daily Intake
               </span>
             </div>
@@ -350,7 +331,7 @@ export default function AnalyticsPage() {
                 <div key={idx} className="flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-2">
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                    <span className="text-slate-700 font-medium">{item.species}</span>
+                    <span className="text-slate-700 font-medium">{t(`data.species.${item.species}`, {}, item.species)}</span>
                   </div>
                   <span className="font-bold text-slate-900">{item.count} ({item.percentage}%)</span>
                 </div>
@@ -377,7 +358,7 @@ export default function AnalyticsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search village..."
-                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 text-xs rounded-xl focus:outline-none focus:border-purple-500 text-slate-900"
+                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 text-xs rounded-xl focus:outline-none focus:border-slate-800 text-slate-900"
               />
             </div>
 
@@ -431,7 +412,7 @@ export default function AnalyticsPage() {
                       <span className="text-[10px] text-slate-400 ml-0.5">/100</span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <RiskBadge level={v.risk_level} score={v.risk_score} />
+                      <RiskBadge level={t(`data.risk.${v.risk_level}`, {}, v.risk_level)} score={v.risk_score} />
                     </td>
                   </tr>
                 ))}

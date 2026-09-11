@@ -1,19 +1,6 @@
 import React, { useState } from 'react'
-import {
-  Camera,
-  Upload,
-  X,
-  AlertTriangle,
-  CheckCircle2,
-  Scan,
-  RefreshCw,
-  Info,
-  ShieldCheck,
-  Eye,
-  Sliders,
-  Check,
-  AlertCircle
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { Camera, Upload, X, AlertTriangle, CheckCircle2, Scan, RefreshCw, Info, ShieldCheck, Eye, Sliders, Check, AlertCircle } from 'lucide-react'
 
 const SAMPLE_LESION_CASES = [
   {
@@ -90,6 +77,7 @@ const SAMPLE_LESION_CASES = [
 ]
 
 export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToReport }) {
+  const { t } = useLanguage()
   const [selectedCase, setSelectedCase] = useState(SAMPLE_LESION_CASES[0])
   const [scanning, setScanning] = useState(false)
   const [scanResult, setScanResult] = useState(SAMPLE_LESION_CASES[0])
@@ -256,7 +244,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                   onClick={() => handleSelectCase(c)}
                   className={`p-3 rounded-2xl text-left border transition ${
                     selectedCase?.id === c.id
-                      ? 'bg-emerald-950/80 border-emerald-400 text-white shadow-lg shadow-emerald-950'
+                      ? 'bg-emerald-950/80 border-emerald-400 text-white shadow-lg shadow-slate-900/20'
                       : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
@@ -267,7 +255,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                     </span>
                   </div>
                   <strong className="text-xs block mt-1 leading-snug">{c.title}</strong>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">{c.species}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">{t(`data.species.${c.species}`, {}, c.species)}</span>
                 </button>
               ))}
             </div>
@@ -285,7 +273,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                 </div>
               ) : (
                 <div className="w-full h-full relative flex flex-col items-center justify-center">
-                  <div className="w-full h-60 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-800 relative flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-60 rounded-2xl border border-slate-800 relative flex items-center justify-center overflow-hidden">
                     
                     {customFileUrl ? (
                       <img
@@ -299,7 +287,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                         <div className="text-center p-4 z-10">
                           <Camera className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                           <span className="text-xs font-bold text-slate-200">{scanResult.title}</span>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">Subject: {scanResult.species}</span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">Subject: {t(`data.species.${scanResult.species}`, {}, scanResult.species)}</span>
                         </div>
                       </>
                     )}
@@ -353,9 +341,9 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                 </div>
 
                 {isCustomUpload && (
-                  <div className="p-3 rounded-xl bg-sky-950/60 border border-sky-500/40 text-sky-200 text-xs space-y-1">
-                    <strong className="block font-bold text-sky-300">Image received.</strong>
-                    <p className="text-[11px] leading-relaxed text-sky-200/90">
+                  <div className="p-3 rounded-xl bg-slate-800 border border-slate-700  text-slate-300 text-xs space-y-1">
+                    <strong className="block font-bold text-slate-300">Image received.</strong>
+                    <p className="text-[11px] leading-relaxed text-slate-300/90">
                       Prototype visual screening workflow. Clinical interpretation requires veterinary review.
                     </p>
                   </div>
@@ -401,7 +389,7 @@ export default function VisualLesionScannerModal({ isOpen, onClose, onApplyToRep
                 if (onApplyToReport) onApplyToReport(scanResult)
                 onClose()
               }}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 transition flex items-center gap-2 shadow-lg shadow-emerald-950"
+              className="px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition flex items-center gap-2 shadow-lg shadow-slate-900/20"
             >
               <CheckCircle2 className="w-4 h-4" /> Apply to Symptom Report
             </button>

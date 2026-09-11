@@ -1,22 +1,12 @@
 import React, { useState } from 'react'
-import {
-  AlertTriangle,
-  Radio,
-  Phone,
-  Truck,
-  CheckCircle2,
-  X,
-  Volume2,
-  VolumeX,
-  Send,
-  Sparkles,
-  MapPin
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { AlertTriangle, Radio, Phone, Truck, CheckCircle2, X, Volume2, VolumeX, Send, Sparkles, MapPin } from 'lucide-react'
 import Card from './Card'
 import { playEmergencySiren, stopEmergencySiren } from '../../utils/audioAlarm'
 import apiClient from '../../services/api'
 
 export default function EmergencyPanicModal({ isOpen, onClose }) {
+  const { t } = useLanguage()
   const [sosSent, setSosSent] = useState(false)
   const [village, setVillage] = useState('Baramati East')
   const [affectedHeads, setAffectedHeads] = useState('4')
@@ -124,7 +114,7 @@ export default function EmergencyPanicModal({ isOpen, onClose }) {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-sm shadow-xl shadow-rose-950 flex items-center justify-center space-x-2 transition"
+              className="w-full py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-xl shadow-slate-900/20 flex items-center justify-center space-x-2 transition"
             >
               <Volume2 className="w-5 h-5 animate-bounce" />
               <span>SIREN SOUND &amp; TRANSMIT SOS ALARM</span>

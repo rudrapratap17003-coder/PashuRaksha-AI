@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from './context/LanguageContext'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ScenarioProvider } from './context/ScenarioContext'
@@ -122,6 +123,7 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const { t } = useLanguage()
   return (
     <LanguageProvider>
       <AuthProvider>
