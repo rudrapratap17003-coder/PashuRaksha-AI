@@ -944,5 +944,63 @@ def test_phase4_authority_mvu_biosecurity_suite(authority_headers):
     assert "CLEARED" in clear_data["message"] or "VALID" in clear_data["message"]
 
 
+def test_phase5_analytics_pipeline_and_filters(authority_headers):
+    """
+    Phase 5: Verify Analytics APIs, temporal series, species distributions, and village risk filters.
+    """
+    # 1. Overview metrics
+    over_res = client.get("/api/v1/analytics/overview", headers=authority_headers)
+    assert over_res.status_code == 200
+    over_data = over_res.json()
+    assert over_data["total_animals"] > 0
+    assert over_data["total_reports"] > 0
+    assert over_data["vaccination_coverage"] > 0.0
+
+    # 2. Filtered overview by district
+    pune_over_res = client.get("/api/v1/analytics/overview?district=Pune", headers=authority_headers)
+    assert pune_over_res.status_code == 200
+    assert pune_over_res.json()["total_animals"] > 0
+
+    # 3. 7-Day Time Series
+    series_7_res = client.get("/api/v1/analytics/cases-over-time?days=7", headers=authority_headers)
+    assert series_7_res.status_code == 200
+    series_7 = series_7_res.json()
+    assert len(series_7) == 7
+    assert all("date" in pt and "count" in pt for pt in series_7)
+
+    # 4. 30-Day Time Series
+    series_30_res = client.get("/api/v1/analytics/cases-over-time?days=30", headers=authority_headers)
+    assert series_30_res.status_code == 200
+    series_30 = series_30_res.json()
+    assert len(series_30) == 30
+
+    # 5. Species distribution
+    spec_res = client.get("/api/v1/analytics/species-distribution", headers=authority_headers)
+    assert spec_res.status_code == 200
+    spec_data = spec_res.json()
+    assert len(spec_data) >= 3
+    total_pct = sum(s["percentage"] for s in spec_data)
+    assert 98.0 <= total_pct <= 102.0
+
+    # 6. Village Risk Ranking & Filter
+    vr_res = client.get("/api/v1/analytics/village-risk", headers=authority_headers)
+    assert vr_res.status_code == 200
+    vr_data = vr_res.json()
+    assert len(vr_data) >= 5
+
+    vr_pune_res = client.get("/api/v1/analytics/village-risk?district=Pune", headers=authority_headers)
+    assert vr_pune_res.status_code == 200
+    vr_pune = vr_pune_res.json()
+    assert all(v["district"].lower() == "pune" for v in vr_pune)
+
+    # 7. Vaccination coverage by village
+    vax_res = client.get("/api/v1/analytics/vaccination-coverage", headers=authority_headers)
+    assert vax_res.status_code == 200
+    vax_data = vax_res.json()
+    assert "Baramati" in vax_data
+    assert "FMD" in vax_data["Baramati"]
+
+
+
 
 
