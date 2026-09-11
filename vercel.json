@@ -6,6 +6,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/health",
+      "destination": "https://pashuraksha-ai-backend.onrender.com/health"
+    },
+    {
       "source": "/api/v1/:path*",
       "destination": "https://pashuraksha-ai-backend.onrender.com/api/v1/:path*"
     },

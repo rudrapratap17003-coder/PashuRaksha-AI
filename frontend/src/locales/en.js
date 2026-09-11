@@ -314,7 +314,10 @@ export default {
     showPassword: 'Show password',
     hidePassword: 'Hide password',
     invalidCredentials: 'Invalid email or password.',
-    networkError: 'Cannot connect to PASHURAKSHA AI server. Please make sure the backend is running at 127.0.0.1:8000.',
+    networkError: 'Cannot connect to PASHURAKSHA AI server. Please verify backend service status.',
+    backendUnavailable: 'PASHURAKSHA AI backend service is currently unreachable or starting up. Please verify the backend deployment.',
+    endpointNotFound: 'Backend authentication endpoint not found (404). Please verify backend deployment and route configuration.',
+    requestTimeout: 'Request to PASHURAKSHA AI backend timed out. Please try again.',
     authFailed: 'Authentication failed. Please check your credentials.'
   },
   roles: {

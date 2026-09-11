@@ -317,7 +317,10 @@ export default {
     showPassword: 'पासवर्ड दाखवा',
     hidePassword: 'पासवर्ड लपवा',
     invalidCredentials: 'अवैध ईमेल किंवा पासवर्ड.',
-    networkError: 'PASHURAKSHA AI सर्व्हरशी कनेक्ट होऊ शकले नाही. कृपया बॅकएंड 127.0.0.1:8000 वर चालू असल्याची खात्री करा.',
+    networkError: 'PASHURAKSHA AI सर्व्हरशी कनेक्ट होऊ शकले नाही. कृपया बॅकएंड सेवा स्थिती तपासा.',
+    backendUnavailable: 'PASHURAKSHA AI बॅकएंड अनुपलब्ध आहे किंवा सुरू होत आहे. कृपया बॅकएंड डिप्लॉयमेंट तपासा.',
+    endpointNotFound: 'बॅकएंड ऑथेंटिकेशन एंडपॉइंट सापडला नाही (404). कृपया बॅकएंड डिप्लॉयमेंट तपासा.',
+    requestTimeout: 'PASHURAKSHA AI बॅकएंड विनंतीची वेळ संपली. कृपया पुन्हा प्रयत्न करा.',
     authFailed: 'प्रमाणीकरण अयशस्वी. कृपया तुमची माहिती तपासा.'
   },
   roles: {

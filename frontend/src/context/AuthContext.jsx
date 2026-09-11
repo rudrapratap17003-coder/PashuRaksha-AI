@@ -34,7 +34,10 @@ export function AuthProvider({ children }) {
     } catch (err) {
       // Security: Failed login must fail. Never create or fall back to fake users.
       const errorMsg = err?.response?.data?.detail || err?.message || 'Authentication failed'
-      throw new Error(errorMsg)
+      const customError = new Error(errorMsg)
+      customError.status = err?.response?.status
+      customError.code = err?.code
+      throw customError
     } finally {
       setLoading(false)
     }
