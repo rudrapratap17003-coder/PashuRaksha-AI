@@ -98,17 +98,8 @@ export default function FarmerVaccinationsPage() {
       setLogModalOpen(false)
     } catch (err) {
       const errMsg = err.response?.data?.detail || err.message || 'Failed to persist vaccination record to live registry.'
-      console.warn('Backend vaccination log notice:', errMsg)
-      // Fallback local update if network is offline
-      setVaccinations(prev => [
-        {
-          id: `vac-${Date.now()}`,
-          ...form,
-          status: 'completed'
-        },
-        ...prev
-      ])
-      setLogModalOpen(false)
+      console.error('Backend vaccination log error:', errMsg)
+      setLogError(errMsg)
     } finally {
       setSubmitting(false)
     }
@@ -229,6 +220,12 @@ export default function FarmerVaccinationsPage() {
             </div>
 
             <form onSubmit={handleLogVaccine} className="space-y-4 text-xs">
+              {logError && (
+                <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 text-rose-400 text-xs flex items-center space-x-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+                  <span>{logError}</span>
+                </div>
+              )}
               <div>
                 <label className="block text-slate-300 font-bold mb-1">{t("vaccination.animalId")}</label>
                 <input

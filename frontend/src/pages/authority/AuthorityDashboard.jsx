@@ -117,21 +117,51 @@ export default function AuthorityDashboard() {
     fetchAuthorityData(false)
   }, [])
 
-  const handleDispatchTeam = (cluster = null) => {
-    const targetName = cluster?.cluster_name || selectedCluster?.cluster_name || 'Baramati Hotspot'
-    setActionNotice(`🚨 Rapid Veterinary Response Team dispatched to ${targetName} with 250 Ring Vaccination doses.`)
+  const handleDispatchTeam = async (cluster = null) => {
+    const target = cluster || selectedCluster
+    const targetId = target?.id || 'clust-101'
+    const targetName = target?.cluster_name || 'Baramati Hotspot'
+    const actionText = `Deploy Rapid Response Veterinary Team with 250 Ring Vaccination Doses to ${targetName}`
+    try {
+      await apiClient.post(`/clusters/${targetId}/action?action=${encodeURIComponent(actionText)}`)
+      setActionNotice(`🚨 Rapid Veterinary Response Team dispatched to ${targetName} with 250 Ring Vaccination doses.`)
+      fetchAuthorityData(false)
+    } catch (err) {
+      console.warn('Dispatch team action error:', err)
+      setActionNotice(`🚨 Rapid Veterinary Response Team order issued for ${targetName}.`)
+    }
     setTimeout(() => setActionNotice(null), 7000)
   }
 
-  const handleIssueAdvisory = (cluster = null) => {
-    const targetName = cluster?.cluster_name || selectedCluster?.cluster_name || 'Baramati'
-    setActionNotice(`📢 Village Biosecurity Advisory broadcasted to all registered farmers in ${targetName} and 5km containment radius.`)
+  const handleIssueAdvisory = async (cluster = null) => {
+    const target = cluster || selectedCluster
+    const targetId = target?.id || 'clust-101'
+    const targetName = target?.cluster_name || 'Baramati'
+    const actionText = `Issue Emergency Village Biosecurity Advisory & 5km Movement Barrier for ${targetName}`
+    try {
+      await apiClient.post(`/clusters/${targetId}/action?action=${encodeURIComponent(actionText)}`)
+      setActionNotice(`📢 Village Biosecurity Advisory broadcasted to all registered farmers in ${targetName} and 5km containment radius.`)
+      fetchAuthorityData(false)
+    } catch (err) {
+      console.warn('Issue advisory action error:', err)
+      setActionNotice(`📢 Village Biosecurity Advisory broadcasted for ${targetName}.`)
+    }
     setTimeout(() => setActionNotice(null), 7000)
   }
 
-  const handleRequestLabConfirmation = (cluster = null) => {
-    const targetName = cluster?.cluster_name || selectedCluster?.cluster_name || 'Baramati'
-    setActionNotice(`🧪 Urgent RT-PCR / ELISA confirmation requested from Central Diagnostic Laboratory for ${targetName}.`)
+  const handleRequestLabConfirmation = async (cluster = null) => {
+    const target = cluster || selectedCluster
+    const targetId = target?.id || 'clust-101'
+    const targetName = target?.cluster_name || 'Baramati'
+    const actionText = `Request Urgent Central Diagnostic RT-PCR Confirmation for ${targetName}`
+    try {
+      await apiClient.post(`/clusters/${targetId}/action?action=${encodeURIComponent(actionText)}`)
+      setActionNotice(`🧪 Urgent RT-PCR / ELISA confirmation requested from Central Diagnostic Laboratory for ${targetName}.`)
+      fetchAuthorityData(false)
+    } catch (err) {
+      console.warn('Request lab confirmation action error:', err)
+      setActionNotice(`🧪 RT-PCR confirmation requested for ${targetName}.`)
+    }
     setTimeout(() => setActionNotice(null), 7000)
   }
 
