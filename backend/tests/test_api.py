@@ -744,3 +744,133 @@ def test_phase8_lab_and_admin_functional_suite(farmer_headers, lab_headers):
     assert admin_stats_res.status_code == 200
 
 
+def test_phase3_disease_risk_outbreak_alert_pipeline(farmer_headers, vet_headers, authority_headers):
+    """
+    Phase 3: Validate the complete Disease -> Risk -> Outbreak -> Alert -> Authority Pipeline.
+    """
+    # 1. Low-Risk Test Case: Single animal with mild lethargy/reduced appetite
+    low_risk_payload = {
+        "animal_id": "COW-101",
+        "lethargy": True,
+        "reduced_appetite": True,
+        "severity": "mild",
+        "duration_days": 1,
+        "number_of_animals_affected": 1,
+        "village": "Baramati",
+        "district": "Pune"
+    }
+    low_res = client.post("/api/v1/health-reports", json=low_risk_payload, headers=farmer_headers)
+    assert low_res.status_code == 201
+    low_data = low_res.json()
+    assert low_data["risk_level"] == "LOW"
+    assert low_data["risk_score"] < 40.0
+    assert low_data["recommendation"] is not None
+    assert len(low_data.get("contributing_factors", [])) >= 1
+
+    # 2. Multi-Report Outbreak Chain Test (Baramati & Nearby)
+    report_ids = []
+    
+    # Report 1: Baramati (Fever + Lesions + Salivation, Severe, 3 cattle affected)
+    rep1_payload = {
+        "animal_id": "COW-101",
+        "fever": True,
+        "lesions": True,
+        "salivation": True,
+        "severity": "severe",
+        "duration_days": 2,
+        "number_of_animals_affected": 3,
+        "village": "Baramati",
+        "district": "Pune",
+        "latitude": 18.1515,
+        "longitude": 74.5772
+    }
+    r1 = client.post("/api/v1/health-reports", json=rep1_payload, headers=farmer_headers)
+    assert r1.status_code == 201
+    r1_data = r1.json()
+    assert r1_data["risk_level"] in ("HIGH", "CRITICAL")
+    assert r1_data["risk_score"] >= 70.0
+    assert "Foot-and-Mouth" in r1_data["possible_disease_concern"] or "Vesicular" in r1_data["possible_disease_concern"]
+    report_ids.append(r1_data["id"])
+
+    # Report 2: Baramati East (Fever + Lesions + Difficulty Breathing, Severe, 2 buffalo affected)
+    rep2_payload = {
+        "animal_id": "BUF-204",
+        "fever": True,
+        "lesions": True,
+        "difficulty_breathing": True,
+        "severity": "severe",
+        "duration_days": 3,
+        "number_of_animals_affected": 2,
+        "village": "Baramati",
+        "district": "Pune",
+        "latitude": 18.1580,
+        "longitude": 74.5820
+    }
+    r2 = client.post("/api/v1/health-reports", json=rep2_payload, headers=farmer_headers)
+    assert r2.status_code == 201
+    r2_data = r2.json()
+    assert r2_data["risk_level"] in ("HIGH", "CRITICAL")
+    report_ids.append(r2_data["id"])
+
+    # Report 3: Proximate Village (<10 km distance) with similar symptoms
+    rep3_payload = {
+        "animal_id": "COW-101",
+        "fever": True,
+        "lesions": True,
+        "salivation": True,
+        "severity": "severe",
+        "duration_days": 2,
+        "number_of_animals_affected": 4,
+        "village": "Baramati",
+        "district": "Pune",
+        "latitude": 18.1620,
+        "longitude": 74.5900
+    }
+    r3 = client.post("/api/v1/health-reports", json=rep3_payload, headers=farmer_headers)
+    assert r3.status_code == 201
+    r3_data = r3.json()
+    assert r3_data["risk_level"] in ("HIGH", "CRITICAL")
+    report_ids.append(r3_data["id"])
+
+    # 3. Check Case Timeline Events are Created
+    timeline_res = client.get(f"/api/v1/cases/{r1_data['id']}/timeline", headers=vet_headers)
+    assert timeline_res.status_code == 200
+    timeline = timeline_res.json()
+    event_types = [ev["event_type"] for ev in timeline]
+    assert "report_created" in event_types
+    assert "ai_triage" in event_types
+
+    # 4. Trigger & Verify Spatial Cluster Detection
+    cluster_res = client.post("/api/v1/clusters/run-detection", headers=authority_headers)
+    assert cluster_res.status_code == 200
+    clusters = cluster_res.json()
+    assert len(clusters) >= 1
+    
+    active_cluster = next((c for c in clusters if "Baramati" in c.get("affected_villages", []) or "Baramati" in c.get("cluster_name", "")), clusters[0])
+    assert active_cluster["case_count"] >= 2
+    assert active_cluster["affected_animals_count"] >= 3
+    assert active_cluster["risk_level"] in ("HIGH", "CRITICAL")
+    assert active_cluster["radius_km"] > 0
+    assert active_cluster["recommended_action"] is not None
+
+    # 5. Verify Multi-Tier Alerts Generated & Deduplicated
+    vet_alerts_res = client.get("/api/v1/alerts?role=veterinarian", headers=vet_headers)
+    assert vet_alerts_res.status_code == 200
+    vet_alerts = vet_alerts_res.json()
+    assert len(vet_alerts) >= 1
+
+    auth_alerts_res = client.get("/api/v1/alerts?role=authority", headers=authority_headers)
+    assert auth_alerts_res.status_code == 200
+    auth_alerts = auth_alerts_res.json()
+    assert len(auth_alerts) >= 1
+
+    # 6. Verify Authority Dashboard reflects live data
+    auth_dash_res = client.get("/api/v1/authority/dashboard", headers=authority_headers)
+    assert auth_dash_res.status_code == 200
+    auth_dash = auth_dash_res.json()
+    assert auth_dash["active_outbreak_clusters"] >= 1
+    assert auth_dash["high_risk_villages_count"] >= 1
+    assert len(auth_dash["villages"]) >= 1
+
+
+
