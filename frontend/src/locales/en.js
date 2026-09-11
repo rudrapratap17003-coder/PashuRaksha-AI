@@ -536,4 +536,44 @@ export default {
     fieldOutreachBadge: "Field Outreach",
     outreachBadge: "Outreach Protocol"
   },
+
+  nav: {
+    farmer: {
+      dashboard: "Farmer Shed",
+      report: "Report Sickness",
+      herd: "Herd Registry",
+      nutrition: "Nutrition & Feed",
+      breeds: "Indigenous Breeds",
+      knowledge: "Disease Guide",
+      vaccinations: "Vaccination Log",
+    },
+    fieldWorker: {
+      dashboard: "Field Ops Desk",
+      report: "Report on Behalf",
+      census: "Household Census",
+    },
+    vet: {
+      dashboard: "Clinical Triage",
+      cases: "Clinical Queue",
+      amr: "AMR Surveillance",
+    },
+    lab: {
+      dashboard: "Diagnostic Desk",
+    },
+    authority: {
+      commandCenter: "Command Center",
+      coldChain: "Cold Chain Ops",
+      mvuFleet: "MVU Rapid Fleet",
+      marketSecurity: "Market Biosecurity",
+      analytics: "State Analytics",
+    },
+    admin: {
+      admin: "Admin Governance",
+      analytics: "System Analytics",
+    },
+    jury: "Jury Console",
+    menuLabel: "{role} Menu",
+    switchPortal: "Switch Portal",
+    selectLanguage: "Select Language",
+  },
 }

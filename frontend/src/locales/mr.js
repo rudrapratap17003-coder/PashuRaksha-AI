@@ -536,4 +536,44 @@ export default {
     fieldOutreachBadge: "क्षेत्रीय आउटरीच",
     outreachBadge: "आउटरीच प्रोटोकॉल"
   },
+
+  nav: {
+    farmer: {
+      dashboard: "शेतकरी शेड",
+      report: "आजाराची नोंदणी",
+      herd: "पशुधन नोंदवही",
+      nutrition: "पोषण आणि आहार",
+      breeds: "स्थानिक जाती",
+      knowledge: "रोग मार्गदर्शिका",
+      vaccinations: "लसीकरण नोंद",
+    },
+    fieldWorker: {
+      dashboard: "फील्ड ऑप्स डेस्क",
+      report: "शेतकऱ्याच्या वतीने नोंदणी",
+      census: "कुटुंब पशुगणना",
+    },
+    vet: {
+      dashboard: "क्लिनिकल ट्रायज",
+      cases: "क्लिनिकल रांग",
+      amr: "एएमआर पाळत",
+    },
+    lab: {
+      dashboard: "डायग्नोस्टिक डेस्क",
+    },
+    authority: {
+      commandCenter: "कमांड सेंटर",
+      coldChain: "कोल्ड चेन ऑप्स",
+      mvuFleet: "एमव्हीयू रॅपिड फ्लीट",
+      marketSecurity: "बाजार जैव सुरक्षा",
+      analytics: "राज्य विश्लेषण",
+    },
+    admin: {
+      admin: "प्रशासन शासन",
+      analytics: "प्रणाली विश्लेषण",
+    },
+    jury: "ज्युरी कन्सोल",
+    menuLabel: "{role} मेनू",
+    switchPortal: "पोर्टल बदला",
+    selectLanguage: "भाषा निवडा",
+  },
 }

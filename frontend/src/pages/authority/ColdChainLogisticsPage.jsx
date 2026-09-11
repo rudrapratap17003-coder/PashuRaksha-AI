@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Thermometer,
   Truck,
@@ -12,6 +13,7 @@ import {
   CheckCircle2,
   Layers,
   ArrowRight,
+  ArrowLeft,
   Send,
   Building2,
   PackageCheck
@@ -113,6 +115,20 @@ export default function ColdChainLogisticsPage() {
 
   return (
     <div className="space-y-6 pb-12 text-slate-800">
+      {/* Top Back Navigation Bar */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/authority/dashboard"
+          className="inline-flex items-center space-x-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-500" />
+          <span>Back to District Command Center</span>
+        </Link>
+        <span className="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
+          State Cold Chain Logistics • Grid #MH-IVBP-411
+        </span>
+      </div>
+
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
