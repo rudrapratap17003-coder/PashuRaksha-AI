@@ -1102,6 +1102,86 @@ def test_phase7_rbac_resource_ownership_and_security(farmer_headers, vet_headers
     assert client.delete(f"/api/v1/animals/{f1_animal_id}", headers=farmer_headers).status_code == 204
 
 
+def test_phase8_production_cors_and_deployment_hardening():
+    """
+    PHASE 8 TEST SUITE: PRODUCTION + VERCEL DEPLOYMENT HARDENING
+    Validates CORS for production and preview domains, preflight OPTIONS, SIH demo features,
+    outbreak triggers, manual emergency siren, and endpoint resilience.
+    """
+    # 1. CORS Preflight (OPTIONS) from Production Vercel Origin
+    prod_origin = "https://pashuraksha-ai.vercel.app"
+    options_res = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": prod_origin,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Authorization,Content-Type",
+        },
+    )
+    assert options_res.status_code == 200
+    assert options_res.headers.get("access-control-allow-origin") == prod_origin
+    assert options_res.headers.get("access-control-allow-credentials") == "true"
+
+    # 2. CORS Preflight from Vercel Preview Deployments (regex matching *.vercel.app)
+    preview_origin = "https://pashuraksha-git-preview-fix123.vercel.app"
+    preview_res = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": preview_origin,
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert preview_res.status_code == 200
+    assert preview_res.headers.get("access-control-allow-origin") == preview_origin
+
+    # 3. Disallowed origin must not receive Access-Control-Allow-Origin
+    unauth_res = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "https://malicious-external-site.evil.com",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert unauth_res.headers.get("access-control-allow-origin") is None
+
+    # 4. Actual GET request with production Origin header
+    get_res = client.get("/api/v1/health", headers={"Origin": prod_origin})
+    assert get_res.status_code == 200
+    assert get_res.headers.get("access-control-allow-origin") == prod_origin
+    assert get_res.json()["status"] == "healthy"
+
+    # 5. SIH Demo & Jury Mode: Verify 7-Stage State Engine & Step Progression
+    demo_state_res = client.get("/api/v1/demo/state")
+    assert demo_state_res.status_code == 200
+    state_data = demo_state_res.json()
+    assert "current_step" in state_data
+    assert "step_title" in state_data
+
+    # Execute Demo Step 1 (Farmer Intake)
+    step1_res = client.post("/api/v1/demo/step/1")
+    assert step1_res.status_code == 200
+    assert step1_res.json()["step"] == 1
+    assert "report_id" in step1_res.json()
+
+    # 6. SIH Emergency Response: Manual Panic Siren / SOS Trigger
+    farmer_token = get_auth_token("farmer1@pashuraksha.ai")
+    farmer_headers = {"Authorization": f"Bearer {farmer_token}"}
+    siren_res = client.post("/api/v1/alerts/emergency", json={
+        "village": "Baramati East",
+        "affected_heads": "4",
+        "symptom_summary": "Manual SIH Grand Finale Siren Activation: Sudden severe salivation & mouth blisters"
+    }, headers=farmer_headers)
+    assert siren_res.status_code == 200
+    siren_data = siren_res.json()
+    assert siren_data.get("alert_type") == "emergency_panic"
+    assert siren_data.get("risk_level") == "CRITICAL"
+
+    # 7. Reset Demo state cleanly
+    reset_res = client.post("/api/v1/demo/reset")
+    assert reset_res.status_code == 200
+    assert reset_res.json()["status"] in ("success", "reset_completed")
+
+
 
 
 
