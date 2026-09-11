@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import { Stethoscope, AlertTriangle, CheckCircle2, Clock, MapPin, Phone, TestTube2, FileText, ShieldAlert, RefreshCw, Search, Filter, Layers, ChevronRight, Sparkles, Radio, FlaskConical, ExternalLink } from 'lucide-react'
+import { Stethoscope, AlertTriangle, CheckCircle2, Clock, MapPin, Phone, TestTube2, FileText, ShieldAlert, RefreshCw, Search, Filter, Layers, ChevronRight, Sparkles, Radio, FlaskConical, ExternalLink, Microscope } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
@@ -43,14 +43,17 @@ export default function VetDashboard() {
     fetchVetCases()
   }, [])
 
+  const casesList = Array.isArray(cases) ? cases : []
+
   // Filtered cases
-  const filteredCases = cases.filter((c) => {
+  const filteredCases = casesList.filter((c) => {
+    if (!c) return false
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter
     const matchesSearch =
-      c.animal_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.species?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.village?.toLowerCase().includes(searchTerm.toLowerCase())
+      (c.animal_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.species || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.farmer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.village || '').toLowerCase().includes(searchTerm.toLowerCase())
     return matchesStatus && matchesSearch
   })
 
@@ -92,21 +95,21 @@ export default function VetDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title={t("vetModule.stats.criticalCases")}
-          value={cases.filter((c) => c.risk_level === 'CRITICAL').length || 1}
+          value={casesList.filter((c) => c?.risk_level === 'CRITICAL').length || 0}
           subtitle={t("vetModule.stats.criticalSub")}
           icon={AlertTriangle}
           iconBg="bg-rose-500/10 text-rose-400 border border-rose-500/20"
         />
         <StatCard
           title={t("vetModule.stats.highPriority")}
-          value={cases.filter((c) => c.risk_level === 'HIGH').length || 2}
+          value={casesList.filter((c) => c?.risk_level === 'HIGH').length || 0}
           subtitle={t("vetModule.stats.highSub")}
           icon={ShieldAlert}
           iconBg="bg-orange-500/10 text-orange-400 border border-orange-500/20"
         />
         <StatCard
           title={t("vetModule.stats.labTests")}
-          value={cases.filter((c) => c.lab_referral).length || 3}
+          value={casesList.filter((c) => c?.lab_referral).length || 0}
           subtitle={t("vetModule.stats.labSub")}
           icon={TestTube2}
           iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
@@ -202,8 +205,8 @@ export default function VetDashboard() {
 
                     {/* Symptoms Tags */}
                     <div className="flex flex-wrap gap-1">
-                      {c.symptoms?.map((s, idx) => (
-                        <span key={idx} className="bg-slate-900 text-slate-300 text-[10px] px-2 py-0.5 rounded  font-medium">
+                      {Array.isArray(c.symptoms) && c.symptoms.map((s, idx) => (
+                        <span key={idx} className="bg-slate-900 text-slate-300 text-[10px] px-2 py-0.5 rounded font-medium">
                           {t(`data.symptom.${s}`) || s}
                         </span>
                       ))}

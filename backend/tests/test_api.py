@@ -1350,9 +1350,56 @@ def test_phase9_full_sih_demo_flow_and_invalid_inputs():
     assert client.get("/api/v1/animals").status_code == 401
 
 
+# -----------------------------------------------------------------
+# 12. CRITICAL API ROUTE & ENDPOINT CONTRACT REGRESSION TEST
+# -----------------------------------------------------------------
+def test_critical_api_route_contract():
+    """
+    Verify that all mission-critical endpoints are registered on the FastAPI app.
+    Prevents silent removal or regressions during refactoring.
+    """
+    critical_paths = [
+        "/",
+        "/api/v1/health",
+        "/api/v1/auth/login",
+        "/api/v1/auth/register",
+        "/api/v1/auth/me",
+        "/api/v1/animals",
+        "/api/v1/vaccinations",
+        "/api/v1/health-reports",
+        "/api/v1/clusters",
+        "/api/v1/alerts",
+        "/api/v1/vet/cases",
+        "/api/v1/authority/dashboard",
+        "/api/v1/authority/mvu-fleet",
+        "/api/v1/authority/market-biosecurity",
+        "/api/v1/lab/dashboard",
+        "/api/v1/admin/stats",
+        "/api/v1/admin/users",
+        "/api/v1/analytics/overview",
+        "/api/v1/notifications",
+        "/api/v1/demo/reset",
+    ]
+    registered_paths = set(app.openapi()["paths"].keys())
+    for path in critical_paths:
+        assert path in registered_paths, f"CRITICAL ROUTE MISSING: {path} not found in registered FastAPI routes!"
 
 
+# -----------------------------------------------------------------
+# 13. CONFIGURATION & ENVIRONMENT VALIDATION TEST
+# -----------------------------------------------------------------
+def test_production_environment_validation():
+    """
+    Verify that in strict production mode, the application rejects insecure defaults.
+    """
+    from app.config import Settings
+    import pytest
 
-
-
-
+    # Setting production with insecure key and DEMO_MODE=false should fail
+    with pytest.raises(RuntimeError) as exc_info:
+        Settings(
+            ENVIRONMENT="production",
+            DEMO_MODE=False,
+            SECRET_KEY="dev-insecure-key-pashuraksha-sih2026-demo-only"
+        )
+    assert "FATAL SECURITY CONFIGURATION ERROR" in str(exc_info.value)

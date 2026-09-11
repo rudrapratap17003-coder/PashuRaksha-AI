@@ -1,22 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "https://pashuraksha-ai-backend.onrender.com/api/v1/:path*"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "https://pashuraksha-ai-backend.onrender.com/api/:path*"
-    },
-    {
-      "source": "/docs",
-      "destination": "https://pashuraksha-ai-backend.onrender.com/docs"
-    },
-    {
-      "source": "/openapi.json",
-      "destination": "https://pashuraksha-ai-backend.onrender.com/openapi.json"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

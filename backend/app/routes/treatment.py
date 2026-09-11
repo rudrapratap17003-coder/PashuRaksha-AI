@@ -16,8 +16,8 @@ def get_protocols(current_user: User = Depends(require_clinical)):
 
 @router.post("/generate-prescription")
 def generate_prescription(
-    case_id: int = Query(1),
-    animal_id: int = Query(1),
+    case_id: str = Query("1"),
+    animal_id: str = Query("1"),
     disease_code: str = Query("FMD"),
     body_weight_kg: float = Query(350.0),
     vet_name: str = Query("Dr. Vivek Kulkarni, B.V.Sc & A.H."),

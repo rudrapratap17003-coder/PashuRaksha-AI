@@ -33,7 +33,32 @@ export function AuthProvider({ children }) {
       return userData
     } catch (err) {
       // Security: Failed login must fail. Never create or fall back to fake users.
-      const errorMsg = err?.response?.data?.detail || err?.message || 'Authentication failed'
+      // Security: Failed login must fail. Never create or fall back to fake users.
+      let errorMsg = 'Authentication failed'
+
+      if (err?.response) {
+        if (err.response.status === 401) {
+          errorMsg = err.response.data?.detail || 'Invalid email or password.'
+        } else if (err.response.status === 404) {
+          errorMsg =
+            'Backend API endpoint not found (404). Please ensure the FastAPI backend is running and VITE_API_URL is set in your deployment environment.'
+        } else if (err.response.status === 422) {
+          errorMsg = 'Please provide a valid email and password.'
+        } else if (err.response.status >= 500) {
+          errorMsg =
+            'Backend server error (500). Please try again or contact administrator.'
+        } else {
+          errorMsg =
+            err.response.data?.detail ||
+            `Server error (${err.response.status})`
+        }
+      } else if (err?.request) {
+        errorMsg =
+          'Backend server is unavailable or network connection failed. Check if FastAPI backend is online.'
+      } else {
+        errorMsg = err?.message || 'Authentication failed'
+      }
+
       const customError = new Error(errorMsg)
       customError.status = err?.response?.status
       customError.code = err?.code

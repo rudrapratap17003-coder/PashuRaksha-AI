@@ -130,8 +130,8 @@ TREATMENT_PROTOCOLS: Dict[str, Dict[str, Any]] = {
 class TreatmentService:
     @staticmethod
     def generate_prescription(
-        case_id: int,
-        animal_id: int,
+        case_id: Any = "1",
+        animal_id: Any = "1",
         disease_code: str = "FMD",
         body_weight_kg: float = 350.0,
         vet_name: str = "Dr. Vivek Kulkarni, B.V.Sc & A.H.",
@@ -172,8 +172,9 @@ class TreatmentService:
                 custom_med["calculated_dose"] = med["dosage"]
             custom_meds.append(custom_med)
 
+        clean_case_id = f"{int(case_id):04d}" if (isinstance(case_id, int) or (isinstance(case_id, str) and case_id.isdigit())) else str(case_id).replace("rep-", "")
         prescription = {
-            "prescription_id": f"RX-MH-{datetime.now().strftime('%Y%m%d')}-{case_id:04d}",
+            "prescription_id": f"RX-MH-{datetime.now().strftime('%Y%m%d')}-{clean_case_id}",
             "issued_at": datetime.now().isoformat(),
             "veterinarian": {
                 "name": vet_name,

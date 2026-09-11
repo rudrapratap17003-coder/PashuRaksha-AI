@@ -11,6 +11,7 @@ import SurveillanceBackground from '../components/background/SurveillanceBackgro
 import MaharashtraHeader from '../components/common/MaharashtraHeader'
 import AIAssistant from '../components/common/AIAssistant'
 import BackendStatusBanner from '../components/common/BackendStatusBanner'
+import ErrorBoundary from '../components/common/ErrorBoundary'
 import apiClient from '../services/api'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -280,7 +281,15 @@ export default function DashboardLayout({ user, onLogout }) {
 
         {/* Page Content */}
         <main className="flex-1 pb-24 md:pb-6 overflow-hidden">
-          <Outlet />
+          <ErrorBoundary
+            title={
+              role === USER_ROLES.VETERINARIAN
+                ? 'Veterinarian dashboard encountered an unexpected error.'
+                : `${(role || 'User').toUpperCase()} dashboard encountered an unexpected error.`
+            }
+          >
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
 
