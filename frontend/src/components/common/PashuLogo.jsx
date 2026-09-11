@@ -1,10 +1,12 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 
 /**
  * Custom Livestock & Animal Protection Emblem Logo
  * Features smooth spring rotation, glassmorphic sheen, and ambient pulse ring
  */
 export default function PashuLogo({ size = 'md', className = '' }) {
+  const { t } = useLanguage()
   const sizeClasses = {
     sm: 'w-9 h-9',
     md: 'w-11 h-11',
@@ -21,7 +23,7 @@ export default function PashuLogo({ size = 'md', className = '' }) {
 
   return (
     <div
-      className={`${sizeClasses[size] || sizeClasses.md} rounded-2xl bg-gradient-to-br from-sky-500 via-sky-600 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-4 ring-sky-100/70 hover:ring-sky-200 flex-shrink-0 relative overflow-hidden group cursor-pointer transition-all duration-300 ease-out hover:scale-110 hover:rotate-3 hover:shadow-sky-500/40 ${className}`}
+      className={`${sizeClasses[size] || sizeClasses.md} rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20 ring-4 ring-sky-100/70 hover:ring-sky-200 flex-shrink-0 relative overflow-hidden group cursor-pointer transition-all duration-300 ease-out hover:scale-110 hover:rotate-3 hover:shadow-slate-900/20 ${className}`}
     >
       {/* Animated subtle shimmer sheen */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />

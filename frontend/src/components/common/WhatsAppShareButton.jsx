@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Share2, Smartphone } from 'lucide-react'
 
 export default function WhatsAppShareButton({
@@ -8,6 +9,7 @@ export default function WhatsAppShareButton({
   prescriptionData = null,
   className = ''
 }) {
+  const { t } = useLanguage()
   const handleShare = () => {
     let text = message
     if (prescriptionData) {

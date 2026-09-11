@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react'
-import { Activity, ShieldCheck, Cpu, Radio, Sparkles, Dna } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { HeartPulse, ShieldCheck, Cpu, Radio, Sparkles, Dna } from 'lucide-react'
 
 export default function Auth3DShowcase() {
+  const { t } = useLanguage()
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -154,7 +156,7 @@ export default function Auth3DShowcase() {
   }, [])
 
   return (
-    <div className="relative w-full h-full min-h-[420px] rounded-3xl overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/80 border border-slate-800 flex flex-col justify-between p-8 shadow-2xl">
+    <div className="relative w-full h-full min-h-[420px] rounded-3xl overflow-hidden border border-slate-800 flex flex-col justify-between p-8 shadow-2xl">
       {/* 3D Canvas Background */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
@@ -185,8 +187,8 @@ export default function Auth3DShowcase() {
 
         <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 backdrop-blur-md space-y-1 shadow-lg">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Ring Vaccination</span>
-          <strong className="text-base font-black text-sky-400 flex items-center gap-1.5">
-            <Radio className="w-4 h-4 text-sky-400" />
+          <strong className="text-base font-black text-slate-300 flex items-center gap-1.5">
+            <Radio className="w-4 h-4 text-slate-300" />
             <span>2°C–8°C IoT Safe</span>
           </strong>
           <span className="text-[9px] text-slate-500 block">10km contagion cordon</span>

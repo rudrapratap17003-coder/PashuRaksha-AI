@@ -1,19 +1,6 @@
 import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
-import {
-  Wheat,
-  Scale,
-  Milk,
-  ShieldCheck,
-  Sparkles,
-  RefreshCw,
-  Printer,
-  ChevronRight,
-  Droplet,
-  IndianRupee,
-  CheckCircle2,
-  HeartPulse
-} from 'lucide-react'
+import { Wheat, Scale, Milk, ShieldCheck, Sparkles, RefreshCw, Printer, ChevronRight, Droplet, IndianRupee, CheckCircle2, HeartPulse } from 'lucide-react'
 import Card from '../../components/common/Card'
 import apiClient from '../../services/api'
 
@@ -72,7 +59,7 @@ export default function NutritionAdvisorPage() {
   return (
     <div className="space-y-6 pb-12 text-slate-100 max-w-5xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Wheat className="w-4 h-4 text-amber-400" />

@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Sparkles, 
-  X, 
-  CheckCircle2, 
-  AlertTriangle, 
-  RefreshCw, 
-  ChevronRight, 
-  ArrowRight, 
-  ShieldAlert, 
-  User, 
-  Users, 
-  Stethoscope, 
-  Microscope, 
-  Building2, 
-  Activity, 
-  Play, 
-  ExternalLink,
-  Syringe,
-  Clock
-} from 'lucide-react'
+import { Sparkles, X, CheckCircle2, AlertTriangle, RefreshCw, ChevronRight, ArrowRight, ShieldAlert, User, Users, Stethoscope, FlaskConical, Building2, HeartPulse, Play, ExternalLink, Syringe, Clock } from 'lucide-react'
 import Card from '../common/Card'
 import Button from '../common/Button'
 import RiskBadge from '../common/RiskBadge'
@@ -28,6 +10,7 @@ import apiClient from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 
 export default function SihDemoScenarioModal({ isOpen, onClose }) {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const { user, login } = useAuth()
   
@@ -120,14 +103,14 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
       <div className="bg-white text-slate-900 border border-slate-200 rounded-3xl max-w-4xl w-full shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-sky-900 via-blue-900 to-indigo-950 text-white px-5 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <div className=" text-white px-5 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 text-sky-300 border border-white/20 flex items-center justify-center font-bold">
-              <Sparkles className="w-5 h-5 text-sky-400" />
+            <div className="w-10 h-10 rounded-2xl bg-white/10 text-slate-300 border border-white/20 flex items-center justify-center font-bold">
+              <Sparkles className="w-5 h-5 text-slate-300" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-mono text-[10px] font-black uppercase tracking-wider text-sky-300">
+                <span className="font-mono text-[10px] font-black uppercase tracking-wider text-slate-300">
                   SIH 2026 DEMONSTRATION SCENARIO
                 </span>
                 <span className="px-2 py-0.2 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px]">
@@ -218,7 +201,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-mono font-bold text-sky-700 uppercase">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase">
                         STEP 1 OF 7 • FARMER DASHBOARD &amp; INTAKE
                       </span>
                       <h3 className="text-xl font-black text-slate-900">
@@ -253,7 +236,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                         <strong className="text-slate-700">14.5 L/day</strong>
                       </div>
                       <div>
-                        <span className="text-slate-400 block text-[10px]">Owner</span>
+                        <span className="text-slate-400 block text-[10px]">{t("commonActions.owner")}</span>
                         <strong className="text-slate-700">Ramesh Patil</strong>
                       </div>
                       <div>
@@ -268,18 +251,18 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                   </div>
 
                   {/* Required Demonstration Symptoms Checklist */}
-                  <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 space-y-2">
-                    <span className="text-xs font-black text-sky-900 uppercase block">
+                  <div className="p-4 rounded-2xl bg-sky-50 border border-slate-800 space-y-2">
+                    <span className="text-xs font-black text-slate-900 uppercase block">
                       Demo Submission Payload (7 Clinical Signs):
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ High Fever (104.5°F)</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ Oral Blisters / Lesions</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ Excessive Frothy Salivation</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ Reduced Appetite / Anorexia</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ Sudden Milk Yield Drop</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold">✓ Duration: 2 Days (Subacute)</span>
-                      <span className="bg-white px-2.5 py-1 rounded-lg border border-sky-200 text-sky-900 font-bold col-span-2">✓ Affected Animals in Herd: 3</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ High Fever (104.5°F)</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ Oral Blisters / Lesions</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ Excessive Frothy Salivation</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ Reduced Appetite / Anorexia</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ Sudden Milk Yield Drop</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold">✓ Duration: 2 Days (Subacute)</span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-800 text-slate-900 font-bold col-span-2">✓ Affected Animals in Herd: 3</span>
                     </div>
                   </div>
 
@@ -401,7 +384,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-mono font-bold text-teal-700 uppercase">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase">
                         STEP 3 OF 7 • FIELD WORKER OUTREACH
                       </span>
                       <h3 className="text-xl font-black text-slate-900">
@@ -475,7 +458,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-mono font-bold text-blue-700 uppercase">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase">
                         STEP 4 OF 7 • VETERINARY CLINICAL DESK
                       </span>
                       <h3 className="text-xl font-black text-slate-900">
@@ -507,13 +490,13 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                       </div>
                       <div className="p-2 bg-white rounded-lg border border-slate-200 flex justify-between">
                         <span>3. Field Worker Verified: Oral Swab Collected</span>
-                        <strong className="text-teal-600">Ankita Jadhav</strong>
+                        <strong className="text-slate-900">Ankita Jadhav</strong>
                       </div>
                     </div>
 
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
-                      <strong className="text-blue-900 block">Attending Veterinarian Actions:</strong>
-                      <p className="text-blue-800">
+                    <div className="p-3 bg-blue-50 border border-slate-800 rounded-xl space-y-1">
+                      <strong className="text-slate-900 block">Attending Veterinarian Actions:</strong>
+                      <p className="text-slate-900">
                         Initiated supportive antiseptic mouthwash protocol. Ordered urgent diagnostic RT-PCR laboratory referral for definitive viral typing.
                       </p>
                     </div>
@@ -541,7 +524,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-mono font-bold text-purple-700 uppercase">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase">
                         STEP 5 OF 7 • DIAGNOSTIC LABORATORY DESK
                       </span>
                       <h3 className="text-xl font-black text-slate-900">
@@ -582,12 +565,12 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                       </div>
                     </div>
 
-                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
+                    <div className="p-3 bg-purple-50 border border-slate-800 rounded-xl space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-purple-900 font-bold">Assay Result Entry:</span>
+                        <span className="text-slate-900 font-bold">Assay Result Entry:</span>
                         <strong className="text-rose-700 font-black">POSITIVE - FMD Serotype O</strong>
                       </div>
-                      <p className="text-purple-800 text-[11px]">
+                      <p className="text-slate-900 text-[11px]">
                         TaqMan Real-Time RT-PCR detected Aphthovirus RNA (Ct value: 21.4). Validated by Dr. Suhas Kulkarni. Triggers automatic cluster detection.
                       </p>
                     </div>
@@ -615,7 +598,7 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-mono font-bold text-indigo-700 uppercase">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase">
                         STEP 6 OF 7 • HEALTH AUTHORITY COMMAND
                       </span>
                       <h3 className="text-xl font-black text-slate-900">
@@ -665,17 +648,17 @@ export default function SihDemoScenarioModal({ isOpen, onClose }) {
                       </div>
                     </div>
 
-                    <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
+                    <div className="p-3.5 bg-indigo-50 border border-slate-800 rounded-xl space-y-2">
                       <span className="font-black text-indigo-950 uppercase block">
                         Containment Protocol Triggered:
                       </span>
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <span className="bg-white px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-900 font-bold flex items-center space-x-1">
-                          <Syringe className="w-3.5 h-3.5 text-indigo-600" />
+                        <span className="bg-white px-3 py-1.5 rounded-lg border border-slate-800 text-slate-900 font-bold flex items-center space-x-1">
+                          <Syringe className="w-3.5 h-3.5 text-slate-900" />
                           <span>Dispatch 250 Ring Vaccines</span>
                         </span>
-                        <span className="bg-white px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-900 font-bold flex items-center space-x-1">
-                          <Users className="w-3.5 h-3.5 text-indigo-600" />
+                        <span className="bg-white px-3 py-1.5 rounded-lg border border-slate-800 text-slate-900 font-bold flex items-center space-x-1">
+                          <Users className="w-3.5 h-3.5 text-slate-900" />
                           <span>SMS Biosecurity Advisory Broadcast</span>
                         </span>
                       </div>

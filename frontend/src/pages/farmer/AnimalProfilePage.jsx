@@ -1,23 +1,7 @@
 import { useLanguage } from '../../context/LanguageContext'
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { 
-  PawPrint, 
-  ArrowLeft, 
-  FilePlus2, 
-  Calendar, 
-  Scale, 
-  Droplet, 
-  Syringe, 
-  MapPin, 
-  Activity, 
-  FileText,
-  ShieldCheck,
-  AlertTriangle,
-  RefreshCw,
-  Clock,
-  Sparkles
-} from 'lucide-react'
+import { PawPrint, ArrowLeft, FilePlus2, Calendar, Scale, Droplet, Syringe, MapPin, HeartPulse, FileText, ShieldCheck, AlertTriangle, RefreshCw, Clock, Sparkles } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
@@ -175,7 +159,7 @@ export default function AnimalProfilePage() {
               EAR-TAG: {animal.animal_id || animal.id}
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {animal.species} ({animal.breed || 'Indigenous'})
+              {t(`data.species.${animal.species}`, {}, animal.species)} ({animal.breed || 'Indigenous'})
             </h1>
           </div>
         </div>
@@ -198,7 +182,7 @@ export default function AnimalProfilePage() {
             <span>Book Camp</span>
           </button>
           <Link to={`/farmer/report?animalId=${animal.animal_id || animal.id}`}>
-            <Button icon={FilePlus2} className="font-bold shadow-md shadow-emerald-200 bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Button icon={FilePlus2} className="font-bold shadow-md shadow-slate-900/20 bg-emerald-600 hover:bg-emerald-500 text-white">
               Report Symptom
             </Button>
           </Link>
@@ -211,11 +195,11 @@ export default function AnimalProfilePage() {
         {/* Left Card: Vitals Overview */}
         <Card className="space-y-6 md:col-span-1 border-emerald-100 bg-gradient-to-b from-emerald-50/40 to-white">
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-200">
+            <div className="w-16 h-16 rounded-3xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-slate-900/20">
               <PawPrint className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-black text-slate-900 font-mono">{animal.animal_id || animal.id}</h2>
-            <p className="text-xs text-slate-500 font-medium">{animal.species} • {animal.gender || 'Female'}</p>
+            <p className="text-xs text-slate-500 font-medium">{t(`data.species.${animal.species}`, {}, animal.species)} • {animal.gender || 'Female'}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2 text-center shadow-xs">
@@ -249,7 +233,7 @@ export default function AnimalProfilePage() {
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
               <span className="text-slate-400">Vaccination</span>
-              <span className="font-bold text-purple-700">{animal.vaccination_status || 'Up to date'}</span>
+              <span className="font-bold text-slate-900">{animal.vaccination_status || 'Up to date'}</span>
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-slate-400">Location</span>
@@ -276,12 +260,12 @@ export default function AnimalProfilePage() {
           <Card className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-                <Syringe className="w-4 h-4 text-purple-600" />
+                <Syringe className="w-4 h-4 text-slate-900" />
                 <span>Vaccination Records &amp; State Drives</span>
               </h3>
               <button
                 onClick={() => setCampModalOpen(true)}
-                className="text-xs font-bold text-purple-600 hover:text-purple-700 underline"
+                className="text-xs font-bold text-slate-900 hover:text-slate-900 underline"
               >
                 + Book Camp
               </button>
@@ -289,7 +273,7 @@ export default function AnimalProfilePage() {
 
             {vaccinations.length === 0 ? (
               <div className="p-5 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                <p>Status: <strong className="text-purple-700">{animal.vaccination_status || 'Due soon'}</strong></p>
+                <p>Status: <strong className="text-slate-900">{animal.vaccination_status || 'Due soon'}</strong></p>
                 <button
                   type="button"
                   onClick={() => setCampModalOpen(true)}
@@ -319,7 +303,7 @@ export default function AnimalProfilePage() {
           <Card className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-sky-600" />
+                <HeartPulse className="w-4 h-4 text-slate-900" />
                 <span>Health &amp; Symptom History</span>
               </h3>
               <span className="text-xs text-slate-400 font-semibold">
@@ -344,7 +328,7 @@ export default function AnimalProfilePage() {
                           {r.severity}
                         </Badge>
                       </div>
-                      <RiskBadge level={r.risk_level} score={r.risk_score} />
+                      <RiskBadge level={t(`data.risk.${r.risk_level}`, {}, r.risk_level)} score={r.risk_score} />
                     </div>
                     <p className="text-slate-600">
                       Concern: <strong className="text-slate-900">{r.possible_disease_concern || 'Clinical Review'}</strong>

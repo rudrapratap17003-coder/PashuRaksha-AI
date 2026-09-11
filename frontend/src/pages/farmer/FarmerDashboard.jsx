@@ -1,22 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  PawPrint,
-  FilePlus2,
-  Syringe,
-  AlertTriangle,
-  Mic,
-  Plus,
-  ChevronRight,
-  Phone,
-  Calculator,
-  ShieldCheck,
-  Activity,
-  Radio,
-  Clock,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react'
+import { PawPrint, FilePlus2, Syringe, AlertTriangle, Mic, Plus, ChevronRight, Phone, Calculator, ShieldCheck, HeartPulse, Radio, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'
@@ -32,9 +16,10 @@ import { useScenario } from '../../context/ScenarioContext'
 import { useLanguage } from '../../context/LanguageContext'
 
 export default function FarmerDashboard() {
+
   const { user } = useAuth()
   const { scenarioData, currentScenario } = useScenario()
-  const { language, setLanguage, t: globalT } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
   const [animals, setAnimals] = useState([])
   const [alerts, setAlerts] = useState([])
   const [recentReports, setRecentReports] = useState([])
@@ -144,7 +129,7 @@ export default function FarmerDashboard() {
     }
   }
 
-  const t = translations[language] || translations.mr
+  const localT = translations[language] || translations.mr
 
   // Computed Herd Health stats
   const totalAnimals = animals.length
@@ -155,21 +140,20 @@ export default function FarmerDashboard() {
     <div className="space-y-6 pb-12 text-slate-800 font-sans">
       
       {/* Top Mobile-First Hero Greeting */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white border border-emerald-500/30 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 rounded-3xl bg-slate-900 text-white border border-emerald-500/30 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1.5 z-10">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30">
               {farmerDisplayName}
             </span>
-            <span className="bg-slate-900 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">
-              📍 {t.villageBadge}
+            <span className="bg-slate-900 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">{localT.villageBadge}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
-            {t.heroTitle}
+            {localT.heroTitle}
           </h1>
           <p className="text-xs sm:text-sm text-emerald-300/90 font-medium">
-            {t.heroSub}
+            {localT.heroSub}
           </p>
         </div>
 
@@ -202,42 +186,42 @@ export default function FarmerDashboard() {
         <Link
           to="/farmer/report"
           onClick={() => console.log('[ReportSymptoms] Opened')}
-          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg shadow-emerald-950 flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
+          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
             <FilePlus2 className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-black text-base sm:text-lg leading-tight">{t.actions.report}</h3>
-            <p className="text-[11px] text-emerald-100 mt-1 leading-snug">{t.actions.reportSub}</p>
+            <h3 className="font-black text-base sm:text-lg leading-tight">{localT.actions.report}</h3>
+            <p className="text-[11px] text-emerald-100 mt-1 leading-snug">{localT.actions.reportSub}</p>
           </div>
         </Link>
 
         {/* 2. MY ANIMALS */}
         <Link
           to="/farmer/animals"
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-800 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
-          <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-sky-100 text-slate-900 flex items-center justify-center">
             <PawPrint className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-base leading-tight">{t.actions.myAnimals}</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.myAnimalsSub}</p>
+            <h3 className="font-bold text-base leading-tight">{localT.actions.myAnimals}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{localT.actions.myAnimalsSub}</p>
           </div>
         </Link>
 
         {/* 3. VACCINATION */}
         <Link
           to="/farmer/vaccinations"
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-800 text-slate-800 shadow-sm flex flex-col justify-between space-y-3 transition transform hover:-translate-y-0.5"
         >
-          <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-purple-100 text-slate-900 flex items-center justify-center">
             <Syringe className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-base leading-tight">{t.actions.vaccine}</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.vaccineSub}</p>
+            <h3 className="font-bold text-base leading-tight">{localT.actions.vaccine}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{localT.actions.vaccineSub}</p>
           </div>
         </Link>
 
@@ -251,8 +235,8 @@ export default function FarmerDashboard() {
             <Mic className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-base leading-tight">{t.actions.speak}</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{t.actions.speakSub}</p>
+            <h3 className="font-bold text-base leading-tight">{localT.actions.speak}</h3>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">{localT.actions.speakSub}</p>
           </div>
         </button>
 
@@ -260,14 +244,14 @@ export default function FarmerDashboard() {
         <button
           type="button"
           onClick={() => setPanicModalOpen(true)}
-          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white shadow-lg shadow-rose-950 flex flex-col justify-between space-y-3 text-left transition transform hover:-translate-y-0.5"
+          className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 flex flex-col justify-between space-y-3 text-left transition transform hover:-translate-y-0.5"
         >
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center animate-pulse">
             <Radio className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-black text-base leading-tight">{t.actions.emergency}</h3>
-            <p className="text-[11px] text-rose-100 mt-1 leading-snug">{t.actions.emergencySub}</p>
+            <h3 className="font-black text-base leading-tight">{localT.actions.emergency}</h3>
+            <p className="text-[11px] text-rose-100 mt-1 leading-snug">{localT.actions.emergencySub}</p>
           </div>
         </button>
 
@@ -283,8 +267,8 @@ export default function FarmerDashboard() {
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-emerald-600" />
-                <h2 className="text-base font-extrabold text-slate-900">{t.sections.herdHealth}</h2>
+                <HeartPulse className="w-5 h-5 text-emerald-600" />
+                <h2 className="text-base font-extrabold text-slate-900">{localT.sections.herdHealth}</h2>
               </div>
               <Link to="/farmer/animals/add">
                 <Button size="sm" icon={Plus} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs">
@@ -335,17 +319,17 @@ export default function FarmerDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="font-mono font-bold text-slate-900 text-sm block">{animal.animal_id || animal.id}</span>
-                          <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {globalT('data.species.' + animal.species) || animal.species}</span>
+                          <span className="text-xs text-slate-500">{animal.breed || 'Gir'} • {t('data.species.' + animal.species) || animal.species}</span>
                         </div>
-                        <RiskBadge level={animal.current_risk_level} score={animal.current_risk_score} />
+                        <RiskBadge level={t(`data.risk.${animal.current_risk_level}`, {}, animal.current_risk_level)} score={animal.current_risk_score} />
                       </div>
                       <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                         <span className="flex items-center space-x-1">
-                          <Syringe className="w-3.5 h-3.5 text-purple-600" />
-                          <span>{globalT('data.status.' + (animal.vaccination_status || 'Up to date')) || (animal.vaccination_status || 'Up to date')}</span>
+                          <Syringe className="w-3.5 h-3.5 text-slate-900" />
+                          <span>{t('data.status.' + (animal.vaccination_status || 'Up to date')) || (animal.vaccination_status || 'Up to date')}</span>
                         </span>
                         <span className="text-emerald-700 font-bold flex items-center group-hover:translate-x-0.5 transition-transform">
-                          {globalT('data.actions.details')} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                          {t('data.actions.details')} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                         </span>
                       </div>
                     </Link>
@@ -359,16 +343,16 @@ export default function FarmerDashboard() {
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-sky-600" />
-                <h2 className="text-base font-extrabold text-slate-900">{t.sections.recentReports}</h2>
+                <Clock className="w-5 h-5 text-slate-900" />
+                <h2 className="text-base font-extrabold text-slate-900">{localT.sections.recentReports}</h2>
               </div>
-              <Link to="/farmer/report" className="text-xs font-bold text-sky-600 hover:text-sky-700">
+              <Link to="/farmer/report" className="text-xs font-bold text-slate-900 hover:text-slate-900">
                 New Report →
               </Link>
             </div>
 
             {recentReports.length === 0 ? (
-              <p className="text-xs text-slate-500 py-3 text-center">No recent symptom reports lodged.</p>
+              <p className="text-xs text-slate-500 py-3 text-center">{t("farmer.noReports") || "No recent symptom reports lodged."}</p>
             ) : (
               <div className="divide-y divide-slate-100 text-xs">
                 {recentReports.slice(0, 4).map((rep) => (
@@ -382,7 +366,7 @@ export default function FarmerDashboard() {
                         {rep.village || 'Baramati'} • {new Date(rep.reported_at).toLocaleDateString('en-IN')}
                       </span>
                     </div>
-                    <RiskBadge level={rep.risk_level} score={rep.risk_score} />
+                    <RiskBadge level={t(`data.risk.${rep.risk_level}`, {}, rep.risk_level)} score={rep.risk_score} />
                   </div>
                 ))}
               </div>
@@ -403,10 +387,10 @@ export default function FarmerDashboard() {
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
-                <Syringe className="w-5 h-5 text-purple-600" />
-                <h2 className="text-base font-extrabold text-slate-900">{t.sections.vaccinesDue}</h2>
+                <Syringe className="w-5 h-5 text-slate-900" />
+                <h2 className="text-base font-extrabold text-slate-900">{localT.sections.vaccinesDue}</h2>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-purple-50 text-slate-900 text-xs font-bold">
                 {dueVaccineAnimals.length} Due
               </span>
             </div>
@@ -414,15 +398,15 @@ export default function FarmerDashboard() {
             {dueVaccineAnimals.length === 0 ? (
               <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>All registered herd cattle have completed scheduled vaccinations.</span>
+                <span>{t("farmer.allVaccinated") || "All registered herd cattle have completed scheduled vaccinations."}</span>
               </div>
             ) : (
               <div className="space-y-2">
                 {dueVaccineAnimals.map((anim) => (
-                  <div key={anim.id} className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between text-xs">
+                  <div key={anim.id} className="p-3 rounded-2xl bg-purple-50/70 border border-slate-800 flex items-center justify-between text-xs">
                     <div>
-                      <strong className="text-purple-950 block">{anim.animal_id || anim.id} ({globalT('data.species.' + anim.species) || anim.species})</strong>
-                      <span className="text-[11px] text-purple-700">{globalT('data.status.' + anim.vaccination_status) || anim.vaccination_status}</span>
+                      <strong className="text-purple-950 block">{anim.animal_id || anim.id} ({t(`data.species.${anim.species}`, {}, anim.species)})</strong>
+                      <span className="text-[11px] text-slate-900">{t(`data.status.${anim.vaccination_status}`, {}, anim.vaccination_status)}</span>
                     </div>
                     <button
                       type="button"
@@ -434,7 +418,7 @@ export default function FarmerDashboard() {
                       }}
                       className="px-2.5 py-1 rounded-xl bg-purple-600 text-white font-bold text-[11px] hover:bg-purple-700 active:scale-95 transition shadow-xs cursor-pointer"
                     >
-                      {globalT('data.actions.bookCamp')}
+                      {t("data.actions.bookCamp")}
                     </button>
                   </div>
                 ))}
@@ -447,7 +431,7 @@ export default function FarmerDashboard() {
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
-                <h2 className="text-base font-extrabold text-slate-900">{t.sections.alerts}</h2>
+                <h2 className="text-base font-extrabold text-slate-900">{localT.sections.alerts}</h2>
               </div>
               <span className="text-[11px] text-slate-400">Baramati Block</span>
             </div>

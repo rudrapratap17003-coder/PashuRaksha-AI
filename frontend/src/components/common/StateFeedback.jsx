@@ -1,11 +1,12 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { RefreshCw, AlertTriangle, Inbox, ArrowRight } from 'lucide-react'
 import Button from './Button'
 
 export function LoadingState({ message = 'Loading live surveillance data...' }) {
   return (
     <div className="py-12 px-4 text-center space-y-3 animate-in fade-in" role="status">
-      <div className="w-10 h-10 rounded-full border-2 border-sky-500/20 border-t-sky-500 animate-spin mx-auto" />
+      <div className="w-10 h-10 rounded-full border-2 border-slate-800 border-t-sky-500 animate-spin mx-auto" />
       <p className="text-xs font-bold text-slate-500">{message}</p>
     </div>
   )

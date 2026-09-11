@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { ShieldAlert, AlertTriangle, CheckCircle, Info, Sparkles } from 'lucide-react'
 import RiskBadge from './RiskBadge'
 
@@ -29,7 +30,7 @@ export default function ExplainableRiskCard({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">
               EXPLAINABLE AI RISK ASSESSMENT
             </span>
             {animalId && (
@@ -98,8 +99,8 @@ export default function ExplainableRiskCard({
       </div>
 
       {/* Recommendation */}
-      <div className="p-3 rounded-xl bg-sky-950/60 border border-sky-500/30 text-xs space-y-1">
-        <strong className="text-sky-300 block font-bold">Recommended Clinical Action:</strong>
+      <div className="p-3 rounded-xl bg-slate-800 border border-slate-700  text-xs space-y-1">
+        <strong className="text-slate-300 block font-bold">Recommended Clinical Action:</strong>
         <p className="text-slate-300 text-[11px] leading-relaxed">{recommendation}</p>
       </div>
     </div>

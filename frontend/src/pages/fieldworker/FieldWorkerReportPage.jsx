@@ -53,9 +53,9 @@ export default function FieldWorkerReportPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 border border-teal-500/20 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900  rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center space-x-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
             <PlusCircle className="w-4 h-4" />
             <span>{t("fieldWorker.outreachBadge")}</span>
           </div>
@@ -68,7 +68,7 @@ export default function FieldWorkerReportPage() {
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-teal-500/30 rounded-3xl p-6 shadow-xl max-w-4xl mx-auto">
+      <div className="bg-slate-900  rounded-3xl p-6 shadow-xl max-w-4xl mx-auto">
         {successMsg ? (
           <div className="p-8 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
@@ -86,7 +86,7 @@ export default function FieldWorkerReportPage() {
                   value={reportForm.reporter_name}
                   onChange={(e) => setReportForm({ ...reportForm, reporter_name: e.target.value })}
                   placeholder={t("fieldWorker.farmerPlaceholder")}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-slate-800 focus:outline-none"
                 />
               </div>
               <div>
@@ -97,7 +97,7 @@ export default function FieldWorkerReportPage() {
                   value={reportForm.animal_id}
                   onChange={(e) => setReportForm({ ...reportForm, animal_id: e.target.value })}
                   placeholder={t("fieldWorker.tagIdPlaceholder")}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-slate-800 focus:outline-none"
                 />
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function FieldWorkerReportPage() {
                 <select
                   value={reportForm.village}
                   onChange={(e) => setReportForm({ ...reportForm, village: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-slate-800"
                 >
                   <option value="Baramati">Baramati (Pune)</option>
                   <option value="Shirur">Shirur (Pune)</option>
@@ -123,7 +123,7 @@ export default function FieldWorkerReportPage() {
                   min="1"
                   value={reportForm.number_of_animals_affected}
                   onChange={(e) => setReportForm({ ...reportForm, number_of_animals_affected: parseInt(e.target.value) || 1 })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-teal-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-slate-800 focus:outline-none"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function FieldWorkerReportPage() {
                       type="checkbox"
                       checked={reportForm[sym.id]}
                       onChange={(e) => setReportForm({ ...reportForm, [sym.id]: e.target.checked })}
-                      className="rounded border-slate-700 text-teal-600 focus:ring-teal-500 w-4 h-4 bg-slate-900"
+                      className="rounded border-slate-700 text-slate-900 focus:ring-teal-500 w-4 h-4 bg-slate-900"
                     />
                     <span className="text-xs">{sym.label}</span>
                   </label>

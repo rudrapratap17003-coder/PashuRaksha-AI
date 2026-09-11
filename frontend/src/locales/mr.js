@@ -1,5 +1,166 @@
 export default {
 
+    copilot: {
+    title: "पशुरक्षा सहाय्यक",
+    subtitle: "महाराष्ट्र पशुधन बुद्धिमत्ता",
+    welcome: "नमस्कार! मी पशुरक्षा एआय सहाय्यक आहे. मी तुम्हाला पशुधनाची लक्षणे, लसीकरण अलर्ट किंवा प्रादुर्भावाच्या माहितीत कशी मदत करू शकतो?",
+    placeholder: "लक्षणे, लस किंवा अलर्टबद्दल विचारा...",
+    active: "सक्रिय",
+    listen: "ऐका",
+    stop: "थांबा",
+    analyzing: "रोगराईच्या नोंदींचे विश्लेषण करत आहे...",
+    error: "क्षमस्व, पशुरक्षा सहाय्यक सध्या तात्पुरता अनुपलब्ध आहे. कृपया पुन्हा प्रयत्न करा.",
+    prompts: [
+      "गुरांमध्ये एफएमडीची सुरुवातीची लक्षणे कोणती आहेत.",
+      "कोणती लसीकरणे बाकी आहेत.",
+      "मी माझ्या पशुधनाचे संरक्षण कसे करू?",
+      "एआय जोखीम स्कोअरची गणना कशी करते ते सांगा"
+    ]
+  },
+
+
+
+  environment: {
+    risk: "पर्यावरणीय जोखीम",
+    sensorMesh: "महाराष्ट्र कृषी-हवामान सेन्सर मेश",
+    temp: "तापमान",
+    humidity: "आर्द्रता",
+    rainfall: "पाऊस",
+    moderateRisk: "मध्यम जोखीम",
+    riskDescription: "हवामानाच्या अंदाजांवर लक्ष ठेवा, कोरडे बिछाने राखा आणि लसीकरणाचे वेळापत्रक अद्ययावत असल्याची खात्री करा.",},
+  labModule: {
+    dashboardTitle: "डायग्नोस्टिक प्रयोगशाळा कन्सोल",
+    samples: "नमुने",
+    pcr: "पीसीआर / आरटी-पीसीआर",
+    diagnostics: "डायग्नोस्टिक्स",
+    results: "निकाल",
+    sampleStatus: "नमुना स्थिती",
+    priority: "प्राधान्य",
+    reports: "अहवाल",
+    forms: "फॉर्म"
+  },
+  authorityModule: {
+    commandCenter: "कमांड सेंटर",
+    coldChain: "कोल्ड चेन",
+    mvuFleet: "1962 एमव्हीयू फ्लीट",
+    marketSecurity: "बाजार सुरक्षा",
+    analytics: "अॅनालिटिक्स",
+    outbreakClusters: "प्रादुर्भाव क्लस्टर्स",
+    clusterActions: "क्लस्टर क्रिया",
+    deployTeam: "टीम तैनात करा",
+    issueAdvisory: "सल्ला जारी करा",
+    requestLab: "लॅबला विनंती करा",
+    broadcastAlert: "इशारा प्रसारित करा",
+    gis: "जीआयएस",
+    vaccination: "लसीकरण"
+  },
+  analyticsModule: {
+    charts: "चार्ट",
+    statistics: "आकडेवारी",
+    exportBtn: "निर्यात",
+    villageRiskMatrix: "ग्राम-स्तरीय जोखीम स्तरीकरण मॅट्रिक्स",
+    epidemiologicalCurve: "साथीचे रोग आणि सेवन वक्र",
+    monitoredLivestock: "निरीक्षण केलेले पशुधन",
+    activeOutbreaks: "सक्रिय रोग क्लस्टर्स"
+  },
+  modals: {
+    confirm: "पुष्टी करा",
+    cancel: "रद्द करा",
+    submit: "सबमिट करा",
+    close: "बंद करा",
+    successLodge: "शेतकऱ्याच्या वतीने आरोग्य अहवाल यशस्वीरित्या दाखल केला.",
+    teamDeployed: "टीम यशस्वीरित्या तैनात",
+    alertBroadcasted: "अलर्ट प्रसारित केला"
+  },
+  placeholders: {
+    searchTag: "टॅग नंबरने शोधा...",
+    searchBreed: "स्वदेशी प्रजाती शोधा...",
+    searchDisease: "आजाराच्या नावाने शोधा...",
+    selectLivestock: "पशुधन निवडा...",
+    searchVillage: "गाव शोधा...",
+    searchFarm: "फार्मच्या नावाने शोधा..."
+  },
+  commonActions: {
+    add: "जोडा",
+    addCattle: "गुरे जोडा",
+    search: "शोधा",
+    select: "निवडा",
+    total: "एकूण",
+    totalHerd: "एकूण कळप",
+    healthy: "निरोगी",
+    risk: "जोखीम",
+    sick: "आजारी",
+    pending: "प्रलंबित",
+    completed: "पूर्ण",
+    due: "बाकी",
+    overdue: "थकबाकी",
+    upToDate: "अद्ययावत",
+    details: "तपशील",
+    action: "कृती",
+    owner: "मालक"
+  },
+  data: {
+    species: {
+      Cow: "गाय",
+      Cattle: "गुरे",
+      "Cattle (Cow)": "गुरे (गाय)",
+      Goat: "शेळी",
+      Buffalo: "म्हैस",
+      Sheep: "मेंढी",
+      Poultry: "कुक्कुटपालन"
+    },
+    symptom: {
+      Fever: "ताप",
+      Cough: "खोकला",
+      Lesions: "घामोळ्या",
+      Blisters: "फोड/घामोळ्या",
+      "Nasal Discharge": "नाकातून स्त्राव",
+      Diarrhea: "अतिसार",
+      Lethargy: "सुस्ती",
+      Salivation: "लाळ गळणे",
+      Dyspnea: "श्वास घेण्यास त्रास / धाप लागणे",
+      "Loss of Appetite": "भूक न लागणे",
+      "Milk Yield Drop": "दुधाचे उत्पादन कमी होणे"
+    },
+    disease: {
+      "Foot-and-Mouth Disease": "लाळ-खुरकूत रोग",
+      "Foot and Mouth Disease (FMD)": "लाळ-खुरकूत रोग (FMD)",
+      "Lumpy Skin Disease": "गाठींचा चर्मरोग (लंपी)",
+      "Hemorrhagic Septicemia": "घटसर्प",
+      "Black Quarter": "फऱ्या",
+      "Mastitis": "स्तनदाह"
+    },
+    status: {
+      Healthy: "निरोगी",
+      Risk: "जोखीम",
+      Sick: "आजारी",
+      Pending: "प्रलंबित",
+      Due: "बाकी",
+      "Due soon": "लवकरच बाकी",
+      Overdue: "थकबाकी",
+      Completed: "पूर्ण",
+      "Up to date": "अद्ययावत",
+      Investigating: "तपासणी सुरु",
+      Investigated: "तपासणी पूर्ण"
+    },
+    risk: {
+      Low: "कमी",
+      Medium: "मध्यम",
+      High: "उच्च",
+      Critical: "गंभीर"
+    },
+    events: {
+      "Case Registered": "प्रकरण नोंदवले",
+      "Investigation Started": "तपास सुरू झाला",
+      "Lab Test Ordered": "प्रयोगशाळा चाचणीचा आदेश दिला",
+      "Treatment Prescribed": "उपचार निर्धारित",
+      "Case Resolved": "प्रकरण सोडवले"
+    },
+    actions: {
+      "bookCamp": "लसीकरण शिबीर बुक करा"
+    }
+  },
+
   vetModule: {
     dashboardTitle: "पशुवैद्यकीय क्लिनिकल ट्राइएज डेस्क",
     priorityActive: "एआय प्राधान्य रांग सक्रिय",

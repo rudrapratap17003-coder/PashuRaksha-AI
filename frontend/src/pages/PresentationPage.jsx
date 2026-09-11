@@ -1,21 +1,7 @@
 import React from 'react'
+import { useLanguage } from '../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import { 
-  Activity, 
-  MapPin, 
-  AlertTriangle, 
-  ShieldAlert, 
-  Syringe, 
-  Users, 
-  Radio, 
-  CheckCircle2, 
-  Clock, 
-  ArrowLeft, 
-  Sparkles,
-  Stethoscope,
-  Building2,
-  Share2
-} from 'lucide-react'
+import { HeartPulse, MapPin, AlertTriangle, ShieldAlert, Syringe, Users, Radio, CheckCircle2, Clock, ArrowLeft, Sparkles, Stethoscope, Building2, Share2 } from 'lucide-react'
 import PashuLogo from '../components/common/PashuLogo'
 import Card from '../components/common/Card'
 import Badge from '../components/common/Badge'
@@ -26,6 +12,7 @@ import SurveillanceBackground from '../components/background/SurveillanceBackgro
 import { useScenario } from '../context/ScenarioContext'
 
 export default function PresentationPage() {
+  const { t } = useLanguage()
   const { currentScenario, setScenario, scenarioData, scenarios } = useScenario()
 
   const isCritical = currentScenario === scenarios.RAMPUR_OUTBREAK
@@ -35,7 +22,7 @@ export default function PresentationPage() {
       <SurveillanceBackground />
 
       {/* Presentation Top Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-sky-100 shadow-sm px-4 sm:px-6 py-3">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-800 shadow-sm px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           
           <div className="flex items-center space-x-3">
@@ -52,9 +39,9 @@ export default function PresentationPage() {
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-base font-black tracking-tight text-slate-900">
-                    PASHURAKSHA <span className="text-sky-600">AI</span>
+                    PASHURAKSHA <span className="text-slate-900">AI</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-sky-50 border border-slate-800 text-slate-900 text-[10px] font-bold">
                     JURY STAGE
                   </span>
                 </div>
@@ -74,8 +61,7 @@ export default function PresentationPage() {
                   ? 'bg-emerald-600 text-white font-black shadow-sm'
                   : 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200'
               }`}
-            >
-              🟢 Baseline
+            >Baseline
             </button>
             <button
               onClick={() => setScenario(scenarios.RAMPUR_OUTBREAK)}
@@ -84,25 +70,23 @@ export default function PresentationPage() {
                   ? 'bg-rose-600 text-white font-black animate-pulse shadow-sm'
                   : 'bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100'
               }`}
-            >
-              🔴 Baramati Outbreak
+            >Baramati Outbreak
             </button>
             <button
               onClick={() => setScenario(scenarios.CONTAINED)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 currentScenario === scenarios.CONTAINED
                   ? 'bg-sky-600 text-white font-black shadow-sm'
-                  : 'bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100'
+                  : 'bg-sky-50 border border-slate-800 text-slate-900 hover:bg-sky-100'
               }`}
-            >
-              🟡 Ring Contained
+            >Ring Contained
             </button>
 
             <Link
               to="/presentation/pitch"
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white shadow-md shadow-sky-600/20 flex items-center space-x-1.5 transition ml-2"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-slate-800 text-white shadow-md shadow-slate-900/20 flex items-center space-x-1.5 transition ml-2"
             >
-              <span>📺 Pitch Deck Slides</span>
+              <span>Pitch Deck Slides</span>
             </Link>
           </div>
         </div>
@@ -117,12 +101,12 @@ export default function PresentationPage() {
         {/* Scenario Overview Banner */}
         <div className={`p-5 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md ${
           isCritical
-            ? 'bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-900'
-            : 'bg-gradient-to-r from-sky-50 via-white to-blue-50 border-sky-100 text-slate-900'
+            ? 'bg-slate-900 border-rose-200 text-rose-900'
+            : 'bg-gradient-to-r from-sky-50 via-white to-blue-50 border-slate-800 text-slate-900'
         }`}>
           <div className="space-y-0.5">
             <div className="flex items-center space-x-2">
-              <span className="font-mono text-xs font-black uppercase text-sky-700">
+              <span className="font-mono text-xs font-black uppercase text-slate-900">
                 ACTIVE SIMULATION STATE:
               </span>
               <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
@@ -138,14 +122,14 @@ export default function PresentationPage() {
           <div className="flex items-center space-x-2">
             <Link
               to="/vet/dashboard"
-              className="px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-700 text-xs font-bold hover:bg-sky-50 transition flex items-center space-x-1 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-white border border-slate-800 text-slate-900 text-xs font-bold hover:bg-sky-50 transition flex items-center space-x-1 shadow-sm"
             >
               <Stethoscope className="w-3.5 h-3.5" />
               <span>Vet Desk →</span>
             </Link>
             <Link
               to="/authority/dashboard"
-              className="px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-700 text-xs font-bold hover:bg-blue-50 transition flex items-center space-x-1 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-white border border-slate-800 text-slate-900 text-xs font-bold hover:bg-blue-50 transition flex items-center space-x-1 shadow-sm"
             >
               <Building2 className="w-3.5 h-3.5" />
               <span>Authority →</span>
@@ -166,10 +150,10 @@ export default function PresentationPage() {
             <Link
               key={i}
               to={portal.to}
-              className="p-3.5 rounded-3xl bg-white border border-sky-100 hover:border-sky-400 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/15 transition-all duration-300 ease-out group text-center shadow-sm relative overflow-hidden"
+              className="p-3.5 rounded-3xl bg-white border border-slate-800 hover:border-slate-800 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/20 transition-all duration-300 ease-out group text-center shadow-sm relative overflow-hidden"
             >
               <div className="text-2xl mb-1.5 group-hover:scale-125 group-hover:rotate-6 transition-transform duration-300">{portal.icon}</div>
-              <div className="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors">{portal.label}</div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-slate-900 transition-colors">{portal.label}</div>
               <div className="text-[10px] text-slate-500">{portal.sublabel}</div>
             </Link>
           ))}
@@ -206,7 +190,7 @@ export default function PresentationPage() {
             {/* AI Risk Score Breakdown */}
             <Card className="bg-white border border-slate-200 p-5 space-y-4 shadow-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-sky-700 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                   AI Risk Engine Telemetry
                 </span>
                 <RiskBadge level={isCritical ? 'CRITICAL' : 'LOW'} score={isCritical ? 94 : 18} />
@@ -223,7 +207,7 @@ export default function PresentationPage() {
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                     <path
-                      className={isCritical ? "text-rose-500" : "text-sky-600"}
+                      className={isCritical ? "text-rose-500" : "text-slate-900"}
                       strokeDasharray={`${isCritical ? 94 : 18}, 100`}
                       strokeWidth="3.5"
                       strokeLinecap="round"
@@ -271,7 +255,7 @@ export default function PresentationPage() {
               <div className="space-y-2">
                 <Link
                   to="/authority/mvu-fleet"
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-2"
+                  className="w-full py-2.5 px-3 rounded-xl hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-2"
                 >
                   <Radio className="w-4 h-4" />
                   <span>Dispatch 1962 MVU Fleet</span>

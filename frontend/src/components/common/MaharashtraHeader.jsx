@@ -10,10 +10,10 @@ export default function MaharashtraHeader() {
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-1.5">
         <div className="flex items-center space-x-2">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-          <span className="font-bold text-sky-300">{t('common.demoBanner')}</span>
+          <span className="font-bold text-slate-300">{t('common.demoBanner')}</span>
         </div>
         <div className="flex items-center space-x-2 text-[10px] text-slate-400 ml-auto">
-          <span className="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-sky-400 font-bold">
+          <span className="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-300 font-bold">
             SIH26128
           </span>
           <span>{t('common.prototypeNotice')}</span>

@@ -117,9 +117,9 @@ export default function FieldWorkerCensusPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 border border-teal-500/20 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900  rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center space-x-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
             <Home className="w-4 h-4" />
             <span>{t("fieldWorker.fieldOutreachBadge")}</span>
           </div>
@@ -153,7 +153,7 @@ export default function FieldWorkerCensusPage() {
                 placeholder={t("fieldWorker.searchFarmerPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-teal-500 focus:outline-none"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-slate-800 focus:outline-none"
               />
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function FieldWorkerCensusPage() {
             filteredHouseholds.map(h => (
               <div 
                 key={h.id}
-                className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-teal-500/30 transition"
+                className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-slate-800 transition"
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center space-x-2">
@@ -187,7 +187,7 @@ export default function FieldWorkerCensusPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 flex items-center space-x-2">
-                    <span className="font-semibold text-teal-400">{h.total_animals} {t("fieldWorker.animalsRegistered")}</span>
+                    <span className="font-semibold text-slate-300">{h.total_animals} {t("fieldWorker.animalsRegistered")}</span>
                   </p>
                 </div>
 
@@ -196,7 +196,7 @@ export default function FieldWorkerCensusPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => openDetails(h)}
-                    className="bg-slate-900 border-teal-500/40 text-teal-300 hover:bg-teal-950 text-xs font-bold"
+                    className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-teal-950 text-xs font-bold"
                   >
                     {t("fieldWorker.viewDetails")}
                   </Button>
@@ -221,7 +221,7 @@ export default function FieldWorkerCensusPage() {
       {/* Details Modal */}
       {detailsModalOpen && selectedHousehold && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-teal-500/30 rounded-3xl p-6 max-w-lg w-full shadow-2xl">
+          <div className="bg-slate-900  rounded-3xl p-6 max-w-lg w-full shadow-2xl">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
               <h3 className="text-lg font-black text-white">{t("fieldWorker.householdDetails")}</h3>
               <button onClick={() => setDetailsModalOpen(false)} className="text-slate-400 hover:text-white">
@@ -253,7 +253,7 @@ export default function FieldWorkerCensusPage() {
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="flex justify-between border-b border-slate-800 pb-1">
                     <span>{t("fieldWorker.totalAnimalsLabel")}</span>
-                    <span className="font-bold text-teal-400">{selectedHousehold.total_animals}</span>
+                    <span className="font-bold text-slate-300">{selectedHousehold.total_animals}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-800 pb-1">
                     <span>{t("fieldWorker.cattleLabel")}</span>
@@ -290,7 +290,7 @@ export default function FieldWorkerCensusPage() {
       {/* {t("fieldWorker.updateCensus")} Modal */}
       {updateModalOpen && selectedHousehold && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-teal-500/30 rounded-3xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900  rounded-3xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
               <h3 className="text-lg font-black text-white">{t("fieldWorker.updateCensus")} for {selectedHousehold.owner_name}</h3>
               <button onClick={() => setUpdateModalOpen(false)} className="text-slate-400 hover:text-white">
@@ -308,19 +308,19 @@ export default function FieldWorkerCensusPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.totalAnimalsLabelNoColon")}</label>
-                    <input type="number" value={formData.total_animals} onChange={e => setFormData({...formData, total_animals: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" />
+                    <input type="number" value={formData.total_animals} onChange={e => setFormData({...formData, total_animals: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" />
                   </div>
                   <div>
                     <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.cattleCountLabel")}</label>
-                    <input type="number" value={formData.cattle_count} onChange={e => setFormData({...formData, cattle_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" />
+                    <input type="number" value={formData.cattle_count} onChange={e => setFormData({...formData, cattle_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" />
                   </div>
                   <div>
                     <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.buffaloCountLabel")}</label>
-                    <input type="number" value={formData.buffalo_count} onChange={e => setFormData({...formData, buffalo_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" />
+                    <input type="number" value={formData.buffalo_count} onChange={e => setFormData({...formData, buffalo_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" />
                   </div>
                   <div>
                     <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.goatCountLabel")}</label>
-                    <input type="number" value={formData.goat_count} onChange={e => setFormData({...formData, goat_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" />
+                    <input type="number" value={formData.goat_count} onChange={e => setFormData({...formData, goat_count: parseInt(e.target.value)||0})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" />
                   </div>
                 </div>
                 
@@ -337,7 +337,7 @@ export default function FieldWorkerCensusPage() {
       {/* Register Household Modal */}
       {registerModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-teal-500/30 rounded-3xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900  rounded-3xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
               <h3 className="text-lg font-black text-white">{t("fieldWorker.registerNew")}</h3>
               <button onClick={() => setRegisterModalOpen(false)} className="text-slate-400 hover:text-white">
@@ -354,15 +354,15 @@ export default function FieldWorkerCensusPage() {
               <form onSubmit={handleRegister} className="space-y-4 text-sm">
                 <div>
                   <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.farmerName")}</label>
-                  <input type="text" required value={formData.owner_name} onChange={e => setFormData({...formData, owner_name: e.target.value, name: `${e.target.value}'s Farm`})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" placeholder={t("fieldWorker.farmerPlaceholder")} />
+                  <input type="text" required value={formData.owner_name} onChange={e => setFormData({...formData, owner_name: e.target.value, name: `${e.target.value}'s Farm`})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" placeholder={t("fieldWorker.farmerPlaceholder")} />
                 </div>
                 <div>
                   <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.villageLabel")}</label>
-                  <input type="text" required value={formData.village} onChange={e => setFormData({...formData, village: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" placeholder={t("fieldWorker.villagePlaceholder")} />
+                  <input type="text" required value={formData.village} onChange={e => setFormData({...formData, village: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" placeholder={t("fieldWorker.villagePlaceholder")} />
                 </div>
                 <div>
                   <label className="block text-slate-300 font-bold mb-1">{t("fieldWorker.taluka")}</label>
-                  <input type="text" value={formData.taluka} onChange={e => setFormData({...formData, taluka: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-teal-500" placeholder={t("fieldWorker.villagePlaceholder")} />
+                  <input type="text" value={formData.taluka} onChange={e => setFormData({...formData, taluka: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:border-slate-800" placeholder={t("fieldWorker.villagePlaceholder")} />
                 </div>
                 
                 <div className="mt-6 flex justify-end space-x-3">

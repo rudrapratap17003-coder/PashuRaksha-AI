@@ -1,8 +1,9 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { AlertTriangle, ShieldAlert, PawPrint, Activity, Info } from 'lucide-react'
+import { AlertTriangle, ShieldAlert, PawPrint, HeartPulse, Info } from 'lucide-react'
 import RiskBadge from '../common/RiskBadge'
 import Badge from '../common/Badge'
 
@@ -60,6 +61,7 @@ export default function OutbreakMap({
   onDeployAction = null,
   onBroadcastAction = null,
 }) {
+  const { t } = useLanguage()
   return (
     <div className="relative w-full rounded-2xl overflow-hidden shadow-inner border border-slate-800" style={{ height }}>
       <MapContainer
@@ -107,14 +109,14 @@ export default function OutbreakMap({
                   <div className="p-2 space-y-2.5 text-slate-900 font-sans">
                     <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
                       <div>
-                        <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+                        <span className="text-[10px] font-mono font-bold text-slate-900 bg-purple-50 px-1.5 py-0.5 rounded border border-slate-800">
                           {c.id} • 14-Day Window
                         </span>
                         <h4 className="font-bold text-xs text-slate-900 mt-1 leading-tight">
                           {c.cluster_name}
                         </h4>
                       </div>
-                      <RiskBadge level={c.risk_level} score={c.cluster_score} size="sm" />
+                      <RiskBadge level={t(`data.risk.${c.risk_level}`, {}, c.risk_level)} score={c.cluster_score} size="sm" />
                     </div>
 
                     <div className="space-y-1.5 text-[11px] text-slate-700">
@@ -131,7 +133,7 @@ export default function OutbreakMap({
                       </div>
 
                       {c.explanation && (
-                        <div className="p-2 rounded-xl bg-purple-50/80 border border-purple-200 text-[10.5px] text-purple-950 leading-relaxed font-medium">
+                        <div className="p-2 rounded-xl bg-purple-50/80 border border-slate-800 text-[10.5px] text-purple-950 leading-relaxed font-medium">
                           <strong>Why Detected:</strong> {c.explanation}
                         </div>
                       )}
@@ -165,7 +167,7 @@ export default function OutbreakMap({
                       </button>
                       <button
                         onClick={() => onBroadcastAction ? onBroadcastAction(c) : alert(`Advisory sent to ${c.cluster_name}`)}
-                        className="flex-1 py-1.5 px-2 bg-purple-900 hover:bg-purple-800 text-purple-200 text-[10px] font-bold rounded-lg transition border border-purple-500/40"
+                        className="flex-1 py-1.5 px-2 bg-purple-900 hover:bg-purple-800 text-slate-300 text-[10px] font-bold rounded-lg transition "
                       >
                         Issue Advisory
                       </button>
@@ -187,7 +189,7 @@ export default function OutbreakMap({
             <Popup>
               <div className="p-1 space-y-1 text-slate-900 text-xs">
                 <div className="font-bold text-slate-900">{m.title || `Case #${m.id}`}</div>
-                <div className="text-[10px] text-slate-600">Risk Score: <strong>{m.risk_score}/100 ({m.risk_level})</strong></div>
+                <div className="text-[10px] text-slate-600">Risk Score: <strong>{m.risk_score}/100 ({t(`data.risk.${m.risk_level}`, {}, m.risk_level)})</strong></div>
                 <div className="text-[10px] text-slate-600">Symptom: <strong>{m.dominant_symptom}</strong></div>
               </div>
             </Popup>
@@ -197,11 +199,11 @@ export default function OutbreakMap({
 
       {/* Floating Map Legend */}
       <div className="absolute bottom-3 right-3 z-20 bg-slate-950/90 backdrop-blur-sm p-3 rounded-2xl shadow-xl border border-slate-800 text-[11px] font-medium text-slate-300 space-y-1.5">
-        <span className="font-black text-[10px] uppercase text-purple-400 block pb-1 border-b border-slate-800">
+        <span className="font-black text-[10px] uppercase text-slate-300 block pb-1 border-b border-slate-800">
           Epidemiological GIS Layers
         </span>
         <div className="flex items-center space-x-2">
-          <span className="w-3 h-3 rounded-full bg-rose-600 inline-block shadow-sm shadow-rose-600" />
+          <span className="w-3 h-3 rounded-full bg-rose-600 inline-block shadow-sm shadow-slate-900/20" />
           <span>Critical Hotspot (Score ≥ 80)</span>
         </div>
         <div className="flex items-center space-x-2">

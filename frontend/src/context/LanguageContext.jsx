@@ -48,7 +48,7 @@ export function LanguageProvider({ children }) {
   }
 
   // Translation function with nested keys and interpolation
-  const t = (key, params = {}) => {
+  const t = (key, params = {}, fallbackStr = undefined) => {
     const dict = dictionaries[language] || dictionaries.en
     let str = resolveKey(dict, key)
 
@@ -58,8 +58,9 @@ export function LanguageProvider({ children }) {
         str = resolveKey(dictionaries.en, key)
       }
       
-      // If still missing, log warning and return key
+      // If still missing, return fallbackStr if provided, else log warning and return key
       if (str === undefined) {
+        if (fallbackStr !== undefined) return fallbackStr;
         console.warn(`[i18n] Missing translation key: ${key}`)
         return key
       }

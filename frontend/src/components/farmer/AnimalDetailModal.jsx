@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { X, PawPrint, Calendar, Scale, Droplet, ShieldAlert, Syringe, MapPin, FileText } from 'lucide-react'
 import RiskBadge from '../common/RiskBadge'
 import Badge from '../common/Badge'
@@ -6,6 +7,7 @@ import Button from '../common/Button'
 import { Link } from 'react-router-dom'
 
 export default function AnimalDetailModal({ animal, onClose }) {
+  const { t } = useLanguage()
   if (!animal) return null
 
   return (
@@ -23,7 +25,7 @@ export default function AnimalDetailModal({ animal, onClose }) {
                 EAR-TAG: {animal.animal_id}
               </span>
               <h3 className="text-xl font-black text-slate-900">
-                {animal.species}
+                {t(`data.species.${animal.species}`, {}, animal.species)}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
                 Breed: <strong>{animal.breed}</strong>

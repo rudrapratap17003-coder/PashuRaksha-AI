@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Wifi, WifiOff, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { getPendingCount, syncReports } from '../../utils/offlineQueue'
 import apiClient from '../../services/api'
 
 export default function OfflineIndicator() {
+  const { t } = useLanguage()
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true))
   const [pendingSync, setPendingSync] = useState(0)
   const [isSyncing, setIsSyncing] = useState(false)
@@ -74,7 +76,7 @@ export default function OfflineIndicator() {
           !isOnline
             ? 'bg-amber-950/80 border-amber-500/40 text-amber-300 animate-pulse'
             : pendingSync > 0
-            ? 'bg-sky-950/80 border-sky-500/40 text-sky-300 hover:bg-sky-900/60'
+            ? 'bg-sky-950/80 border-slate-800 text-slate-300 hover:bg-sky-900/60'
             : 'bg-emerald-950/70 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/60'
         }`}
       >
@@ -85,7 +87,7 @@ export default function OfflineIndicator() {
           </>
         ) : isSyncing ? (
           <>
-            <RefreshCw className="w-3 h-3 text-sky-400 animate-spin" />
+            <RefreshCw className="w-3 h-3 text-slate-300 animate-spin" />
             <span>Syncing...</span>
           </>
         ) : !isOnline ? (
@@ -95,7 +97,7 @@ export default function OfflineIndicator() {
           </>
         ) : pendingSync > 0 ? (
           <>
-            <RefreshCw className="w-3 h-3 text-sky-400" />
+            <RefreshCw className="w-3 h-3 text-slate-300" />
             <span>Pending Sync ({pendingSync})</span>
           </>
         ) : (

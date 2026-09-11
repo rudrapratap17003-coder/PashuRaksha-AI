@@ -1,10 +1,11 @@
 import React from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 
 const VARIANTS = {
-  primary: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-200 border-transparent',
+  primary: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-slate-900/20 border-transparent',
   secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200',
   outline: 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm',
-  danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-200 border-transparent',
+  danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-slate-900/20 border-transparent',
   ghost: 'bg-transparent hover:bg-slate-100 text-slate-600 border-transparent',
 }
 
@@ -24,6 +25,7 @@ export default function Button({
   icon: Icon,
   ...props
 }) {
+  const { t } = useLanguage()
   return (
     <button
       disabled={disabled || loading}

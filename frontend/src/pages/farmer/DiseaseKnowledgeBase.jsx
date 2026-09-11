@@ -1,18 +1,6 @@
 import { useLanguage } from '../../context/LanguageContext'
 import React, { useState } from 'react'
-import {
-  BookOpen,
-  Search,
-  ShieldCheck,
-  AlertTriangle,
-  Syringe,
-  Activity,
-  Bug,
-  Droplet,
-  ChevronRight,
-  ExternalLink,
-  Info
-} from 'lucide-react'
+import { BookOpen, Search, ShieldCheck, AlertTriangle, Syringe, HeartPulse, Bug, Droplet, ChevronRight, ExternalLink, Info } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
 
@@ -68,7 +56,7 @@ const MAHARASHTRA_DISEASES = [
     ],
     containmentProtocol: 'Immediate antimicrobial therapy (Oxytetracycline / Sulfa). Deep burial of carcasses with lime powder.',
     vaccineSchedule: 'Annual pre-monsoon vaccination (May) with Alum precipitated or Oil adjuvant HS vaccine.',
-    color: 'border-purple-500/40 bg-purple-950/20'
+    color: 'border-slate-800 bg-slate-50 border border-slate-200'
   },
   {
     id: 'bq',
@@ -85,7 +73,7 @@ const MAHARASHTRA_DISEASES = [
     ],
     containmentProtocol: 'Never open carcass in open pasture! Burn or deep bury with quicklime. Disinfect sheds.',
     vaccineSchedule: 'Annual combined HS + BQ vaccine before onset of monsoon rains.',
-    color: 'border-indigo-500/40 bg-indigo-950/20'
+    color: 'border-slate-800 bg-slate-50 border border-slate-200'
   },
   {
     id: 'mastitis',
@@ -102,7 +90,7 @@ const MAHARASHTRA_DISEASES = [
     ],
     containmentProtocol: 'Post-milking teat dipping in 0.5% Povidone Iodine. Complete milking hygiene protocols.',
     vaccineSchedule: 'Management-based control; dry cow therapy (Intramammary infusions at drying off).',
-    color: 'border-teal-500/40 bg-teal-950/20'
+    color: 'border-slate-800 bg-slate-50 border border-slate-200'
   },
   {
     id: 'ppr',
@@ -138,7 +126,7 @@ export default function DiseaseKnowledgeBase() {
   return (
     <div className="space-y-6 pb-12 text-slate-100 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className=" border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <BookOpen className="w-4 h-4" />
@@ -175,7 +163,7 @@ export default function DiseaseKnowledgeBase() {
               onClick={() => setSelectedDisease(d)}
               className={`w-full p-4 rounded-2xl text-left border transition flex items-center justify-between ${
                 selectedDisease.id === d.id
-                  ? 'bg-slate-900 border-emerald-400 shadow-lg shadow-emerald-950'
+                  ? 'bg-slate-900 border-emerald-400 shadow-lg shadow-slate-900/20'
                   : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700 text-slate-300'
               }`}
             >
@@ -208,7 +196,7 @@ export default function DiseaseKnowledgeBase() {
               {/* Cardinal Signs */}
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-rose-400" />
+                  <HeartPulse className="w-3.5 h-3.5 text-rose-400" />
                   <span>{t("diseaseGuide.cardinalSigns")}</span>
                 </h4>
                 <ul className="space-y-1.5 bg-slate-950 p-3.5 rounded-2xl border border-slate-800/80 text-xs">
@@ -245,11 +233,11 @@ export default function DiseaseKnowledgeBase() {
 
               {/* Vaccine Schedule */}
               <div className="space-y-1 text-xs">
-                <h4 className="font-bold text-sky-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                   <Syringe className="w-3.5 h-3.5" />
                   <span>{t("diseaseGuide.vaccineSchedule")}</span>
                 </h4>
-                <p className="text-sky-200 bg-sky-950/40 p-3 rounded-xl border border-sky-500/30 leading-relaxed">
+                <p className="text-slate-300 bg-slate-800 border border-slate-700 p-3 rounded-xl  leading-relaxed">
                   {selectedDisease.vaccineSchedule}
                 </p>
               </div>

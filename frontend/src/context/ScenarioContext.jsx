@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 import { SCENARIOS, SCENARIO_DATA } from '../data/scenarios'
 
 const ScenarioContext = createContext(null)

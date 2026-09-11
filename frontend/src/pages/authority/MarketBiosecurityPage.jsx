@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import {
-  ShieldCheck,
-  AlertTriangle,
-  QrCode,
-  Truck,
-  CheckCircle2,
-  XCircle,
-  Building2,
-  MapPin,
-  Search,
-  Scan,
-  Calendar,
-  Layers,
-  ArrowRight,
-  ArrowLeft,
-  RefreshCw,
-  FileCheck2,
-  ShieldAlert,
-  BadgeAlert
-} from 'lucide-react'
+import { ShieldCheck, AlertTriangle, QrCode, Truck, CheckCircle2, XCircle, Building2, MapPin, Search, Scan, Calendar, Layers, ArrowRight, ArrowLeft, RefreshCw, FileCheck2, ShieldAlert, BadgeAlert } from 'lucide-react'
 import StatCard from '../../components/common/StatCard'
 import Button from '../../components/common/Button'
 import apiClient from '../../services/api'
@@ -105,6 +87,7 @@ const SAMPLE_PERMITS = [
 ]
 
 export default function MarketBiosecurityPage() {
+  const { t } = useLanguage()
   const [markets, setMarkets] = useState(ANIMAL_MARKETS)
   const [permits, setPermits] = useState(SAMPLE_PERMITS)
   const [scanCode, setScanCode] = useState('')
@@ -198,7 +181,7 @@ export default function MarketBiosecurityPage() {
       </div>
 
       {/* Main Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-slate-900 border border-emerald-500/20 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Building2 className="w-4 h-4 text-emerald-400" />
@@ -252,7 +235,7 @@ export default function MarketBiosecurityPage() {
           value="142 Today"
           subtitle="Verified across APMC toll gates"
           icon={FileCheck2}
-          iconBg="bg-sky-500/10 text-sky-600 border border-sky-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-900 "
         />
         <StatCard
           title="Blocked Violations"
@@ -419,7 +402,7 @@ export default function MarketBiosecurityPage() {
                   <td className="py-3.5 px-4 font-bold text-slate-900">{p.trader}</td>
                   <td className="py-3.5 px-4 text-slate-600 font-medium">{p.originVillage}</td>
                   <td className="py-3.5 px-4 text-slate-600 font-medium">{p.destinationMarket}</td>
-                  <td className="py-3.5 px-4 text-slate-800 font-medium">{p.animalCount} Animals • {p.species}</td>
+                  <td className="py-3.5 px-4 text-slate-800 font-medium">{p.animalCount} Animals • {t(`data.species.${p.species}`, {}, p.species)}</td>
                   <td className="py-3.5 px-4 font-bold text-slate-700">{p.vaxStatus}</td>
                   <td className="py-3.5 px-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${

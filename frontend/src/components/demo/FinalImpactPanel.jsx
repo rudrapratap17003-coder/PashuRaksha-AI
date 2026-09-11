@@ -1,24 +1,11 @@
 import React from 'react'
-import { 
-  CheckCircle2, 
-  Clock, 
-  ShieldAlert, 
-  MapPin, 
-  Activity, 
-  Syringe, 
-  ArrowRight, 
-  Sparkles,
-  Users,
-  Stethoscope,
-  Microscope,
-  Building2,
-  Share2,
-  FileCheck2
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { CheckCircle2, Clock, ShieldAlert, MapPin, HeartPulse, Syringe, ArrowRight, Sparkles, Users, Stethoscope, FlaskConical, Building2, Share2, FileCheck2 } from 'lucide-react'
 import Card from '../common/Card'
 import Button from '../common/Button'
 
 export default function FinalImpactPanel({ onClose, onReset }) {
+  const { t } = useLanguage()
   const steps = [
     {
       time: '08:30 AM',
@@ -32,7 +19,7 @@ export default function FinalImpactPanel({ onClose, onReset }) {
       time: '08:31 AM',
       phase: 'Explainable AI Risk Engine',
       actor: 'PASHURAKSHA AI Platform',
-      icon: Activity,
+      icon: HeartPulse,
       color: 'rose',
       detail: 'Risk Score 82/100 (CRITICAL). Detected Vesicular Triad synergy and overdue FMD booster gap.'
     },
@@ -56,7 +43,7 @@ export default function FinalImpactPanel({ onClose, onReset }) {
       time: '11:45 AM',
       phase: 'Laboratory Confirmation',
       actor: 'Dr. Suhas Kulkarni (District Lab, Pune)',
-      icon: Microscope,
+      icon: FlaskConical,
       color: 'purple',
       detail: 'Validated POSITIVE for FMD Virus Serotype O via RT-PCR (Ct: 21.4). Triggered epidemic alert.'
     },
@@ -81,7 +68,7 @@ export default function FinalImpactPanel({ onClose, onReset }) {
   return (
     <div className="space-y-6 text-slate-800">
       {/* Top Headline Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 text-white rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="relative z-10 space-y-3">
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider">
@@ -190,8 +177,7 @@ export default function FinalImpactPanel({ onClose, onReset }) {
             variant="outline"
             onClick={onReset}
             className="w-full sm:w-auto font-bold text-xs"
-          >
-            🔄 Reset Demo Scenario for Next Jury
+          >Reset Demo Scenario for Next Jury
           </Button>
           <Button
             variant="primary"

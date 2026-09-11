@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
-import {
-  FileText,
-  Printer,
-  Download,
-  X,
-  ShieldCheck,
-  Stethoscope,
-  AlertTriangle,
-  QrCode,
-  Sparkles,
-  RefreshCw,
-  CheckCircle2
-} from 'lucide-react'
+import { FileText, Printer, Download, X, ShieldCheck, Stethoscope, AlertTriangle, QrCode, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
 import WhatsAppShareButton from '../common/WhatsAppShareButton'
 import apiClient from '../../services/api'
 
@@ -291,7 +279,7 @@ export default function PrescriptionGeneratorModal({ isOpen, onClose, caseData, 
               }}
               className={`px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg ${
                 vetConfirmed
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-950 cursor-pointer'
+                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20 cursor-pointer'
                   : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60'
               }`}
             >

@@ -1,23 +1,7 @@
 import React from 'react'
+import { useLanguage } from '../context/LanguageContext'
 import { Link } from 'react-router-dom'
-import {
-  Activity,
-  Stethoscope,
-  Building2,
-  AlertTriangle,
-  TrendingUp,
-  Users,
-  ArrowRight,
-  CheckCircle2,
-  Shield,
-  Truck,
-  Presentation,
-  QrCode,
-  Microscope,
-  Cpu,
-  Sparkles,
-  ChevronRight
-} from 'lucide-react'
+import { HeartPulse, Stethoscope, Building2, AlertTriangle, TrendingUp, Users, ArrowRight, CheckCircle2, Shield, Truck, Presentation, QrCode, FlaskConical, Cpu, Sparkles, ChevronRight } from 'lucide-react'
 import Button from '../components/common/Button'
 import OutbreakMap from '../components/map/OutbreakMap'
 import SurveillanceBackground from '../components/background/SurveillanceBackground'
@@ -25,6 +9,7 @@ import WeatherWidget from '../components/common/WeatherWidget'
 import PashuLogo from '../components/common/PashuLogo'
 
 export default function LandingPage() {
+  const { t } = useLanguage()
 
   const portals = [
     {
@@ -40,7 +25,7 @@ export default function LandingPage() {
       marathi: 'पशु सखी',
       description: 'Door-to-door livestock census & offline sample collection.',
       link: '/field-worker/dashboard',
-      icon: Activity,
+      icon: HeartPulse,
       color: 'bg-teal-600',
     },
     {
@@ -56,7 +41,7 @@ export default function LandingPage() {
       marathi: 'रोग निदान प्रयोगशाळा',
       description: 'Sample testing, RT-PCR results, and outbreak sync.',
       link: '/lab/dashboard',
-      icon: Microscope,
+      icon: FlaskConical,
       color: 'bg-cyan-600',
     },
     {
@@ -138,7 +123,7 @@ export default function LandingPage() {
                   <Button
                     size="lg"
                     icon={ArrowRight}
-                    className="w-full sm:w-auto font-black bg-emerald-600 hover:bg-emerald-500 text-white text-base py-4 px-8 border-0 rounded-2xl shadow-lg shadow-emerald-950/20 transition"
+                    className="w-full sm:w-auto font-black bg-emerald-600 hover:bg-emerald-500 text-white text-base py-4 px-8 border-0 rounded-2xl shadow-lg shadow-slate-900/20 transition"
                   >
                     EXPLORE LIVE DEMO
                   </Button>
@@ -200,11 +185,11 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-xs">
               {[
                 { step: '1', title: 'FARMER', desc: 'Voice/Text Intake', bg: 'bg-emerald-950 border-emerald-500/40 text-emerald-300' },
-                { step: '2', title: 'REPORT', desc: 'Symptom Entry', bg: 'bg-teal-950 border-teal-500/40 text-teal-300' },
+                { step: '2', title: 'REPORT', desc: 'Symptom Entry', bg: 'bg-teal-950 border-slate-800 text-slate-300' },
                 { step: '3', title: 'RISK ENGINE', desc: 'Multi-Factor Score', bg: 'bg-amber-950 border-amber-500/40 text-amber-300' },
-                { step: '4', title: 'FIELD VISIT', desc: 'Pashu Sakhi Census', bg: 'bg-sky-950 border-sky-500/40 text-sky-300' },
-                { step: '5', title: 'VET', desc: 'Clinical Triage', bg: 'bg-blue-950 border-blue-500/40 text-blue-300' },
-                { step: '6', title: 'LAB', desc: 'RT-PCR Confirm', bg: 'bg-purple-950 border-purple-500/40 text-purple-300' },
+                { step: '4', title: 'FIELD VISIT', desc: 'Pashu Sakhi Census', bg: 'bg-sky-950 border-slate-800 text-slate-300' },
+                { step: '5', title: 'VET', desc: 'Clinical Triage', bg: 'bg-blue-950 border-slate-800 text-slate-300' },
+                { step: '6', title: 'LAB', desc: 'RT-PCR Confirm', bg: 'bg-purple-950 border-slate-800 text-slate-300' },
                 { step: '7', title: 'GIS', desc: 'Spatial Haversine', bg: 'bg-rose-950 border-rose-500/40 text-rose-300' },
                 { step: '8', title: 'AUTHORITY', desc: 'Ring Containment', bg: 'bg-red-950 border-red-500/40 text-red-300' }
               ].map((n, idx) => (
@@ -223,7 +208,7 @@ export default function LandingPage() {
       {/* 4 Core Pillars — Simple & Clear */}
       <section className="relative z-10 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-slate-200">
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="text-sm font-bold text-sky-700 bg-sky-50 px-4 py-1.5 rounded-full border border-sky-200">
+          <span className="text-sm font-bold text-slate-900 bg-sky-50 px-4 py-1.5 rounded-full border border-slate-800">
             HOW IT WORKS
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
@@ -241,7 +226,7 @@ export default function LandingPage() {
                 className="group p-5 rounded-2xl bg-white border border-slate-200 shadow-sm card-hover space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-extrabold text-sky-600">{p.step}</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{p.step}</span>
                   <div className="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center text-white icon-lift">
                     <Icon className="w-5 h-5" />
                   </div>
@@ -257,7 +242,7 @@ export default function LandingPage() {
       {/* 6 Portals — Big Tap Targets for Farmers */}
       <section className="relative z-10 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-slate-200">
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="text-sm font-bold text-sky-700 bg-sky-50 px-4 py-1.5 rounded-full border border-sky-200">
+          <span className="text-sm font-bold text-slate-900 bg-sky-50 px-4 py-1.5 rounded-full border border-slate-800">
             PORTALS
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
@@ -273,18 +258,18 @@ export default function LandingPage() {
               <Link
                 key={p.title}
                 to={p.link}
-                className="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 card-hover shadow-sm flex items-start space-x-4"
+                className="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-800 card-hover shadow-sm flex items-start space-x-4"
               >
                 <div className={`w-12 h-12 rounded-xl ${p.color} flex items-center justify-center text-white flex-shrink-0 icon-lift`}>
                   <Icon className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors duration-200">
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-slate-900 transition-colors duration-200">
                     {p.title}
                   </h3>
-                  <span className="text-sm text-sky-600 font-semibold">{p.marathi}</span>
+                  <span className="text-sm text-slate-900 font-semibold">{p.marathi}</span>
                   <p className="text-sm text-slate-500 mt-1">{p.description}</p>
-                  <span className="inline-flex items-center text-sm font-semibold text-sky-600 mt-2">
+                  <span className="inline-flex items-center text-sm font-semibold text-slate-900 mt-2">
                     Open <ChevronRight className="w-4 h-4 ml-0.5" />
                   </span>
                 </div>
@@ -306,7 +291,7 @@ export default function LandingPage() {
             </p>
           </div>
           <Link to="/authority/dashboard">
-            <button className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400 text-sm font-semibold flex items-center space-x-2 transition-colors duration-200">
+            <button className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 hover:bg-sky-50 hover:border-slate-800 text-sm font-semibold flex items-center space-x-2 transition-colors duration-200">
               <span>Full Map</span>
               <ChevronRight className="w-4 h-4" />
             </button>

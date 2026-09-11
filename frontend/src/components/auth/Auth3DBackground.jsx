@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function Auth3DBackground() {
+  const { t } = useLanguage()
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -186,7 +188,7 @@ export default function Auth3DBackground() {
 
       {/* Ambient background glows */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-50 border border-slate-200 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Subtle grid pattern overlay */}
       <div 

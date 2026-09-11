@@ -1,23 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import {
-  Mic,
-  MicOff,
-  X,
-  Sparkles,
-  CheckCircle2,
-  Volume2,
-  ArrowRight,
-  Activity,
-  AlertCircle,
-  ShieldCheck,
-  CheckSquare,
-  Square,
-  Edit3,
-  RefreshCw,
-  Info,
-  Radio,
-  StopCircle
-} from 'lucide-react'
+import { Mic, MicOff, X, Sparkles, CheckCircle2, Volume2, ArrowRight, HeartPulse, AlertCircle, ShieldCheck, CheckSquare, Square, Edit3, RefreshCw, Info, Radio, StopCircle } from 'lucide-react'
 import Card from './Card'
 import Button from './Button'
 import apiClient from '../../services/api'
@@ -93,6 +75,7 @@ export default function VoiceReportModal({
   availableAnimals = [],
   initialText = ''
 }) {
+  const { t } = useLanguage()
   if (!isOpen) return null
 
   const { user } = useAuth()
@@ -329,7 +312,7 @@ export default function VoiceReportModal({
               >
                 {availableAnimals.map(a => (
                   <option key={a.animal_id} value={a.animal_id}>
-                    {a.animal_id} ({a.species})
+                    {a.animal_id} ({t(`data.species.${a.species}`, {}, a.species)})
                   </option>
                 ))}
               </select>
@@ -366,7 +349,7 @@ export default function VoiceReportModal({
                 <button
                   type="button"
                   onClick={handleStartRecording}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-amber-950 transition transform hover:scale-105 active:scale-95"
+                  className="w-20 h-20 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-slate-900/20 transition transform hover:scale-105 active:scale-95"
                 >
                   <Mic className="w-8 h-8 font-black" />
                 </button>
@@ -405,15 +388,14 @@ export default function VoiceReportModal({
               <button
                 type="button"
                 onClick={handleStopRecording}
-                className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-rose-950 transition transform active:scale-95"
+                className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-slate-900/20 transition transform active:scale-95"
               >
                 <Mic className="w-7 h-7 animate-pulse" />
               </button>
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
-                🔴 Listening to microphone ({LOCALE_MAP[selectedLang] || selectedLang})...
+              <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">Listening to microphone ({LOCALE_MAP[selectedLang] || selectedLang})...
               </span>
               <p className="text-xs text-slate-400">
                 Speak clearly into your microphone. Tap stop when finished.

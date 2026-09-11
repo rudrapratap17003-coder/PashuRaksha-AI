@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { X, Truck, CheckCircle2, ShieldAlert } from 'lucide-react'
 import apiClient from '../../services/api'
 
 export default function DeployTeamModal({ isOpen, onClose, cluster, onSuccess }) {
+  const { t } = useLanguage()
   const [deploying, setDeploying] = useState(false)
 
   if (!isOpen) return null
@@ -35,7 +37,7 @@ export default function DeployTeamModal({ isOpen, onClose, cluster, onSuccess })
         {/* Header */}
         <div className="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-2xl bg-blue-500/20 border border-blue-500/30 text-blue-400">
+            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200  text-slate-300">
               <Truck className="w-5 h-5" />
             </div>
             <div>
@@ -66,7 +68,7 @@ export default function DeployTeamModal({ isOpen, onClose, cluster, onSuccess })
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-400">Vaccine Allocation</span>
-              <span className="text-sm font-bold text-blue-400">250 doses</span>
+              <span className="text-sm font-bold text-slate-300">250 doses</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-400">Affected Animals</span>
@@ -86,7 +88,7 @@ export default function DeployTeamModal({ isOpen, onClose, cluster, onSuccess })
           <button
             onClick={handleDeploy}
             disabled={deploying}
-            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-blue-900/50"
+            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-slate-900/20"
           >
             {deploying ? 'Deploying...' : 'Confirm Deployment'}
           </button>

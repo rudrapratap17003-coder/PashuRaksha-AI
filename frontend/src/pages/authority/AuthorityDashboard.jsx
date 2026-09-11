@@ -1,32 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../../context/LanguageContext'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  Building2, 
-  MapPin, 
-  AlertTriangle, 
-  ShieldAlert, 
-  TrendingUp, 
-  Users, 
-  Syringe, 
-  Sparkles, 
-  CheckCircle2, 
-  RefreshCw,
-  Layers,
-  Radio,
-  FileSpreadsheet,
-  Activity,
-  Send,
-  Bell,
-  ArrowUpRight,
-  TrendingDown,
-  Minus,
-  Microscope,
-  Shield,
-  Clock,
-  RadioTower,
-  Truck,
-  FileText
-} from 'lucide-react'
+import { Building2, MapPin, AlertTriangle, ShieldAlert, TrendingUp, Users, Syringe, Sparkles, CheckCircle2, RefreshCw, Layers, Radio, FileSpreadsheet, HeartPulse, Send, Bell, ArrowUpRight, TrendingDown, Minus, FlaskConical, Shield, Clock, RadioTower, Truck, FileText } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatCard from '../../components/common/StatCard'
@@ -45,6 +20,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useScenario } from '../../context/ScenarioContext'
 
 export default function AuthorityDashboard() {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { currentScenario } = useScenario()
@@ -157,14 +133,14 @@ export default function AuthorityDashboard() {
   return (
     <div className="space-y-6 pb-32">
       {/* Header: District Livestock Health Command Center */}
-      <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="  rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-              <RadioTower className="w-4 h-4 text-purple-400 animate-pulse" />
+            <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <RadioTower className="w-4 h-4 text-slate-300 animate-pulse" />
               DISTRICT LIVESTOCK HEALTH COMMAND CENTER
             </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 text-[10px] font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-950  text-slate-300 text-[10px] font-bold">
               14-Day Rolling Surveillance Window Active
             </span>
           </div>
@@ -183,13 +159,13 @@ export default function AuthorityDashboard() {
             className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer ${
               refreshSuccess
                 ? 'bg-emerald-600 text-white border border-emerald-500'
-                : 'bg-slate-900 hover:bg-slate-800 text-white border border-purple-500/30 hover:border-purple-400/50'
+                : 'bg-slate-900 hover:bg-slate-800 text-white  hover:border-slate-800'
             } disabled:opacity-70`}
           >
             {refreshSuccess ? (
               <CheckCircle2 className="w-3.5 h-3.5 text-white" />
             ) : (
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-purple-400' : 'text-purple-300'}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-slate-300' : 'text-slate-300'}`} />
             )}
             <span>{refreshing ? 'Refreshing...' : refreshSuccess ? '✓ Refreshed' : 'Refresh Data'}</span>
           </button>
@@ -205,7 +181,7 @@ export default function AuthorityDashboard() {
             size="sm"
             onClick={() => setBroadcastOpen(true)}
             icon={Send}
-            className="font-bold bg-purple-900 border border-purple-400/50 hover:bg-purple-800 text-purple-200 shadow-lg text-xs"
+            className="font-bold bg-purple-900  hover:bg-purple-800 text-slate-300 shadow-lg text-xs"
           >
             Broadcast Alert
           </Button>
@@ -214,7 +190,7 @@ export default function AuthorityDashboard() {
             onClick={handleRunClustering}
             loading={runningDetection}
             icon={Radio}
-            className="font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950 text-xs"
+            className="font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-slate-900/20 text-xs"
           >
             Run Outbreak Detection
           </Button>
@@ -222,8 +198,8 @@ export default function AuthorityDashboard() {
       </div>
 
       {actionNotice && (
-        <div className="p-4 rounded-2xl bg-purple-950/90 border border-purple-400 text-white text-xs font-bold flex items-center space-x-3 animate-in fade-in shadow-xl">
-          <Bell className="w-5 h-5 text-purple-300 flex-shrink-0 animate-bounce" />
+        <div className="p-4 rounded-2xl bg-purple-950/90 border border-slate-800 text-white text-xs font-bold flex items-center space-x-3 animate-in fade-in shadow-xl">
+          <Bell className="w-5 h-5 text-slate-300 flex-shrink-0 animate-bounce" />
           <span>{actionNotice}</span>
         </div>
       )}
@@ -249,7 +225,7 @@ export default function AuthorityDashboard() {
           value={dashboardData?.total_health_reports || 8}
           subtitle="Rolling 14-day temporal window"
           icon={Clock}
-          iconBg="bg-purple-500/10 text-purple-400 border border-purple-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
         />
         <StatCard
           title="ACTIVE CLUSTERS"
@@ -275,7 +251,7 @@ export default function AuthorityDashboard() {
           }
           subtitle="Mobile veterinary units"
           icon={Truck}
-          iconBg="bg-blue-500/10 text-blue-400 border border-blue-500/20"
+          iconBg="bg-slate-50 border border-slate-200 text-slate-300 "
         />
       </div>
 
@@ -295,8 +271,8 @@ export default function AuthorityDashboard() {
             <span>Shirur Taluka monitoring 3 respiratory syndromic cases in past 7 days.</span>
           </div>
         </div>
-        <div className="p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/40 text-purple-200 text-xs flex items-start space-x-2.5 shadow-md">
-          <Syringe className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-2xl bg-slate-800 border border-slate-700  text-slate-300 text-xs flex items-start space-x-2.5 shadow-md">
+          <Syringe className="w-4 h-4 text-slate-300 flex-shrink-0 mt-0.5" />
           <div>
             <strong className="text-white block">Priority: Vaccination Gap</strong>
             <span>Baramati buffer zone is at 72.5% coverage; 250 booster doses allocated.</span>
@@ -306,7 +282,7 @@ export default function AuthorityDashboard() {
 
       {/* KILLER UI MOMENT: Active Detected Outbreak Cluster Card with Explainable Reason */}
       {(clusters.length > 0 || selectedCluster) && (
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-950 via-slate-900 to-purple-950 border-2 border-rose-500/80 shadow-2xl space-y-4">
+        <div className="p-6 rounded-3xl bg-slate-900 border-2 border-rose-500/80 shadow-2xl space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-500/30 pb-3">
             <div className="flex items-center space-x-3">
               <span className="w-3.5 h-3.5 rounded-full bg-rose-500 animate-ping" />
@@ -327,9 +303,9 @@ export default function AuthorityDashboard() {
           </div>
 
           {/* Explainable Detection Reason Box */}
-          <div className="p-4 rounded-2xl bg-slate-950/90 border border-purple-500/40 text-xs space-y-1 text-slate-200">
-            <div className="text-purple-300 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <div className="p-4 rounded-2xl bg-slate-950/90  text-xs space-y-1 text-slate-200">
+            <div className="text-slate-300 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-slate-300" />
               EPIDEMIOLOGICAL EXPLANATION & TRIGGER FACTORS
             </div>
             <p className="text-sm font-semibold text-white leading-relaxed">
@@ -386,7 +362,7 @@ export default function AuthorityDashboard() {
                 variant="outline"
                 onClick={() => setAdvisoryModalOpen(true)}
                 disabled={actionStatus[selectedCluster?.cluster_name]?.advisory}
-                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "bg-emerald-900 border-emerald-500/50 text-emerald-300 text-xs font-bold" : "bg-slate-900 border-purple-400/50 text-purple-300 hover:bg-purple-950 text-xs font-bold"}
+                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "bg-emerald-900 border-emerald-500/50 text-emerald-300 text-xs font-bold" : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-purple-950 text-xs font-bold"}
               >
                 {actionStatus[selectedCluster?.cluster_name]?.advisory ? '✅ Advisory Issued' : '📢 Issue Advisory'}
               </Button>
@@ -403,7 +379,7 @@ export default function AuthorityDashboard() {
                 size="sm"
                 onClick={() => setBroadcastOpen(true)}
                 disabled={actionStatus[selectedCluster?.cluster_name]?.broadcast}
-                className={actionStatus[selectedCluster?.cluster_name]?.broadcast ? "bg-emerald-600/50 text-emerald-100 font-bold text-xs shadow-md border-0" : "bg-purple-900 hover:bg-purple-800 text-purple-200 border border-purple-400/50 text-xs font-bold"}
+                className={actionStatus[selectedCluster?.cluster_name]?.broadcast ? "bg-emerald-600/50 text-emerald-100 font-bold text-xs shadow-md border-0" : "bg-purple-900 hover:bg-purple-800 text-slate-300  text-xs font-bold"}
               >
                 {actionStatus[selectedCluster?.cluster_name]?.broadcast ? '✅ Alert Broadcasted' : '📱 Broadcast Alert'}
               </Button>
@@ -423,7 +399,7 @@ export default function AuthorityDashboard() {
                 <p className="text-xs text-slate-500">Centroids with Haversine buffer containment radiuses (14-day rolling window)</p>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-[10px] font-mono bg-purple-50 text-purple-800 font-bold px-2.5 py-1 rounded-full border border-purple-200">
+                <span className="text-[10px] font-mono bg-purple-50 text-slate-900 font-bold px-2.5 py-1 rounded-full border border-slate-800">
                   10 km Proximity Threshold
                 </span>
               </div>
@@ -445,7 +421,7 @@ export default function AuthorityDashboard() {
           {/* Emergency Response Actions */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
             <div>
-              <div className="flex items-center space-x-2 text-sky-600 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+              <div className="flex items-center space-x-2 text-slate-900 text-[10px] font-bold uppercase tracking-wider mb-0.5">
                 <Radio className="w-3.5 h-3.5 animate-pulse" />
                 <span>State Mobility & Cordon Protocols</span>
               </div>
@@ -457,7 +433,7 @@ export default function AuthorityDashboard() {
               <button
                 type="button"
                 onClick={() => navigate('/authority/mvu-fleet')}
-                className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer transition active:scale-[0.98]"
+                className="w-full hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer transition active:scale-[0.98]"
               >
                 <Truck className="w-4 h-4 flex-shrink-0" />
                 <span>Dispatch 1962 MVU Fleet</span>
@@ -485,16 +461,15 @@ export default function AuthorityDashboard() {
               <Button
                 variant="primary"
                 onClick={() => handleDispatchTeam()}
-                className="w-full bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-bold text-xs py-3 rounded-2xl shadow-lg"
-              >
-                🚨 Deploy Rapid Response Team
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl shadow-lg"
+              >Deploy Rapid Response Team
               </Button>
 
               <Button
                 variant="outline"
                 onClick={() => setAdvisoryModalOpen(true)}
                 disabled={actionStatus[selectedCluster?.cluster_name]?.advisory}
-                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-900 border-purple-500/40 text-purple-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
+                className={actionStatus[selectedCluster?.cluster_name]?.advisory ? "w-full bg-emerald-900 border-emerald-500/50 text-emerald-300 font-bold text-xs py-3 rounded-2xl" : "w-full bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"}
               >
                 {actionStatus[selectedCluster?.cluster_name]?.advisory ? '✅ Advisory Issued' : '📢 Issue Biosecurity Advisory'}
               </Button>
@@ -511,17 +486,15 @@ export default function AuthorityDashboard() {
               <Button
                 variant="outline"
                 onClick={() => setBroadcastOpen(true)}
-                className="w-full bg-purple-950/80 border-purple-500/50 text-purple-200 hover:bg-purple-900 font-bold text-xs py-3 rounded-2xl"
-              >
-                📱 Broadcast Multilingual SMS Alert
+                className="w-full bg-purple-950/80 border-slate-800 text-slate-300 hover:bg-purple-900 font-bold text-xs py-3 rounded-2xl"
+              >Broadcast Multilingual SMS Alert
               </Button>
 
               <Link to="/analytics" className="block">
                 <Button
                   variant="outline"
                   className="w-full bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 font-bold text-xs py-3 rounded-2xl"
-                >
-                  📊 Open Deep Analytics Curve
+                >Open Deep Analytics Curve
                 </Button>
               </Link>
             </div>

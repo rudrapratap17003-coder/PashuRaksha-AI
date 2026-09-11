@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { 
-  FilePlus2, 
-  Sparkles, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ArrowRight, 
-  MapPin, 
-  PawPrint, 
-  HelpCircle,
-  Stethoscope,
-  Radio,
-  Clock,
-  Mic,
-  ShieldCheck,
-  ChevronRight,
-  RefreshCw,
-  Cpu
-} from 'lucide-react'
+import { FilePlus2, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, MapPin, PawPrint, HelpCircle, Stethoscope, Radio, Clock, Mic, ShieldCheck, ChevronRight, RefreshCw, Cpu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
@@ -203,7 +186,7 @@ export default function SymptomReportPage() {
           <button
             type="button"
             onClick={handleAutoFillBaramatiDemo}
-            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black text-xs flex items-center space-x-1.5 transition shadow-lg shadow-rose-950/40"
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center space-x-1.5 transition shadow-lg shadow-slate-900/20"
             title="Pre-fill with Baramati FMD Demo Data (7 Clinical Signs)"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -405,7 +388,7 @@ export default function SymptomReportPage() {
           type="submit"
           size="lg"
           icon={Sparkles}
-          className="w-full font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-emerald-500/30 text-base py-3.5"
+          className="w-full font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-slate-900/20 text-base py-3.5"
         >
           {t('report.analyzeBtn')}
         </Button>
@@ -465,7 +448,7 @@ export default function SymptomReportPage() {
                   Clinical Risk Evaluation: {analysisResult.animal_id}
                 </h3>
               </div>
-              <RiskBadge level={analysisResult.risk_level} score={analysisResult.risk_score} />
+              <RiskBadge level={t(`data.risk.${analysisResult.risk_level}`, {}, analysisResult.risk_level)} score={analysisResult.risk_score} />
             </div>
 
             {/* Mandatory Non-Diagnostic Disclaimer */}

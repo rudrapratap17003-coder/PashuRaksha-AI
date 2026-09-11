@@ -1,20 +1,6 @@
 import React, { useState } from 'react'
-import { 
-  X, 
-  Stethoscope, 
-  PawPrint, 
-  Phone, 
-  MapPin, 
-  CheckCircle2, 
-  AlertTriangle, 
-  FileText, 
-  Syringe, 
-  TestTube2, 
-  Send,
-  Calendar,
-  Clock,
-  ShieldAlert
-} from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+import { X, Stethoscope, PawPrint, Phone, MapPin, CheckCircle2, AlertTriangle, FileText, Syringe, TestTube2, Send, Calendar, Clock, ShieldAlert } from 'lucide-react'
 import Card from '../common/Card'
 import Button from '../common/Button'
 import RiskBadge from '../common/RiskBadge'
@@ -22,6 +8,7 @@ import Badge from '../common/Badge'
 import apiClient from '../../services/api'
 
 export default function VetCaseModal({ caseItem, caseData, onClose, onActionSuccess, onSuccess }) {
+  const { t } = useLanguage()
   const item = caseItem || caseData
   if (!item) return null
 
@@ -64,7 +51,7 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-800 flex items-center justify-center font-black">
+            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-slate-900 flex items-center justify-center font-black">
               <Stethoscope className="w-6 h-6" />
             </div>
             <div>
@@ -72,7 +59,7 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
                 CASE ID: {item.id}
               </span>
               <h3 className="text-xl font-black text-slate-900">
-                {item.animal_id} — {item.species} ({item.breed || 'Indigenous'})
+                {item.animal_id} — {t(`data.species.${item.species}`, {}, item.species)} ({item.breed || 'Indigenous'})
               </h3>
             </div>
           </div>
@@ -127,7 +114,7 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               AI Decision-Support Assessment
             </span>
-            <RiskBadge level={caseItem.risk_level} score={caseItem.risk_score} />
+            <RiskBadge level={t(`data.risk.${caseItem.risk_level}`, {}, caseItem.risk_level)} score={caseItem.risk_score} />
           </div>
 
           <div className="text-xs space-y-1">
@@ -153,7 +140,7 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
         {/* Clinical Action Form */}
         <form onSubmit={handleSubmitAction} className="space-y-4 pt-2 border-t border-slate-100">
           <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
-            <Stethoscope className="w-4 h-4 text-sky-600" />
+            <Stethoscope className="w-4 h-4 text-slate-900" />
             <span>Record Veterinary Clinical Action</span>
           </h4>
 
@@ -193,10 +180,10 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
               id="labRef"
               checked={labReferral}
               onChange={(e) => setLabReferral(e.target.checked)}
-              className="w-4 h-4 text-sky-600 rounded-md focus:ring-sky-500 border-slate-300"
+              className="w-4 h-4 text-slate-900 rounded-md focus:ring-sky-500 border-slate-300"
             />
             <label htmlFor="labRef" className="text-xs font-bold text-slate-800 flex items-center space-x-1.5 cursor-pointer">
-              <TestTube2 className="w-3.5 h-3.5 text-sky-600" />
+              <TestTube2 className="w-3.5 h-3.5 text-slate-900" />
               <span>Order Confirmatory Diagnostic Laboratory Referral</span>
             </label>
           </div>
@@ -219,7 +206,7 @@ export default function VetCaseModal({ caseItem, caseData, onClose, onActionSucc
               size="md"
               loading={submitting}
               icon={Send}
-              className="flex-1 font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-200"
+              className="flex-1 font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-slate-900/20"
             >
               Submit Veterinary Action
             </Button>

@@ -1,29 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import {
-  Activity,
-  PawPrint,
-  Stethoscope,
-  Building2,
-  Bell,
-  LogOut,
-  Menu,
-  X,
-  Home,
-  FilePlus2,
-  Syringe,
-  Radio,
-  Sparkles,
-  Presentation,
-  Microscope,
-  TrendingUp,
-  Shield,
-  Users,
-  Wheat,
-  Dna,
-  Truck,
-  BookOpen
-} from 'lucide-react'
+import { HeartPulse, PawPrint, Stethoscope, Building2, Bell, LogOut, Menu, X, Home, FilePlus2, Syringe, Radio, Sparkles, Presentation, FlaskConical, TrendingUp, Shield, Users, Wheat, Dna, Truck, BookOpen } from 'lucide-react'
 import { USER_ROLES } from '../utils/constants'
 import PashuLogo from '../components/common/PashuLogo'
 import AlertCenterModal from '../components/common/AlertCenterModal'
@@ -78,7 +55,7 @@ export default function DashboardLayout({ user, onLogout }) {
         ]
       case USER_ROLES.FIELD_WORKER:
         return [
-          { name: t('nav.fieldWorker.dashboard'), path: '/field-worker/dashboard', icon: Activity },
+          { name: t('nav.fieldWorker.dashboard'), path: '/field-worker/dashboard', icon: HeartPulse },
           { name: t('nav.fieldWorker.report'), path: '/field-worker/report-on-behalf', icon: FilePlus2 },
           { name: t('nav.fieldWorker.census'), path: '/field-worker/households', icon: Home },
         ]
@@ -86,11 +63,11 @@ export default function DashboardLayout({ user, onLogout }) {
         return [
           { name: t('nav.vet.dashboard'), path: '/vet/dashboard', icon: Stethoscope },
           { name: t('nav.vet.cases'), path: '/vet/cases/rep-101', icon: FilePlus2 },
-          { name: t('nav.vet.amr'), path: '/vet/amr', icon: Microscope },
+          { name: t('nav.vet.amr'), path: '/vet/amr', icon: FlaskConical },
         ]
       case USER_ROLES.LABORATORY:
         return [
-          { name: t('nav.lab.dashboard'), path: '/lab/dashboard', icon: Microscope },
+          { name: t('nav.lab.dashboard'), path: '/lab/dashboard', icon: FlaskConical },
         ]
       case USER_ROLES.AUTHORITY:
         return [
@@ -137,7 +114,7 @@ export default function DashboardLayout({ user, onLogout }) {
               <PashuLogo size="sm" />
               <div>
                 <span className="text-sm font-extrabold text-slate-900 leading-none block">
-                  PASHURAKSHA <span className="text-sky-600">AI</span>
+                  PASHURAKSHA <span className="text-slate-900">AI</span>
                 </span>
                 <span className="text-[10px] font-medium text-slate-500 block truncate max-w-[200px] sm:max-w-none">
                   {t('common.prototypeNotice')}
@@ -182,7 +159,7 @@ export default function DashboardLayout({ user, onLogout }) {
             </button>
 
             <Link to="/presentation" className="hidden sm:flex">
-              <button className="px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-colors duration-200 flex items-center space-x-1">
+              <button className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold hover:bg-slate-800 transition-colors duration-200 flex items-center space-x-1 shadow-sm">
                 <Presentation className="w-3.5 h-3.5" />
                 <span>{t('nav.jury')}</span>
               </button>
@@ -218,7 +195,7 @@ export default function DashboardLayout({ user, onLogout }) {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white p-4 space-y-3 shadow-lg">
-            <span className="text-xs font-bold text-sky-700 block px-1">
+            <span className="text-xs font-bold text-slate-900 block px-1">
               {t('nav.menuLabel', { role: t('roles.' + (role === USER_ROLES.FIELD_WORKER ? 'fieldWorker' : role === USER_ROLES.VETERINARIAN ? 'vetDoctor' : role === USER_ROLES.LABORATORY ? 'lab' : role === 'admin' ? 'admin' : role)) })}
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -274,7 +251,7 @@ export default function DashboardLayout({ user, onLogout }) {
 
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex flex-col w-52 space-y-1 flex-shrink-0">
-          <span className="text-xs font-bold text-sky-700 px-3 py-1.5">
+          <span className="text-xs font-bold text-slate-900 px-3 py-1.5">
             {t('nav.menuLabel', { role: t('roles.' + (role === USER_ROLES.FIELD_WORKER ? 'fieldWorker' : role === USER_ROLES.VETERINARIAN ? 'vetDoctor' : role === USER_ROLES.LABORATORY ? 'lab' : role === 'admin' ? 'admin' : role)) })}
           </span>
           {navItems.map((item) => {
@@ -287,7 +264,7 @@ export default function DashboardLayout({ user, onLogout }) {
                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                   isActive
                     ? 'bg-sky-600 text-white'
-                    : 'text-slate-600 hover:bg-sky-50 hover:text-sky-700'
+                    : 'text-slate-600 hover:bg-sky-50 hover:text-slate-900'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -313,7 +290,7 @@ export default function DashboardLayout({ user, onLogout }) {
               key={item.path}
               to={item.path}
               className={`flex flex-col items-center py-1.5 px-2 rounded-lg text-xs font-semibold ${
-                isActive ? 'text-sky-600 font-bold' : 'text-slate-500'
+                isActive ? 'text-slate-900 font-bold' : 'text-slate-500'
               }`}
             >
               <Icon className="w-5 h-5" />
