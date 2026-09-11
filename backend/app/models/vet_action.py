@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, Index
 from app.database import Base
 
 class VeterinaryAction(Base):
@@ -8,10 +8,11 @@ class VeterinaryAction(Base):
 
     id = Column(String(50), primary_key=True, default=lambda: f"vact-{str(uuid.uuid4())[:8]}")
     case_id = Column(String(50), nullable=False, index=True)
-    report_id = Column(String(50), ForeignKey("health_reports.id"), nullable=True)
-    veterinarian_id = Column(String(50), ForeignKey("users.id"), nullable=True)
+    report_id = Column(String(50), ForeignKey("health_reports.id"), nullable=True, index=True)
+    veterinarian_id = Column(String(50), ForeignKey("users.id"), nullable=True, index=True)
     action = Column(String(255), nullable=False)
     notes = Column(Text, nullable=True)
     lab_referral = Column(Boolean, default=False)
     status = Column(String(50), default="investigated", index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+

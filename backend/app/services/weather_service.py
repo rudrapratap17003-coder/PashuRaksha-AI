@@ -4,7 +4,7 @@ Uses synthetic demonstration data for Maharashtra monsoon conditions.
 Clearly labeled as prototype data.
 """
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class WeatherService:
@@ -44,7 +44,7 @@ class WeatherService:
             "environmental_risk_score": env_score,
             "risk_factors": WeatherService._get_risk_factors(temp, humidity, rainfall),
             "advisory": WeatherService._get_advisory(env_score),
-            "last_updated": datetime.utcnow().isoformat(),
+            "last_updated": datetime.now(timezone.utc).isoformat(),
             "disclaimer": "Synthetic weather data for demonstration purposes only.",
         }
 

@@ -1,12 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 class FarmBase(BaseModel):
-    name: str = Field(..., example="Kumar Farm")
-    village: Optional[str] = Field(None, example="Baramati")
-    taluka: Optional[str] = Field(None, example="Baramati")
-    district: Optional[str] = Field(None, example="Pune")
+    name: str = Field(...)
+    village: Optional[str] = Field(None)
+    taluka: Optional[str] = Field(None)
+    district: Optional[str] = Field(None)
 
 class FarmCreate(FarmBase):
     owner_name: Optional[str] = None
@@ -25,6 +25,8 @@ class FarmUpdate(BaseModel):
     poultry_count: Optional[int] = None
 
 class FarmResponse(FarmBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     owner_id: str
     owner_name: Optional[str] = None
@@ -39,6 +41,3 @@ class FarmResponse(FarmBase):
     poultry_count: int = 0
     vaccination_coverage: float = 0.0
     created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True

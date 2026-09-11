@@ -523,13 +523,13 @@ def test_phase5_outbreak_detection_14_day_filtering_and_gis(vet_headers, authori
     Phase 5: Test strict temporal filtering (14 days), spatial proximity,
     symptom similarity, and human-interpretable explainability reasons.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     from app.database import SessionLocal
     from app.models.health_report import HealthReport
     from app.ai.clustering import OutbreakClusterEngine
 
     # 1. Test 14-Day Temporal Filtering: Historical reports (>14 days) must be excluded
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     old_reports = [
         {
             "id": "old-rep-1",

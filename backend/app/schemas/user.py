@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 class UserRole(str, Enum):
     FARMER = "farmer"
@@ -12,31 +12,31 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 class UserBase(BaseModel):
-    name: str = Field(..., example="Ramesh Kumar")
-    phone: str = Field(..., example="9876543210")
-    email: EmailStr = Field(..., example="farmer.ramesh@pashuraksha.ai")
+    name: str = Field(..., min_length=1, max_length=255)
+    phone: str = Field(..., min_length=5, max_length=20)
+    email: EmailStr = Field(...)
     role: UserRole = Field(default=UserRole.FARMER)
-    village: Optional[str] = Field(None, example="Baramati")
-    district: Optional[str] = Field(None, example="Pune")
-    state: Optional[str] = Field(default="Maharashtra", example="Maharashtra")
-    latitude: Optional[float] = Field(None, example=18.1515)
-    longitude: Optional[float] = Field(None, example=74.5772)
+    village: Optional[str] = Field(None, max_length=255)
+    district: Optional[str] = Field(None, max_length=255)
+    state: Optional[str] = Field(default="Maharashtra", max_length=255)
+    latitude: Optional[float] = Field(None, ge=-90.0, le=90.0)
+    longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=6, example="password123")
+    password: str = Field(..., min_length=6, max_length=128)
 
 class UserLogin(BaseModel):
-    email: EmailStr = Field(..., example="farmer.ramesh@pashuraksha.ai")
-    password: str = Field(..., example="password123")
+    email: EmailStr = Field(...)
+    password: str = Field(..., min_length=1)
 
 class UserResponse(UserBase):
-    id: str = Field(..., example="usr-101")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: str = Field(...)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+

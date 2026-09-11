@@ -9,7 +9,10 @@ from app.models.animal import Animal
 from app.models.cluster import OutbreakCluster
 from app.models.vaccination import Vaccination
 from app.models.lab_referral import LabReferral
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from app.utils import get_logger, get_utc_now
+
+logger = get_logger(__name__)
 
 
 class AnalyticsService:
@@ -63,7 +66,7 @@ class AnalyticsService:
         data = []
         days_clamped = max(7, min(days, 90))
         for i in range(days_clamped - 1, -1, -1):
-            dt = datetime.utcnow() - timedelta(days=i)
+            dt = datetime.now(timezone.utc) - timedelta(days=i)
             # Generate stable deterministic seasonal curve
             day_idx = (days_clamped - i) % 10
             base = [3, 5, 4, 8, 6, 12, 8, 7, 9, 6][day_idx]

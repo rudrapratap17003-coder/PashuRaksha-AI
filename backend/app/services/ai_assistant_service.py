@@ -148,5 +148,5 @@ class AIAssistantService:
             "answer": answer,
             "sources": sources,
             "disclaimer": DISCLAIMER,
-            "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+            "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
         }

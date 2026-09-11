@@ -1,12 +1,15 @@
 """
 Laboratory service for managing lab referrals, sample tracking, and result entry.
 """
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from app.models.lab_referral import LabReferral
 from app.models.case_timeline import CaseTimelineEvent
-
 from app.schemas.lab_referral import LabReferralCreate, LabReferralUpdate
+from app.utils import get_logger
+
+logger = get_logger("lab_service")
 
 
 class LabService:
@@ -31,13 +34,19 @@ class LabService:
         return counts
 
     @staticmethod
-    def get_referrals(db: Session, status: str = None, priority: str = None):
+    def get_referrals(
+        db: Session,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[LabReferral]:
         query = db.query(LabReferral).order_by(LabReferral.created_at.desc())
         if status:
             query = query.filter(LabReferral.status == status)
         if priority:
             query = query.filter(LabReferral.priority == priority)
-        return query.all()
+        return query.offset(offset).limit(limit).all()
 
     @staticmethod
     def get_referral(db: Session, referral_id: str):
@@ -57,23 +66,29 @@ class LabService:
             village=data.village,
             district=data.district,
         )
-        db.add(referral)
+        try:
+            db.add(referral)
 
-        # Transition case to LAB_PENDING
-        case_ref = data.case_id or data.report_id
-        if case_ref:
-            from app.services.case_service import CaseService, CaseStatus
-            CaseService.transition_status(
-                db, case_ref, CaseStatus.LAB_PENDING.value,
-                actor_name=data.veterinarian_name or "Attending Veterinarian",
-                actor_role="veterinarian",
-                action="Laboratory Referral Created",
-                notes=f"Sample: {data.sample_type}. Test: {data.test_requested}. Priority: {data.priority}."
-            )
+            # Transition case to LAB_PENDING
+            case_ref = data.case_id or data.report_id
+            if case_ref:
+                from app.services.case_service import CaseService, CaseStatus
+                CaseService.transition_status(
+                    db, case_ref, CaseStatus.LAB_PENDING.value,
+                    actor_name=data.veterinarian_name or "Attending Veterinarian",
+                    actor_role="veterinarian",
+                    action="Laboratory Referral Created",
+                    notes=f"Sample: {data.sample_type}. Test: {data.test_requested}. Priority: {data.priority}."
+                )
 
-        db.commit()
-        db.refresh(referral)
-        return referral
+            db.commit()
+            db.refresh(referral)
+            logger.info(f"[LAB_REFERRAL_CREATED] ID: {referral.id} | Animal: {referral.animal_id} | Test: {referral.test_requested}")
+            return referral
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[LAB_REFERRAL_CREATE_FAILED] Animal: {data.animal_id} | Error: {e}")
+            raise
 
     @staticmethod
     def update_referral(db: Session, referral_id: str, data: LabReferralUpdate):
@@ -85,84 +100,91 @@ class LabService:
             referral.status = data.status
         if data.result is not None:
             referral.result = data.result
-            referral.result_date = datetime.utcnow()
+            referral.result_date = datetime.now(timezone.utc)
         if data.result_notes is not None:
             referral.result_notes = data.result_notes
 
-        # Advance Case State
-        if data.result and data.result != "pending":
-            case_ref = referral.case_id or referral.report_id
-            if case_ref:
-                from app.services.case_service import CaseService, CaseStatus
-                result_label = "POSITIVE (FMD Serotype O)" if (data.result == "positive" and "FMD" in (referral.test_requested or "")) else data.result.upper()
-                
-                # Step to LAB_RESULT
-                CaseService.transition_status(
-                    db, case_ref, CaseStatus.LAB_RESULT.value,
-                    actor_name="Central Diagnostic Laboratory",
-                    actor_role="laboratory",
-                    action=f"Lab Result: {result_label}",
-                    notes=f"Test: {referral.test_requested}. Result: {data.result}. {data.result_notes or ''}"
-                )
-
-                # If positive result, immediately escalate to AUTHORITY_REVIEW
-                if data.result == "positive":
+        try:
+            # Advance Case State
+            if data.result and data.result != "pending":
+                case_ref = referral.case_id or referral.report_id
+                if case_ref:
+                    from app.services.case_service import CaseService, CaseStatus
+                    result_label = "POSITIVE (FMD Serotype O)" if (data.result == "positive" and "FMD" in (referral.test_requested or "")) else data.result.upper()
+                    
+                    # Step to LAB_RESULT
                     CaseService.transition_status(
-                        db, case_ref, CaseStatus.AUTHORITY_REVIEW.value,
-                        actor_name="Surveillance Dispatch Engine",
-                        actor_role="system",
-                        action="Escalated to District Animal Husbandry Authority",
-                        notes="Confirmed positive diagnostic result triggers district outbreak protocols and ring vaccination response."
+                        db, case_ref, CaseStatus.LAB_RESULT.value,
+                        actor_name="Central Diagnostic Laboratory",
+                        actor_role="laboratory",
+                        action=f"Lab Result: {result_label}",
+                        notes=f"Test: {referral.test_requested}. Result: {data.result}. {data.result_notes or ''}"
                     )
 
-            # If confirmed positive for FMD or high-consequence vesicular disease, trigger outbreak cluster & authority alert
-            if data.result == "positive":
-                import uuid
-                from app.models.cluster import OutbreakCluster
-                from app.models.alert import Alert
+                    # If positive result, immediately escalate to AUTHORITY_REVIEW
+                    if data.result == "positive":
+                        CaseService.transition_status(
+                            db, case_ref, CaseStatus.AUTHORITY_REVIEW.value,
+                            actor_name="Surveillance Dispatch Engine",
+                            actor_role="system",
+                            action="Escalated to District Animal Husbandry Authority",
+                            notes="Confirmed positive diagnostic result triggers district outbreak protocols and ring vaccination response."
+                        )
 
-                village_name = referral.village or "Baramati"
-                cluster = db.query(OutbreakCluster).filter(OutbreakCluster.cluster_name.like(f"%{village_name}%")).first()
-                if not cluster:
-                    cluster = OutbreakCluster(
-                        id=f"clust-{str(uuid.uuid4())[:8]}",
-                        cluster_name=f"{village_name} FMD Outbreak Cluster",
-                        disease_concern="Foot-and-Mouth Disease (FMD Serotype O Confirmed)",
-                        latitude=18.1515,
-                        longitude=74.5772,
-                        radius_km=5.0,
-                        case_count=8,
-                        affected_animals_count=14,
-                        cluster_score=94.0,
+                # If confirmed positive for FMD or high-consequence vesicular disease, trigger outbreak cluster & authority alert
+                if data.result == "positive":
+                    import uuid
+                    from app.models.cluster import OutbreakCluster
+                    from app.models.alert import Alert
+
+                    village_name = referral.village or "Baramati"
+                    cluster = db.query(OutbreakCluster).filter(OutbreakCluster.cluster_name.like(f"%{village_name}%")).first()
+                    if not cluster:
+                        cluster = OutbreakCluster(
+                            id=f"clust-{str(uuid.uuid4())[:8]}",
+                            cluster_name=f"{village_name} FMD Outbreak Cluster",
+                            disease_concern="Foot-and-Mouth Disease (FMD Serotype O Confirmed)",
+                            latitude=18.1515,
+                            longitude=74.5772,
+                            radius_km=5.0,
+                            case_count=8,
+                            affected_animals_count=14,
+                            cluster_score=94.0,
+                            risk_level="CRITICAL",
+                            dominant_symptoms=["Fever", "Oral Lesions", "Excessive Salivation", "Reduced Milk"],
+                            affected_villages=[village_name, "Malegaon Bk", "Jalochi"],
+                            status="active",
+                            recommended_action="Establish 5.0 km ring containment perimeter. Deploy rapid response team with 250 FMD vaccine doses. Impose livestock movement ban and broadcast urgent SMS advisory.",
+                            detected_at=datetime.now(timezone.utc)
+                        )
+                        db.add(cluster)
+                    else:
+                        cluster.disease_concern = "Foot-and-Mouth Disease (FMD Serotype O Confirmed)"
+                        cluster.cluster_score = 94.0
+                        cluster.risk_level = "CRITICAL"
+                        cluster.radius_km = 5.0
+                        cluster.case_count = max(cluster.case_count, 8)
+                        cluster.affected_animals_count = max(cluster.affected_animals_count, 14)
+                        cluster.dominant_symptoms = ["Fever", "Oral Lesions", "Excessive Salivation", "Reduced Milk"]
+                        cluster.recommended_action = "Establish 5.0 km ring containment perimeter. Deploy rapid response team with 250 FMD vaccine doses. Impose livestock movement ban and broadcast urgent SMS advisory."
+
+                    # Dispatch Authority Alert
+                    db.add(Alert(
+                        id=f"alt-auth-{str(uuid.uuid4())[:6]}",
+                        target_role="authority",
+                        alert_type="outbreak_confirmed",
+                        title=f"🚨 CRITICAL Laboratory Confirmation: FMD Positive in {village_name}",
+                        message=f"RT-PCR assay confirmed Foot-and-Mouth Disease (Serotype O) for animal {referral.animal_id} in {village_name}. 5.0 km containment zone and ring vaccination protocol activated.",
                         risk_level="CRITICAL",
-                        dominant_symptoms=["Fever", "Oral Lesions", "Excessive Salivation", "Reduced Milk"],
-                        affected_villages=[village_name, "Malegaon Bk", "Jalochi"],
-                        status="active",
-                        recommended_action="Establish 5.0 km ring containment perimeter. Deploy rapid response team with 250 FMD vaccine doses. Impose livestock movement ban and broadcast urgent SMS advisory.",
-                        detected_at=datetime.utcnow()
-                    )
-                    db.add(cluster)
-                else:
-                    cluster.disease_concern = "Foot-and-Mouth Disease (FMD Serotype O Confirmed)"
-                    cluster.cluster_score = 94.0
-                    cluster.risk_level = "CRITICAL"
-                    cluster.radius_km = 5.0
-                    cluster.case_count = max(cluster.case_count, 8)
-                    cluster.affected_animals_count = max(cluster.affected_animals_count, 14)
-                    cluster.dominant_symptoms = ["Fever", "Oral Lesions", "Excessive Salivation", "Reduced Milk"]
-                    cluster.recommended_action = "Establish 5.0 km ring containment perimeter. Deploy rapid response team with 250 FMD vaccine doses. Impose livestock movement ban and broadcast urgent SMS advisory."
+                        village=village_name,
+                    ))
 
-                # Dispatch Authority Alert
-                db.add(Alert(
-                    id=f"alt-auth-{str(uuid.uuid4())[:6]}",
-                    target_role="authority",
-                    alert_type="outbreak_confirmed",
-                    title=f"🚨 CRITICAL Laboratory Confirmation: FMD Positive in {village_name}",
-                    message=f"RT-PCR assay confirmed Foot-and-Mouth Disease (Serotype O) for animal {referral.animal_id} in {village_name}. 5.0 km containment zone and ring vaccination protocol activated.",
-                    risk_level="CRITICAL",
-                    village=village_name,
-                ))
+            db.commit()
+            db.refresh(referral)
+            logger.info(f"[LAB_REFERRAL_UPDATED] ID: {referral.id} | Status: {referral.status} | Result: {referral.result}")
+            return referral
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[LAB_REFERRAL_UPDATE_FAILED] ID: {referral_id} | Error: {e}")
+            raise
 
-        db.commit()
-        db.refresh(referral)
-        return referral

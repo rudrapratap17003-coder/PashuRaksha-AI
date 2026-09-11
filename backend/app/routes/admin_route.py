@@ -19,6 +19,8 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 @router.get("/users")
 def get_users(
     role: str = Query(None),
+    limit: int = Query(100, ge=1, le=500, description="Max users to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
@@ -26,7 +28,7 @@ def get_users(
     query = db.query(User)
     if role:
         query = query.filter(User.role == role)
-    users = query.all()
+    users = query.offset(offset).limit(limit).all()
     return [
         {
             "id": u.id, "name": u.name, "role": u.role,

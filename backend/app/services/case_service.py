@@ -6,7 +6,7 @@ REPORTED -> RISK_ASSESSED -> FIELD_VERIFICATION -> VET_REVIEW -> SAMPLE_COLLECTE
 """
 from enum import Enum
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.models.health_report import HealthReport
@@ -157,9 +157,14 @@ class CaseService:
             description=f"Status changed from {previous_status} to {new_status}. {notes or ''}".strip(),
             actor_name=actor_name,
             actor_role=actor_role,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
-        db.add(event)
-        db.commit()
-        db.refresh(case)
-        return case
+        try:
+            db.add(event)
+            db.commit()
+            db.refresh(case)
+            return case
+        except Exception as e:
+            db.rollback()
+            raise
+

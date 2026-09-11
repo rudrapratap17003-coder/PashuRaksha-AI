@@ -22,6 +22,9 @@ from app.models.alert import Alert
 from app.models.animal import Animal
 from app.schemas.health_report import HealthReportCreate
 from app.schemas.lab_referral import LabReferralCreate, LabReferralUpdate
+from app.utils import get_logger, get_utc_now
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/demo", tags=["SIH Demo Orchestration"])
 
@@ -323,7 +326,7 @@ def execute_demo_step(step_num: int, db: Session = Depends(get_db)) -> Dict[str,
                 affected_villages=["Baramati", "Malegaon Bk", "Jalochi"],
                 status="active",
                 recommended_action="Establish 5.0 km ring containment perimeter. Deploy rapid response veterinary team with 250 FMD vaccine doses. Impose livestock movement restrictions and broadcast emergency biosecurity advisory.",
-                detected_at=datetime.utcnow()
+                detected_at=get_utc_now()
             )
             db.add(cluster)
         else:

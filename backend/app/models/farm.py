@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey, Index
 from app.database import Base
 
 class Farm(Base):
@@ -10,9 +10,9 @@ class Farm(Base):
     name = Column(String(255), nullable=False)
     owner_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
     owner_name = Column(String(255), nullable=True)
-    village = Column(String(255), nullable=True)
-    taluka = Column(String(255), nullable=True)
-    district = Column(String(255), nullable=True)
+    village = Column(String(255), nullable=True, index=True)
+    taluka = Column(String(255), nullable=True, index=True)
+    district = Column(String(255), nullable=True, index=True)
     state = Column(String(100), default="Maharashtra")
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
@@ -23,4 +23,5 @@ class Farm(Base):
     sheep_count = Column(Integer, default=0)
     poultry_count = Column(Integer, default=0)
     vaccination_coverage = Column(Float, default=0.0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+

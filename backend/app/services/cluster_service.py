@@ -1,20 +1,23 @@
 import uuid
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.cluster import OutbreakCluster
 from app.models.health_report import HealthReport
 from app.models.alert import Alert
 from app.schemas.cluster import ClusterResponse
 from app.ai.clustering import OutbreakClusterEngine
+from app.utils import get_logger
+
+logger = get_logger("cluster_service")
 
 class ClusterService:
     @staticmethod
-    def get_all(db: Session) -> List[ClusterResponse]:
-        clusters = db.query(OutbreakCluster).order_by(OutbreakCluster.cluster_score.desc()).all()
+    def get_all(db: Session, limit: int = 50, offset: int = 0) -> List[ClusterResponse]:
+        clusters = db.query(OutbreakCluster).order_by(OutbreakCluster.cluster_score.desc()).offset(offset).limit(limit).all()
         
         # If no clusters found, run detection automatically
-        if not clusters:
+        if not clusters and offset == 0:
             return ClusterService.run_detection(db)
 
         return [
@@ -75,7 +78,7 @@ class ClusterService:
     def run_detection(db: Session, window_days: int = 14) -> List[ClusterResponse]:
         """
         Executes AI spatial-temporal clustering over all stored health reports,
-        persists detected clusters into the database, and emits alerts.
+        persists detected clusters into the database, and emits alerts with duplicate checks.
         """
         reports = db.query(HealthReport).all()
         
@@ -107,84 +110,92 @@ class ClusterService:
         ]
 
         detected = OutbreakClusterEngine.detect_clusters(report_dicts, eps_km=12.0, time_window_days=window_days, min_cases=2)
-        persisted_clusters = []
+        logger.info(f"[CLUSTER_SCAN_COMPLETED] Evaluated {len(reports)} reports -> Discovered {len(detected)} clusters")
 
         for d in detected:
-            existing = db.query(OutbreakCluster).filter(OutbreakCluster.id == d["id"]).first()
-            if not existing:
-                cluster_obj = OutbreakCluster(
-                    id=d["id"],
-                    cluster_name=d["cluster_name"],
-                    disease_concern=d["disease_concern"],
-                    latitude=d["latitude"],
-                    longitude=d["longitude"],
-                    radius_km=d["radius_km"],
-                    case_count=d["case_count"],
-                    affected_animals_count=d["affected_animals_count"],
-                    case_ids=d.get("case_ids", []),
-                    cluster_score=d["cluster_score"],
-                    risk_level=d["risk_level"],
-                    dominant_symptoms=d["dominant_symptoms"],
-                    affected_villages=d["affected_villages"],
-                    explanation=d.get("explanation"),
-                    temporal_window_days=d.get("temporal_window_days", 14),
-                    vaccination_coverage=d.get("vaccination_coverage", 78.5),
-                    contributing_factors=d.get("contributing_factors", []),
-                    status="active",
-                    recommended_action=d["recommended_action"],
-                    detected_at=datetime.utcnow()
-                )
-                db.add(cluster_obj)
+            try:
+                existing = db.query(OutbreakCluster).filter(OutbreakCluster.id == d["id"]).first()
+                if not existing:
+                    cluster_obj = OutbreakCluster(
+                        id=d["id"],
+                        cluster_name=d["cluster_name"],
+                        disease_concern=d["disease_concern"],
+                        latitude=d["latitude"],
+                        longitude=d["longitude"],
+                        radius_km=d["radius_km"],
+                        case_count=d["case_count"],
+                        affected_animals_count=d["affected_animals_count"],
+                        case_ids=d.get("case_ids", []),
+                        cluster_score=d["cluster_score"],
+                        risk_level=d["risk_level"],
+                        dominant_symptoms=d["dominant_symptoms"],
+                        affected_villages=d["affected_villages"],
+                        explanation=d.get("explanation"),
+                        temporal_window_days=d.get("temporal_window_days", 14),
+                        vaccination_coverage=d.get("vaccination_coverage", 78.5),
+                        contributing_factors=d.get("contributing_factors", []),
+                        status="active",
+                        recommended_action=d["recommended_action"],
+                        detected_at=datetime.now(timezone.utc)
+                    )
+                    db.add(cluster_obj)
 
-                # If High or Critical, generate multi-tier alerts
-                if d["risk_level"] in ["HIGH", "CRITICAL"]:
-                    village_name = d["affected_villages"][0] if d.get("affected_villages") else "Baramati"
-                    # Vet Alert
-                    db.add(Alert(
-                        id=f"alt-vet-{str(uuid.uuid4())[:6]}",
-                        target_role="veterinarian",
-                        alert_type="outbreak_cluster",
-                        title=f"Outbreak Alert: {d['cluster_name']}",
-                        message=f"{d['disease_concern']} detected affecting {d['affected_animals_count']} livestock across {', '.join(d.get('affected_villages', [village_name]))}. Cluster score: {d['cluster_score']}/100.",
-                        risk_level=d["risk_level"],
-                        related_cluster_id=d["id"],
-                        village=village_name,
-                    ))
-                    # Authority Alert
-                    db.add(Alert(
-                        id=f"alt-auth-{str(uuid.uuid4())[:6]}",
-                        target_role="authority",
-                        alert_type="outbreak_cluster",
-                        title=f"Epidemic Surveillance Alert: {d['cluster_name']}",
-                        message=f"Spatial cluster formed in {', '.join(d.get('affected_villages', [village_name]))} with {d['case_count']} reports ({d['affected_animals_count']} animals). Action required: {d['recommended_action']}",
-                        risk_level=d["risk_level"],
-                        related_cluster_id=d["id"],
-                        village=village_name,
-                    ))
-                    # Farmer Advisory Broadcast
-                    db.add(Alert(
-                        id=f"alt-farm-{str(uuid.uuid4())[:6]}",
-                        target_role="farmer",
-                        alert_type="village_advisory",
-                        title=f"Livestock Advisory for {village_name}",
-                        message=f"Elevated livestock health concern ({d['disease_concern']}) reported nearby. Check your livestock vitals and isolate animals with fever or lesions.",
-                        risk_level=d["risk_level"],
-                        related_cluster_id=d["id"],
-                        village=village_name,
-                    ))
-            else:
-                existing.case_count = d["case_count"]
-                existing.affected_animals_count = d["affected_animals_count"]
-                existing.case_ids = d.get("case_ids", [])
-                existing.cluster_score = d["cluster_score"]
-                existing.risk_level = d["risk_level"]
-                existing.dominant_symptoms = d["dominant_symptoms"]
-                existing.affected_villages = d["affected_villages"]
-                existing.explanation = d.get("explanation")
-                existing.contributing_factors = d.get("contributing_factors", [])
-                existing.recommended_action = d["recommended_action"]
-                existing.disease_concern = d["disease_concern"]
+                    # If High or Critical, generate multi-tier alerts if not already generated
+                    if d["risk_level"] in ["HIGH", "CRITICAL"]:
+                        village_name = d["affected_villages"][0] if d.get("affected_villages") else "Baramati"
+                        
+                        existing_alert = db.query(Alert).filter(Alert.related_cluster_id == d["id"]).first()
+                        if not existing_alert:
+                            # Vet Alert
+                            db.add(Alert(
+                                id=f"alt-vet-{str(uuid.uuid4())[:6]}",
+                                target_role="veterinarian",
+                                alert_type="outbreak_cluster",
+                                title=f"Outbreak Alert: {d['cluster_name']}",
+                                message=f"{d['disease_concern']} detected affecting {d['affected_animals_count']} livestock across {', '.join(d.get('affected_villages', [village_name]))}. Cluster score: {d['cluster_score']}/100.",
+                                risk_level=d["risk_level"],
+                                related_cluster_id=d["id"],
+                                village=village_name,
+                            ))
+                            # Authority Alert
+                            db.add(Alert(
+                                id=f"alt-auth-{str(uuid.uuid4())[:6]}",
+                                target_role="authority",
+                                alert_type="outbreak_cluster",
+                                title=f"Epidemic Surveillance Alert: {d['cluster_name']}",
+                                message=f"Spatial cluster formed in {', '.join(d.get('affected_villages', [village_name]))} with {d['case_count']} reports ({d['affected_animals_count']} animals). Action required: {d['recommended_action']}",
+                                risk_level=d["risk_level"],
+                                related_cluster_id=d["id"],
+                                village=village_name,
+                            ))
+                            # Farmer Advisory Broadcast
+                            db.add(Alert(
+                                id=f"alt-farm-{str(uuid.uuid4())[:6]}",
+                                target_role="farmer",
+                                alert_type="village_advisory",
+                                title=f"Livestock Advisory for {village_name}",
+                                message=f"Elevated livestock health concern ({d['disease_concern']}) reported nearby. Check your livestock vitals and isolate animals with fever or lesions.",
+                                risk_level=d["risk_level"],
+                                related_cluster_id=d["id"],
+                                village=village_name,
+                            ))
+                else:
+                    existing.case_count = d["case_count"]
+                    existing.affected_animals_count = d["affected_animals_count"]
+                    existing.case_ids = d.get("case_ids", [])
+                    existing.cluster_score = d["cluster_score"]
+                    existing.risk_level = d["risk_level"]
+                    existing.dominant_symptoms = d["dominant_symptoms"]
+                    existing.affected_villages = d["affected_villages"]
+                    existing.explanation = d.get("explanation")
+                    existing.contributing_factors = d.get("contributing_factors", [])
+                    existing.recommended_action = d["recommended_action"]
+                    existing.disease_concern = d["disease_concern"]
 
-            db.commit()
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                logger.error(f"[CLUSTER_PERSIST_ERROR] Cluster: {d.get('cluster_name')} | Error: {e}")
 
         return ClusterService.get_all(db)
+

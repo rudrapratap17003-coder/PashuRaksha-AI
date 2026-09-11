@@ -24,10 +24,12 @@ def get_dashboard(
 def get_referrals(
     status: str = Query(None),
     priority: str = Query(None),
+    limit: int = Query(100, ge=1, le=500, description="Max referrals to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_clinical_or_lab)
 ):
-    return LabService.get_referrals(db, status, priority)
+    return LabService.get_referrals(db, status, priority, limit=limit, offset=offset)
 
 @router.post("/referrals", response_model=LabReferralResponse)
 def create_referral(

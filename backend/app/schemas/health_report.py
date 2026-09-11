@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 class SeverityEnum(str, Enum):
@@ -9,7 +9,7 @@ class SeverityEnum(str, Enum):
     SEVERE = "severe"
 
 class HealthReportBase(BaseModel):
-    animal_id: str = Field(..., example="COW-101")
+    animal_id: str = Field(..., min_length=1, max_length=50)
     
     # 11 Core Monitored Symptoms
     fever: bool = Field(False, description="Elevated body temperature")
@@ -23,37 +23,37 @@ class HealthReportBase(BaseModel):
     salivation: bool = Field(False, description="Excessive salivation / drooling")
     lesions: bool = Field(False, description="Blisters or sores on mouth/tongue/feet")
     swelling: bool = Field(False, description="Swelling in throat, jaw, or limbs")
-    other_symptoms: Optional[str] = Field(None, example="Shivering in the morning")
+    other_symptoms: Optional[str] = Field(None, max_length=1000)
     
     # Severity and Epidemiology Context
     severity: SeverityEnum = Field(default=SeverityEnum.MODERATE)
-    duration_days: int = Field(default=2, ge=1, le=60, description="Duration in days")
-    number_of_animals_affected: int = Field(default=1, ge=1, description="Count of animals displaying symptoms in vicinity")
+    duration_days: int = Field(default=2, ge=1, le=365, description="Duration in days")
+    number_of_animals_affected: int = Field(default=1, ge=1, le=100000, description="Count of animals displaying symptoms in vicinity")
     
     # Geospatial location
-    latitude: Optional[float] = Field(None, example=18.1515)
-    longitude: Optional[float] = Field(None, example=74.5772)
-    village: Optional[str] = Field(None, example="Baramati")
-    district: Optional[str] = Field(None, example="Pune")
+    latitude: Optional[float] = Field(None, ge=-90.0, le=90.0)
+    longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
+    village: Optional[str] = Field(None, max_length=255)
+    district: Optional[str] = Field(None, max_length=255)
 
 class HealthReportCreate(HealthReportBase):
-    reported_by: Optional[str] = Field(None, example="usr-101")
-    reporter_name: Optional[str] = Field(None, example="Ramesh Patil")
+    reported_by: Optional[str] = Field(None)
+    reporter_name: Optional[str] = Field(None)
 
 class HealthReportResponse(HealthReportBase):
-    id: str = Field(..., example="rep-101")
-    reported_by: str = Field(..., example="usr-101")
-    reporter_name: Optional[str] = Field("Ramesh Kumar", example="Ramesh Kumar")
-    species: Optional[str] = Field("Cattle (Cow)", example="Cattle (Cow)")
-    reported_at: datetime = Field(default_factory=datetime.utcnow)
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str = Field(...)
+    reported_by: str = Field(...)
+    reporter_name: Optional[str] = Field("Ramesh Kumar")
+    species: Optional[str] = Field("Cattle (Cow)")
+    reported_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     # Linked initial AI risk assessment
-    risk_score: Optional[float] = Field(74.0, example=74.0)
-    risk_level: Optional[str] = Field("HIGH", example="HIGH")
-    possible_disease_concern: Optional[str] = Field("Possible Bovine Respiratory Disease / Elevated Viral Concern", example="Possible Bovine Respiratory Disease / Elevated Viral Concern")
-    recommendation: Optional[str] = Field("Veterinary assessment recommended.", example="Veterinary assessment recommended.")
-    status: Optional[str] = Field("RISK_ASSESSED", example="RISK_ASSESSED")
+    risk_score: Optional[float] = Field(74.0)
+    risk_level: Optional[str] = Field("HIGH")
+    possible_disease_concern: Optional[str] = Field("Possible Bovine Respiratory Disease / Elevated Viral Concern")
+    recommendation: Optional[str] = Field("Veterinary assessment recommended.")
+    status: Optional[str] = Field("RISK_ASSESSED")
     contributing_factors: Optional[list] = None
 
-    class Config:
-        from_attributes = True

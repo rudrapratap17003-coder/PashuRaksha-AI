@@ -1,13 +1,16 @@
 import uuid
 import jwt
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, TokenResponse
+from app.utils import get_logger, get_utc_now
+
+logger = get_logger(__name__)
 
 class AuthService:
     @staticmethod
@@ -34,7 +37,7 @@ class AuthService:
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         to_encode = data.copy()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if expires_delta:
             expire = now + expires_delta
         else:
@@ -70,23 +73,30 @@ class AuthService:
             state=user_in.state or "Maharashtra",
             latitude=user_in.latitude,
             longitude=user_in.longitude,
+            created_at=get_utc_now()
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return UserResponse(
-            id=user.id,
-            name=user.name,
-            phone=user.phone,
-            email=user.email,
-            role=user.role,
-            village=user.village,
-            district=user.district,
-            state=user.state,
-            latitude=user.latitude,
-            longitude=user.longitude,
-            created_at=user.created_at
-        )
+        try:
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            logger.info("[USER_REGISTER_SUCCESS]", extra={"extra_data": {"user_id": user.id, "email": user.email, "role": user.role}})
+            return UserResponse(
+                id=user.id,
+                name=user.name,
+                phone=user.phone,
+                email=user.email,
+                role=user.role,
+                village=user.village,
+                district=user.district,
+                state=user.state,
+                latitude=user.latitude,
+                longitude=user.longitude,
+                created_at=user.created_at
+            )
+        except Exception as e:
+            db.rollback()
+            logger.error("[USER_REGISTER_ERROR]", extra={"extra_data": {"error": str(e), "email": email}})
+            raise
 
     @staticmethod
     def login(db: Session, login_in: UserLogin) -> TokenResponse:

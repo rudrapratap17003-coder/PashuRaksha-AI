@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
 import os
 import sys
@@ -7,6 +7,12 @@ import logging
 logger = logging.getLogger("pashuraksha.config")
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+        case_sensitive=True,
+        extra="allow"
+    )
+
     PROJECT_NAME: str = "PASHURAKSHA AI"
     API_V1_STR: str = "/api/v1"
     PORT: int = 8000
@@ -70,11 +76,5 @@ class Settings(BaseSettings):
             extras = [o.strip() for o in self.EXTRA_CORS_ORIGINS.split(",") if o.strip()]
             origins.extend(extras)
         return origins
-
-    class Config:
-        # Resolve .env relative to the backend directory (parent of app/)
-        # This ensures it works whether CWD is project root or backend/
-        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-        case_sensitive = True
 
 settings = Settings()

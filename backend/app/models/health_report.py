@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Boolean, Integer, Float, DateTime, Text, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Boolean, Integer, Float, DateTime, Text, ForeignKey, Index
 from app.database import Base
 
 class HealthReport(Base):
@@ -10,7 +10,7 @@ class HealthReport(Base):
     animal_id = Column(String(50), nullable=False, index=True)
     reported_by = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
     reporter_name = Column(String(255), nullable=True)
-    species = Column(String(100), nullable=True)
+    species = Column(String(100), nullable=True, index=True)
     
     # 11 Core Monitored Symptoms
     fever = Column(Boolean, default=False)
@@ -26,19 +26,20 @@ class HealthReport(Base):
     swelling = Column(Boolean, default=False)
     other_symptoms = Column(Text, nullable=True)
     
-    severity = Column(String(20), default="moderate")
+    severity = Column(String(20), default="moderate", index=True)
     duration_days = Column(Integer, default=2)
     number_of_animals_affected = Column(Integer, default=1)
     
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    village = Column(String(255), nullable=True)
-    district = Column(String(255), nullable=True)
+    village = Column(String(255), nullable=True, index=True)
+    district = Column(String(255), nullable=True, index=True)
     
     risk_score = Column(Float, default=0.0)
-    risk_level = Column(String(20), default="LOW")
+    risk_level = Column(String(20), default="LOW", index=True)
     possible_disease_concern = Column(String(255), nullable=True)
     recommendation = Column(Text, nullable=True)
     status = Column(String(50), default="RISK_ASSESSED", index=True)
     
-    reported_at = Column(DateTime, default=datetime.utcnow, index=True)
+    reported_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+

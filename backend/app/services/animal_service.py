@@ -4,14 +4,22 @@ from sqlalchemy.orm import Session
 from app.models.animal import Animal
 from app.models.user import User
 from app.schemas.animal import AnimalCreate, AnimalUpdate, AnimalResponse
+from app.utils import get_logger
+
+logger = get_logger("animal_service")
 
 class AnimalService:
     @staticmethod
-    def get_all(db: Session, owner_id: Optional[str] = None) -> List[AnimalResponse]:
+    def get_all(
+        db: Session,
+        owner_id: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[AnimalResponse]:
         query = db.query(Animal)
         if owner_id:
             query = query.filter(Animal.owner_id == owner_id)
-        animals = query.order_by(Animal.created_at.desc()).all()
+        animals = query.order_by(Animal.created_at.desc()).offset(offset).limit(limit).all()
         return [
             AnimalResponse(
                 id=a.id,
@@ -68,13 +76,13 @@ class AnimalService:
 
         anim = Animal(
             id=f"anim-{str(uuid.uuid4())[:8]}",
-            animal_id=animal_in.animal_id,
+            animal_id=animal_in.animal_id.strip(),
             owner_id=owner_id,
             owner_name=owner_name,
-            species=animal_in.species,
-            breed=animal_in.breed,
+            species=animal_in.species.strip(),
+            breed=animal_in.breed.strip(),
             age=animal_in.age,
-            gender=animal_in.gender,
+            gender=animal_in.gender.strip(),
             weight=animal_in.weight,
             vaccination_status=animal_in.vaccination_status or "Up to date",
             previous_diseases=animal_in.previous_diseases or "None",
@@ -84,9 +92,16 @@ class AnimalService:
             current_risk_score=0.0,
             current_risk_level="LOW",
         )
-        db.add(anim)
-        db.commit()
-        db.refresh(anim)
+        try:
+            db.add(anim)
+            db.commit()
+            db.refresh(anim)
+            logger.info(f"[ANIMAL_CREATED] ID: {anim.id} | Tag: {anim.animal_id} | Owner: {owner_name}")
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[ANIMAL_CREATE_FAILED] Tag: {animal_in.animal_id} | Error: {e}")
+            raise
+
         return AnimalResponse(
             id=anim.id,
             animal_id=anim.animal_id,
@@ -115,8 +130,15 @@ class AnimalService:
         update_data = animal_in.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(anim, key, value)
-        db.commit()
-        db.refresh(anim)
+        try:
+            db.commit()
+            db.refresh(anim)
+            logger.info(f"[ANIMAL_UPDATED] ID: {anim.id} | Tag: {anim.animal_id}")
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[ANIMAL_UPDATE_FAILED] ID: {animal_id} | Error: {e}")
+            raise
+
         return AnimalResponse(
             id=anim.id,
             animal_id=anim.animal_id,
@@ -142,6 +164,13 @@ class AnimalService:
         anim = db.query(Animal).filter((Animal.id == animal_id) | (Animal.animal_id == animal_id)).first()
         if not anim:
             return False
-        db.delete(anim)
-        db.commit()
-        return True
+        try:
+            db.delete(anim)
+            db.commit()
+            logger.info(f"[ANIMAL_DELETED] ID: {anim.id} | Tag: {anim.animal_id}")
+            return True
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[ANIMAL_DELETE_FAILED] ID: {animal_id} | Error: {e}")
+            raise
+

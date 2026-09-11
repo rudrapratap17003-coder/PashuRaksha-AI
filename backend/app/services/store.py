@@ -3,7 +3,7 @@ In-memory demonstration data store for Phase 3.
 Provides pre-populated seed data representing multiple villages, livestock profiles,
 and an active simulated disease cluster in Rampur village.
 """
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import uuid
 
 class InMemoryStore:
@@ -31,7 +31,7 @@ class InMemoryStore:
             "state": "Rajasthan",
             "latitude": 26.9124,
             "longitude": 75.7873,
-            "created_at": datetime.utcnow() - timedelta(days=30),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=30),
         }
         self.users["usr-farmer-2"] = {
             "id": "usr-farmer-2",
@@ -44,7 +44,7 @@ class InMemoryStore:
             "state": "Rajasthan",
             "latitude": 26.9140,
             "longitude": 75.7890,
-            "created_at": datetime.utcnow() - timedelta(days=25),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=25),
         }
         self.users["usr-vet-1"] = {
             "id": "usr-vet-1",
@@ -57,7 +57,7 @@ class InMemoryStore:
             "state": "Rajasthan",
             "latitude": 26.9100,
             "longitude": 75.7800,
-            "created_at": datetime.utcnow() - timedelta(days=60),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=60),
         }
         self.users["usr-auth-1"] = {
             "id": "usr-auth-1",
@@ -70,7 +70,7 @@ class InMemoryStore:
             "state": "Rajasthan",
             "latitude": 26.9200,
             "longitude": 75.8000,
-            "created_at": datetime.utcnow() - timedelta(days=90),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=90),
         }
 
         # 2. Seed Animals
@@ -91,7 +91,7 @@ class InMemoryStore:
             "district": "Jaipur Rural",
             "current_risk_score": 12.0,
             "current_risk_level": "LOW",
-            "created_at": datetime.utcnow() - timedelta(days=20),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=20),
         }
         self.animals["anim-102"] = {
             "id": "anim-102",
@@ -110,7 +110,7 @@ class InMemoryStore:
             "district": "Jaipur Rural",
             "current_risk_score": 74.0,
             "current_risk_level": "HIGH",
-            "created_at": datetime.utcnow() - timedelta(days=15),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=15),
         }
         self.animals["anim-103"] = {
             "id": "anim-103",
@@ -129,7 +129,7 @@ class InMemoryStore:
             "district": "Jaipur Rural",
             "current_risk_score": 8.0,
             "current_risk_level": "LOW",
-            "created_at": datetime.utcnow() - timedelta(days=10),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=10),
         }
 
         # 3. Seed Vaccinations
@@ -141,7 +141,7 @@ class InMemoryStore:
             "next_due_date": date.today() + timedelta(days=300),
             "status": "completed",
             "notes": "Annual booster administered",
-            "created_at": datetime.utcnow() - timedelta(days=60),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=60),
         }
         self.vaccinations["vac-102"] = {
             "id": "vac-102",
@@ -151,7 +151,7 @@ class InMemoryStore:
             "next_due_date": date.today() + timedelta(days=10),
             "status": "due",
             "notes": "Booster due before monsoon",
-            "created_at": datetime.utcnow() - timedelta(days=170),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=170),
         }
 
         # 4. Seed Health Reports & Risk Assessments
@@ -180,7 +180,7 @@ class InMemoryStore:
             "longitude": 75.7873,
             "village": "Rampur",
             "district": "Jaipur Rural",
-            "reported_at": datetime.utcnow() - timedelta(hours=3),
+            "reported_at": datetime.now(timezone.utc) - timedelta(hours=3),
             "risk_score": 74.0,
             "risk_level": "HIGH",
             "possible_disease_concern": "Possible Bovine Respiratory Disease / Elevated Viral Concern",
@@ -206,7 +206,7 @@ class InMemoryStore:
             "cluster_detected": True,
             "cluster_name": "Rampur Village Cluster #1",
             "disclaimer": "PASHURAKSHA AI provides AI-assisted health risk assessment and early-warning support. It does not replace professional veterinary diagnosis or treatment.",
-            "created_at": datetime.utcnow() - timedelta(hours=3),
+            "created_at": datetime.now(timezone.utc) - timedelta(hours=3),
         }
 
         # 5. Seed Simulated Outbreak Cluster
@@ -224,7 +224,7 @@ class InMemoryStore:
             "dominant_symptoms": ["Fever", "Cough", "Reduced Appetite"],
             "affected_villages": ["Rampur"],
             "status": "active",
-            "detected_at": datetime.utcnow() - timedelta(hours=4),
+            "detected_at": datetime.now(timezone.utc) - timedelta(hours=4),
             "recommended_action": "On-site veterinary inspection recommended. Ring vaccination check advised.",
         }
 
@@ -240,7 +240,7 @@ class InMemoryStore:
             "related_cluster_id": "clust-101",
             "village": "Rampur",
             "is_read": False,
-            "created_at": datetime.utcnow() - timedelta(hours=2),
+            "created_at": datetime.now(timezone.utc) - timedelta(hours=2),
         }
         self.alerts["alt-102"] = {
             "id": "alt-102",
@@ -253,7 +253,7 @@ class InMemoryStore:
             "related_cluster_id": "clust-101",
             "village": "Rampur",
             "is_read": False,
-            "created_at": datetime.utcnow() - timedelta(hours=3),
+            "created_at": datetime.now(timezone.utc) - timedelta(hours=3),
         }
         self.alerts["alt-103"] = {
             "id": "alt-103",
@@ -266,7 +266,7 @@ class InMemoryStore:
             "related_cluster_id": "clust-101",
             "village": "Rampur",
             "is_read": False,
-            "created_at": datetime.utcnow() - timedelta(hours=4),
+            "created_at": datetime.now(timezone.utc) - timedelta(hours=4),
         }
 
         # 7. Seed Vet Cases
@@ -291,7 +291,7 @@ class InMemoryStore:
             "status": "pending",
             "veterinary_notes": None,
             "lab_referral": False,
-            "reported_at": datetime.utcnow() - timedelta(hours=3),
+            "reported_at": datetime.now(timezone.utc) - timedelta(hours=3),
         }
 
 store = InMemoryStore()
