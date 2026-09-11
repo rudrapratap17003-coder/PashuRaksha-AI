@@ -1044,6 +1044,65 @@ def test_phase6_database_validation_hardening(farmer_headers, vet_headers):
     assert "SELECT " not in bad_req.text
 
 
+def test_phase7_rbac_resource_ownership_and_security(farmer_headers, vet_headers, authority_headers, lab_headers):
+    """
+    Phase 7: Enforce strict backend RBAC matrix, token validation, and resource ownership boundaries.
+    """
+    # 1. Unauthenticated requests strictly return 401
+    assert client.get("/api/v1/animals").status_code == 401
+    assert client.get("/api/v1/health-reports").status_code == 401
+    assert client.get("/api/v1/vet/cases").status_code == 401
+    assert client.get("/api/v1/lab/dashboard").status_code == 401
+    assert client.get("/api/v1/authority/dashboard").status_code == 401
+    assert client.get("/api/v1/admin/users").status_code == 401
+
+    # 2. Tampered JWT signature returns 401
+    assert client.get("/api/v1/animals", headers={"Authorization": "Bearer fake.tampered.token"}).status_code == 401
+
+    # 3. RBAC Cross-Role Boundary Checks (Must return 403 Forbidden)
+    assert client.get("/api/v1/vet/cases", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/lab/dashboard", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/authority/dashboard", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/admin/users", headers=farmer_headers).status_code == 403
+    assert client.get("/api/v1/admin/users", headers=vet_headers).status_code == 403
+    assert client.get("/api/v1/admin/users", headers=authority_headers).status_code == 403
+    assert client.get("/api/v1/admin/users", headers=lab_headers).status_code == 403
+
+    # 4. Resource Ownership Checks (Farmer B cannot modify Farmer A's animal)
+    # Log in as Farmer 2
+    farmer2_token = get_auth_token("farmer2@pashuraksha.ai")
+    farmer2_headers = {"Authorization": f"Bearer {farmer2_token}"}
+
+    # Create an animal under Farmer 1
+    new_anim_res = client.post("/api/v1/animals", json={
+        "animal_id": f"COW-OWNER-{uuid.uuid4().hex[:4].upper()}",
+        "species": "Cattle (Cow)",
+        "breed": "Gir",
+        "gender": "female",
+        "age": 3.0,
+        "village": "Baramati",
+        "district": "Pune"
+    }, headers=farmer_headers)
+    assert new_anim_res.status_code == 201
+    f1_animal_id = new_anim_res.json()["animal_id"]
+
+    # Farmer 2 tries to update Farmer 1's animal -> 403 Forbidden
+    update_res = client.put(f"/api/v1/animals/{f1_animal_id}", json={
+        "weight": 500.0,
+        "notes": "Unauthorized modification attempt"
+    }, headers=farmer2_headers)
+    assert update_res.status_code == 403
+
+    # Farmer 2 tries to delete Farmer 1's animal -> 403 Forbidden
+    del_res = client.delete(f"/api/v1/animals/{f1_animal_id}", headers=farmer2_headers)
+    assert del_res.status_code == 403
+
+    # Farmer 1 can successfully update and delete their own animal
+    assert client.put(f"/api/v1/animals/{f1_animal_id}", json={"weight": 410.0}, headers=farmer_headers).status_code == 200
+    assert client.delete(f"/api/v1/animals/{f1_animal_id}", headers=farmer_headers).status_code == 204
+
+
+
 
 
 
