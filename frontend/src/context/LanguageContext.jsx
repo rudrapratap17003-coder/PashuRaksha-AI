@@ -13,25 +13,20 @@ const dictionaries = { en, hi, mr }
 
 // Utility to resolve nested keys (e.g., 'auth.login')
 function resolveKey(obj, path) {
-  if (!obj || !path || typeof path !== 'string') return undefined
-  try {
-    return path.split('.').reduce((acc, part) => (acc && typeof acc === 'object' ? acc[part] : undefined), obj)
-  } catch {
-    return undefined
-  }
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
 }
 
 const LanguageContext = createContext({
   language: 'en',
   setLanguage: () => {},
-  t: (key, params, fallbackStr) => (fallbackStr !== undefined ? fallbackStr : (typeof key === 'string' ? key : '')),
+  t: (key, params) => key,
   languages: LANGUAGES
 })
 
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
     try {
-      const saved = typeof window !== 'undefined' ? localStorage.getItem('pashuraksha_language') : null
+      const saved = localStorage.getItem('pashuraksha_language')
       if (saved && (saved === 'en' || saved === 'hi' || saved === 'mr')) {
         return saved
       }
@@ -45,9 +40,7 @@ export function LanguageProvider({ children }) {
     if (langCode === 'en' || langCode === 'hi' || langCode === 'mr') {
       setLanguageState(langCode)
       try {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('pashuraksha_language', langCode)
-        }
+        localStorage.setItem('pashuraksha_language', langCode)
       } catch (err) {
         console.warn('Failed to save language to localStorage:', err)
       }
@@ -56,10 +49,7 @@ export function LanguageProvider({ children }) {
 
   // Translation function with nested keys and interpolation
   const t = (key, params = {}, fallbackStr = undefined) => {
-    if (!key || typeof key !== 'string') {
-      return fallbackStr !== undefined ? fallbackStr : ''
-    }
-    const dict = dictionaries[language] || dictionaries.en || {}
+    const dict = dictionaries[language] || dictionaries.en
     let str = resolveKey(dict, key)
 
     // Fallback to English if missing in current locale
@@ -71,7 +61,9 @@ export function LanguageProvider({ children }) {
       // If still missing, return fallbackStr if provided, else format the key
       if (str === undefined) {
         if (fallbackStr !== undefined) return fallbackStr;
-        const keyBase = key.split('.').pop() || key
+        console.warn(`[i18n] Missing translation key: ${key}`)
+        // Fallback: extract last part of key and format as Title Case
+        const keyBase = key.split('.').pop()
         return keyBase
           .replace(/([A-Z])/g, ' $1')
           .replace(/^./, (s) => s.toUpperCase())

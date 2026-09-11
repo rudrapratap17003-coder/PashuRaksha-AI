@@ -65,20 +65,20 @@ class AIAssistantService:
             f"4. Format the response nicely.\n"
         )
 
-        from app.config import settings
-
-        gemini_api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-        model_name = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        gemini_api_key = os.environ.get("GEMINI_API_KEY")
+        if not gemini_api_key and os.environ.get("GOOGLE_API_KEY"):
+            gemini_api_key = os.environ.get("GOOGLE_API_KEY")
 
         if genai and gemini_api_key:
             try:
                 client = genai.Client(api_key=gemini_api_key)
-                full_prompt = f"{system_prompt}\n\nUser Question:\n{q}"
                 response = client.models.generate_content(
-                    model=model_name,
-                    contents=full_prompt
+                    model='gemini-2.5-flash',
+                    contents=[
+                        {"role": "user", "parts": [{"text": system_prompt + "\n\nUser Query: " + q}]}
+                    ]
                 )
-                answer = response.text or ""
+                answer = response.text
             except Exception as e:
                 answer = AIAssistantService._fallback_response(q, lang_instruction)
         else:
@@ -90,7 +90,7 @@ class AIAssistantService:
             "answer": answer,
             "sources": sources,
             "disclaimer": DISCLAIMER,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
         }
 
     @staticmethod

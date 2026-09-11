@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, HeartPulse, MapPin, Calendar, Clock, User, Phone, Stethoscope, TestTube2, AlertTriangle, CheckCircle2, ShieldAlert, FlaskConical, Send, Sparkles, Plus } from 'lucide-react'
+import { ArrowLeft, HeartPulse, MapPin, Calendar, Clock, User, Phone, Stethoscope, TestTube2, AlertTriangle, CheckCircle2, ShieldAlert, FlaskConical, Send, Sparkles, Plus, Microscope } from 'lucide-react'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import RiskBadge from '../../components/common/RiskBadge'

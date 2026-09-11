@@ -58,20 +58,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-_db_initialized = False
-
 def get_db():
     """
     FastAPI dependency that provides a transactional database session per request.
     """
-    global _db_initialized
-    if not _db_initialized:
-        try:
-            init_db()
-            _db_initialized = True
-        except Exception as e:
-            logger.warning(f"Lazy DB init note: {e}")
-
     db = SessionLocal()
     try:
         yield db
