@@ -1001,6 +1001,50 @@ def test_phase5_analytics_pipeline_and_filters(authority_headers):
     assert "FMD" in vax_data["Baramati"]
 
 
+def test_phase6_database_validation_hardening(farmer_headers, vet_headers):
+    """
+    Phase 6: Validate HTTP Error codes, Validation rules, DB Integrity, and Error formatting.
+    """
+    # 1. Validation Error (HTTP 422 with structured detail, not 500)
+    invalid_report_res = client.post("/api/v1/health-reports", json={"invalid_field": True}, headers=farmer_headers)
+    assert invalid_report_res.status_code == 422
+    err_body = invalid_report_res.json()
+    assert "detail" in err_body
+
+    # 2. Resource Not Found (HTTP 404)
+    not_found_res = client.get("/api/v1/animals/nonexistent-animal-id-9999", headers=farmer_headers)
+    assert not_found_res.status_code == 404
+    assert "not found" in not_found_res.json()["detail"].lower()
+
+    # 3. Duplicate User Registration Conflict Check
+    dup_email = "farmer1@pashuraksha.ai"
+    dup_res = client.post("/api/v1/auth/register", json={
+        "name": "Duplicate Ramesh",
+        "phone": "9876543210",
+        "email": dup_email,
+        "password": "password123",
+        "role": "farmer",
+        "village": "Baramati",
+        "district": "Pune"
+    })
+    assert dup_res.status_code in (400, 409)
+    assert "already registered" in dup_res.json()["detail"].lower() or "exists" in dup_res.json()["detail"].lower()
+
+    # 4. Invalid Case State Transition Rejected (HTTP 400)
+    invalid_trans_res = client.post(
+        "/api/v1/cases/nonexistent-case-id/transition?target_status=CLOSED",
+        headers=vet_headers
+    )
+    assert invalid_trans_res.status_code in (400, 404)
+
+    # 5. Non-leakage of internal stack traces on errors
+    bad_req = client.get("/api/v1/health-reports/bad'sql;injection--", headers=farmer_headers)
+    assert bad_req.status_code in (400, 404, 422)
+    assert "Traceback" not in bad_req.text
+    assert "SELECT " not in bad_req.text
+
+
+
 
 
 
