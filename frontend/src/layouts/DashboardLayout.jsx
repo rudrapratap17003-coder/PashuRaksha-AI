@@ -128,6 +128,7 @@ export default function DashboardLayout({ user, onLogout }) {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -175,6 +176,7 @@ export default function DashboardLayout({ user, onLogout }) {
             {/* SOS */}
             <button
               onClick={() => setPanicModalOpen(true)}
+              aria-label="Trigger Emergency Panic SOS Alarm"
               className="px-3 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-xs font-bold transition-colors duration-200 flex items-center space-x-1"
             >
               <Radio className="w-3.5 h-3.5" />
@@ -182,7 +184,7 @@ export default function DashboardLayout({ user, onLogout }) {
             </button>
 
             <Link to="/presentation" className="hidden sm:flex">
-              <button className="px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-colors duration-200 flex items-center space-x-1">
+              <button aria-label="Open SIH Jury Stage Presentation" className="px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-colors duration-200 flex items-center space-x-1">
                 <Presentation className="w-3.5 h-3.5" />
                 <span>{t('nav.jury')}</span>
               </button>
@@ -192,6 +194,7 @@ export default function DashboardLayout({ user, onLogout }) {
             <button
               type="button"
               onClick={() => setAlertCenterOpen(true)}
+              aria-label={`View Notifications (${unreadCount} unread)`}
               className="relative p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors duration-200"
             >
               <Bell className="w-5 h-5" />
@@ -208,6 +211,7 @@ export default function DashboardLayout({ user, onLogout }) {
                 if (onLogout) onLogout()
                 navigate('/')
               }}
+              aria-label="Log Out of System"
               className="p-2 rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors duration-200"
             >
               <LogOut className="w-5 h-5" />

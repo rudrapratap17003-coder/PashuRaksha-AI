@@ -1182,6 +1182,175 @@ def test_phase8_production_cors_and_deployment_hardening():
     assert reset_res.json()["status"] in ("success", "reset_completed")
 
 
+def test_phase9_full_sih_demo_flow_and_invalid_inputs():
+    """
+    PHASE 9 TEST SUITE: COMPLETE SIH END-TO-END DEMO FLOW + INVALID INPUT MATRIX
+    Validates complete closed-loop data pipeline:
+    Farmer -> Animal -> Report -> Risk -> Outbreak -> Alert -> Authority -> MVU -> Biosecurity -> Vet -> Lab -> Analytics
+    Plus strict invalid input error handling (401, 403, 404, 422).
+    """
+    # -------------------------------------------------------------
+    # 1. AUTHENTICATE ALL STAKEHOLDERS
+    # -------------------------------------------------------------
+    farmer_token = get_auth_token("farmer1@pashuraksha.ai")
+    vet_token = get_auth_token("vet1@pashuraksha.ai")
+    lab_token = get_auth_token("lab1@pashuraksha.ai")
+    auth_token = get_auth_token("officer1@pashuraksha.ai")
+
+    f_headers = {"Authorization": f"Bearer {farmer_token}"}
+    v_headers = {"Authorization": f"Bearer {vet_token}"}
+    l_headers = {"Authorization": f"Bearer {lab_token}"}
+    a_headers = {"Authorization": f"Bearer {auth_token}"}
+
+    # -------------------------------------------------------------
+    # 2. FARMER CREATES ANIMAL PASSPORT
+    # -------------------------------------------------------------
+    tag_id = f"TAG-E2E-{uuid.uuid4().hex[:4].upper()}"
+    anim_res = client.post("/api/v1/animals", json={
+        "animal_id": tag_id,
+        "species": "Cattle (Cow)",
+        "breed": "Gir",
+        "gender": "female",
+        "age": 4.5,
+        "weight": 420.0,
+        "village": "Baramati",
+        "district": "Pune"
+    }, headers=f_headers)
+    assert anim_res.status_code == 201
+    animal_db_id = anim_res.json()["id"]
+
+    # -------------------------------------------------------------
+    # 3. FARMER LODGES SYMPTOM REPORT (TRIAD SYNERGY)
+    # -------------------------------------------------------------
+    rep_res = client.post("/api/v1/health-reports", json={
+        "animal_id": tag_id,
+        "fever": True,
+        "lesions": True,
+        "salivation": True,
+        "reduced_milk": True,
+        "affected_count": 4,
+        "dead_count": 0,
+        "village": "Baramati",
+        "district": "Pune",
+        "latitude": 18.1515,
+        "longitude": 74.5772,
+        "other_symptoms": "Severe blisters on tongue and dental pad. Ropy saliva."
+    }, headers=f_headers)
+    assert rep_res.status_code == 201
+    rep_data = rep_res.json()
+    case_id = rep_data["id"]
+
+    # -------------------------------------------------------------
+    # 4. EXPLAINABLE AI RISK SCORING EVALUATION
+    # -------------------------------------------------------------
+    assert rep_data["risk_level"] in ("HIGH", "CRITICAL")
+    assert rep_data["risk_score"] >= 80.0
+    assert "Foot-and-Mouth" in rep_data["possible_disease_concern"]
+
+    # -------------------------------------------------------------
+    # 5. SPATIAL-TEMPORAL CLUSTER ASSESSMENT
+    # -------------------------------------------------------------
+    detect_res = client.post("/api/v1/clusters/run-detection", headers=a_headers)
+    assert detect_res.status_code == 200
+    clusters = detect_res.json()
+    assert isinstance(clusters, list)
+
+    # -------------------------------------------------------------
+    # 6. AUTHORITY COMMAND & MVU SOS DISPATCH
+    # -------------------------------------------------------------
+    auth_dash = client.get("/api/v1/authority/dashboard", headers=a_headers)
+    assert auth_dash.status_code == 200
+    assert auth_dash.json()["total_monitored_animals"] > 0
+
+    dispatch_res = client.post("/api/v1/authority/mvu-fleet/dispatch", json={
+        "unit_id": "MH-12-MVU-1963",
+        "destination": "Baramati Outbreak Hotspot (Contagion Core)",
+        "priority": "EMERGENCY_SOS",
+        "notes": "Mobilize veterinary mobile unit with FMD containment cold-box."
+    }, headers=a_headers)
+    assert dispatch_res.status_code == 200
+    assert dispatch_res.json()["success"] is True
+    assert dispatch_res.json()["eta_minutes"] > 0
+
+    # -------------------------------------------------------------
+    # 7. APMC BIOSECURITY TRANSIT PERMIT VERIFICATION
+    # -------------------------------------------------------------
+    # Hotspot permit must be blocked
+    block_res = client.post("/api/v1/authority/market-biosecurity/verify-permit", json={
+        "permit_id_or_code": "MH-TRANSIT-2026-9401"
+    }, headers=a_headers)
+    assert block_res.status_code == 200
+    assert block_res.json()["allowed"] is False
+
+    # -------------------------------------------------------------
+    # 8. VETERINARIAN CLINICAL TRIAGE & LAB REFERRAL
+    # -------------------------------------------------------------
+    triage_res = client.post(f"/api/v1/vet/cases/{case_id}/action", json={
+        "action": "Clinical Triage & Isolation",
+        "notes": "Suspected Aphthovirus Foot-and-Mouth Disease. Prescribed 2% sodium carbonate footbath and issued laboratory swab referral.",
+        "lab_referral": True,
+        "status": "investigated"
+    }, headers=v_headers)
+    assert triage_res.status_code == 200
+
+    referral_res = client.post("/api/v1/lab/referrals", json={
+        "report_id": case_id,
+        "animal_id": tag_id,
+        "sample_type": "Oral Vesicular Fluid Swab",
+        "test_requested": "RT-PCR for Aphthovirus Type O/A/Asia-1",
+        "priority": "urgent"
+    }, headers=v_headers)
+    assert referral_res.status_code in (200, 201)
+    lab_ref_id = referral_res.json()["id"]
+
+    # -------------------------------------------------------------
+    # 9. DIAGNOSTIC LAB RT-PCR CONFIRMATION
+    # -------------------------------------------------------------
+    verify_res = client.put(f"/api/v1/lab/referrals/{lab_ref_id}", json={
+        "result": "positive",
+        "result_notes": "RT-PCR positive for FMDV Type O (Ct value 18.2).",
+        "status": "completed"
+    }, headers=l_headers)
+    assert verify_res.status_code == 200
+    assert verify_res.json()["result"] == "positive"
+
+    # -------------------------------------------------------------
+    # 10. REAL DATABASE ANALYTICS AGGREGATION
+    # -------------------------------------------------------------
+    analytics_res = client.get("/api/v1/analytics/overview", headers=a_headers)
+    assert analytics_res.status_code == 200
+    analytics_data = analytics_res.json()
+    assert analytics_data["total_animals"] > 0
+    assert analytics_data["total_reports"] > 0
+    assert 0 <= analytics_data["vaccination_coverage"] <= 100.0
+
+    # -------------------------------------------------------------
+    # 11. INVALID INPUT & ERROR HANDLING MATRIX
+    # -------------------------------------------------------------
+    # Missing required field in animal creation (missing 'species' or 'gender') -> 422
+    assert client.post("/api/v1/animals", json={"animal_id": "COW-BAD-1"}, headers=f_headers).status_code == 422
+
+    # Non-existent animal query -> 404
+    assert client.get("/api/v1/animals/anim-nonexistent-999", headers=f_headers).status_code == 404
+
+    # Non-existent health report -> 404
+    assert client.get("/api/v1/health-reports/rep-nonexistent-999", headers=f_headers).status_code == 404
+
+    # Non-existent lab referral -> 404
+    assert client.get("/api/v1/lab/referrals/lab-nonexistent-999", headers=l_headers).status_code == 404
+
+    # Farmer trying to perform authority dispatch -> 403 Forbidden
+    assert client.post("/api/v1/authority/mvu-fleet/dispatch", json={
+        "vehicle_id": "MH-12-MVU-1963",
+        "target_village": "Baramati East",
+        "target_district": "Pune"
+    }, headers=f_headers).status_code == 403
+
+    # Unauthenticated request -> 401 Unauthorized
+    assert client.get("/api/v1/animals").status_code == 401
+
+
+
 
 
 
