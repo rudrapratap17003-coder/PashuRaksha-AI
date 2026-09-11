@@ -26,6 +26,17 @@ export default function SymptomReportPage() {
   const [severity, setSeverity] = useState('moderate')
   const [durationDays, setDurationDays] = useState(2)
   const [affectedCount, setAffectedCount] = useState(1)
+
+  // ML clinical assessment inputs
+  const [rectalTemperature, setRectalTemperature] = useState('')
+  const [girth, setGirth] = useState('')
+  const [famachaLeft, setFamachaLeft] = useState('')
+  const [famachaRight, setFamachaRight] = useState('')
+  const [elasticity, setElasticity] = useState('')
+  const [consistencyOfFaeces, setConsistencyOfFaeces] = useState('')
+  const [suckling, setSuckling] = useState('')
+  const [grazing, setGrazing] = useState('')
+
   const [village, setVillage] = useState('Baramati')
   const [district, setDistrict] = useState('Pune')
   const [loadingAnimals, setLoadingAnimals] = useState(true)
@@ -71,6 +82,14 @@ export default function SymptomReportPage() {
     setAffectedCount(3)
     setVillage('Baramati')
     setDistrict('Pune')
+    setRectalTemperature('39.5')
+    setGirth('78')
+    setFamachaLeft('3')
+    setFamachaRight('3')
+    setElasticity('Normal')
+    setConsistencyOfFaeces('Normal')
+    setSuckling('Yes')
+    setGrazing('Yes')
   }
 
   const handleInlineVoiceInput = (finalTranscript, fullLiveTranscript) => {
@@ -107,6 +126,25 @@ export default function SymptomReportPage() {
     // Build payload
     const payload = {
       animal_id: selectedAnimalId,
+
+      // ML clinical assessment inputs
+      rectal_temperature: rectalTemperature
+        ? parseFloat(rectalTemperature)
+        : null,
+      girth: girth
+        ? parseFloat(girth)
+        : null,
+      famacha_score_left: famachaLeft
+        ? parseFloat(famachaLeft)
+        : null,
+      famacha_score_right: famachaRight
+        ? parseFloat(famachaRight)
+        : null,
+      elasticity: elasticity || null,
+      consistency_of_faeces: consistencyOfFaeces || null,
+      suckling: suckling || null,
+      grazing: grazing || null,
+
       fever: selectedSymptoms.includes('fever'),
       cough: selectedSymptoms.includes('cough'),
       nasal_discharge: selectedSymptoms.includes('nasal_discharge'),
@@ -165,7 +203,7 @@ export default function SymptomReportPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
         <div>
@@ -220,7 +258,7 @@ export default function SymptomReportPage() {
 
       {/* Main Multi-Step Symptom Form */}
       <form onSubmit={handleAnalyzeHealthRisk} className="space-y-6">
-        
+
         {/* Step 1: Select Animal */}
         <Card className="bg-slate-900/90 border border-slate-800 p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -235,11 +273,10 @@ export default function SymptomReportPage() {
               <div
                 key={anim.id}
                 onClick={() => setSelectedAnimalId(anim.animal_id)}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition space-y-1 ${
-                  selectedAnimalId === anim.animal_id
-                    ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/40'
-                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
-                }`}
+                className={`p-3.5 rounded-2xl border cursor-pointer transition space-y-1 ${selectedAnimalId === anim.animal_id
+                  ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/40'
+                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  }`}
               >
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-mono font-black text-emerald-400">{anim.animal_id}</span>
@@ -277,17 +314,15 @@ export default function SymptomReportPage() {
                 <div
                   key={sym.id}
                   onClick={() => toggleSymptom(sym.id)}
-                  className={`p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between space-y-2 select-none ${
-                    active
-                      ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/50 text-white'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
-                  }`}
+                  className={`p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between space-y-2 select-none ${active
+                    ? 'bg-slate-950 border-emerald-400 ring-2 ring-emerald-400/50 text-white'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">{sym.icon}</span>
-                    <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
-                      active ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black' : 'border-slate-600'
-                    }`}>
+                    <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${active ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black' : 'border-slate-600'
+                      }`}>
                       {active ? '✓' : ''}
                     </span>
                   </div>
@@ -323,6 +358,156 @@ export default function SymptomReportPage() {
                 <option value="severe">{t('report.severe')}</option>
               </select>
             </div>
+            {/* Step 3: Clinical Assessment */}
+            <Card className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-5">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                  Step 3: Clinical Assessment
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Enter observed clinical measurements for the clinical-risk model.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Rectal Temperature (°C)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="30"
+                    max="45"
+                    value={rectalTemperature}
+                    onChange={(e) => setRectalTemperature(e.target.value)}
+                    placeholder="e.g. 38.8"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Girth (cm)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1"
+                    max="200"
+                    value={girth}
+                    onChange={(e) => setGirth(e.target.value)}
+                    placeholder="e.g. 78"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    FAMACHA Score — Left Eye
+                  </label>
+                  <select
+                    value={famachaLeft}
+                    onChange={(e) => setFamachaLeft(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select score</option>
+                    <option value="1">1 — Healthy</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5 — Severe</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    FAMACHA Score — Right Eye
+                  </label>
+                  <select
+                    value={famachaRight}
+                    onChange={(e) => setFamachaRight(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select score</option>
+                    <option value="1">1 — Healthy</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5 — Severe</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Skin Elasticity
+                  </label>
+                  <select
+                    value={elasticity}
+                    onChange={(e) => setElasticity(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select observation</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Consistency of Faeces
+                  </label>
+                  <select
+                    value={consistencyOfFaeces}
+                    onChange={(e) => setConsistencyOfFaeces(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select observation</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Diarrhoea">Diarrhoea</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Suckling
+                  </label>
+                  <select
+                    value={suckling}
+                    onChange={(e) => setSuckling(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select observation</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2">
+                    Grazing
+                  </label>
+                  <select
+                    value={grazing}
+                    onChange={(e) => setGrazing(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                  >
+                    <option value="">Select observation</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-[11px] text-blue-200">
+                <strong className="text-blue-300">ML screening model:</strong>{" "}
+                Trained on real calf clinical observations. The result is a screening
+                signal, not a veterinary diagnosis.
+              </div>
+            </Card>
 
             {/* Duration */}
             <div className="space-y-1.5">
@@ -437,7 +622,7 @@ export default function SymptomReportPage() {
       {analysisResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
           <Card className="bg-slate-900 border border-slate-700 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
-            
+
             {/* Header */}
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>

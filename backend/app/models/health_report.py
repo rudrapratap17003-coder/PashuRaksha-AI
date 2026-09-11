@@ -25,6 +25,15 @@ class HealthReport(Base):
     lesions = Column(Boolean, default=False)
     swelling = Column(Boolean, default=False)
     other_symptoms = Column(Text, nullable=True)
+        # ML Clinical Assessment Features
+    rectal_temperature = Column(Float, nullable=True)
+    girth = Column(Float, nullable=True)
+    famacha_score_left = Column(Float, nullable=True)
+    famacha_score_right = Column(Float, nullable=True)
+    elasticity = Column(String(50), nullable=True)
+    consistency_of_faeces = Column(String(50), nullable=True)
+    suckling = Column(String(20), nullable=True)
+    grazing = Column(String(20), nullable=True)
     
     severity = Column(String(20), default="moderate", index=True)
     duration_days = Column(Integer, default=2)
