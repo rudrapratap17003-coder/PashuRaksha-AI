@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     # Database URL
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
+    # Gemini AI Integration Configuration (Local backend environment)
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
     # Comma-separated CORS origins or list
     CORS_ORIGINS: List[str] = [
         "https://pashu-raksha-ai.vercel.app",

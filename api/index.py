@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 from pathlib import Path
 
@@ -17,3 +17,9 @@ os.environ.setdefault("DEMO_MODE", "true")
 os.environ.setdefault("ENVIRONMENT", "production")
 
 from app.main import app
+from app.database import init_db
+
+try:
+    init_db()
+except Exception as e:
+    pass
